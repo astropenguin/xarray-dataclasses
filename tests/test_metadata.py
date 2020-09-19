@@ -1,4 +1,4 @@
-import demonstration as demo
+import xarray_dataclasses as demo
 
 
 def test_author():

@@ -4,4 +4,4 @@
    :hidden:
 
    Home <self>
-   Package guide <_apidoc/demonstration>
+   Package guide <_apidoc/xarray_dataclasses>

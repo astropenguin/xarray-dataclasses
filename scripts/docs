@@ -6,7 +6,7 @@ pandoc --column 500 -f markdown -t rst -o docs/readme.rst README.md
 
 
 # auto-generate package guide
-sphinx-apidoc -efT -o docs/_apidoc demonstration
+sphinx-apidoc -efT -o docs/_apidoc xarray_dataclasses
 
 
 # build website
