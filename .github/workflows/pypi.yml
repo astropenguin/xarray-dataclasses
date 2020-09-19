@@ -1,0 +1,24 @@
+name: PyPI
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  job:
+    name: PyPI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: |
+          pip install poetry
+      - name: Publish package
+        run: |
+          poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
+          poetry publish --build

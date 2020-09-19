@@ -1,0 +1,32 @@
+name: GitHub Pages
+
+on:
+  release:
+    types:
+      - created
+      - edited
+
+jobs:
+  job:
+    name: GitHub Pages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: |
+          sudo apt install pandoc
+          pip install poetry
+          poetry install
+      - name: Build docs
+        run: poetry run scripts/docs
+      - name: Deploy docs
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/_build
+          publish_branch: gh-pages
+          force_orphan: true

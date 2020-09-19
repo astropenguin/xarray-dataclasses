@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "demonstration"
+version = "0.2.0"
+description = "Demo package for learning Python development"
+authors = ["Akio Taniguchi <taniguchi@a.phys.nagoya-u.ac.jp>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/astropenguin/python-package-template/"
+documentation = "https://astropenguin.github.io/python-package-template/"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+
+[tool.poetry.dev-dependencies]
+black = "^20.8b"
+flake8 = "^3.8"
+ipython = "^7.16"
+ipykernel = "^5.3"
+pydata-sphinx-theme = "^0.4"
+pytest = "^6.0"
+sphinx = "^3.2"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
