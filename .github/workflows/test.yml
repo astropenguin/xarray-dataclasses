@@ -27,9 +27,9 @@ jobs:
           pip install poetry
           poetry install
       - name: Lint by Flake8
-        run: poetry run flake8 xarray_dataclasses
+        run: poetry run flake8 docs tests xarray_dataclasses
       - name: Format by Black
-        run: poetry run black --check xarray_dataclasses
+        run: poetry run black --check docs tests xarray_dataclasses
       - name: Test by pytest
         run : poetry run pytest -v tests
       - name: Build docs
