@@ -1,9 +1,9 @@
-import xarray_dataclasses as demo
+import xarray_dataclasses
 
 
 def test_author():
-    assert demo.__author__ == "Akio Taniguchi"
+    assert xarray_dataclasses.__author__ == "Akio Taniguchi"
 
 
 def test_version():
-    assert demo.__version__ == "0.1.0"
+    assert xarray_dataclasses.__version__ == "0.1.0"
