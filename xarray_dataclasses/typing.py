@@ -17,9 +17,6 @@ Dtype = Optional[Union[Type, str]]
 
 # main features
 class DataArrayMeta(type):
-    dims: Dims = None
-    dtype: Dtype = None
-
     def __getitem__(cls, options: Tuple[Dims, Dtype]) -> Type:
         try:
             dims, dtype = options
@@ -44,6 +41,9 @@ class DataArrayMeta(type):
 
 
 class DataArray(metaclass=DataArrayMeta):
+    dims: Dims = None
+    dtype: Dtype = None
+
     def __new__(cls, data: Any, **kwargs) -> xr.DataArray:
         data = np.asarray(data, dtype=cls.dtype)
         return xr.DataArray(data, dims=cls.dims, **kwargs)
