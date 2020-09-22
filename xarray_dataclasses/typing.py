@@ -17,6 +17,8 @@ Dtype = Optional[Union[Type, str]]
 
 # main features
 class DataArrayMeta(type):
+    """Metaclass for the DataArray class."""
+
     def __getitem__(cls, options: Tuple[Dims, Dtype]) -> Type:
         try:
             dims, dtype = options
@@ -57,8 +59,10 @@ class DataArrayMeta(type):
 
 
 class DataArray(metaclass=DataArrayMeta):
-    dims: Dims = None
-    dtype: Dtype = None
+    """Type hint for xarray.DataArray."""
+
+    dims: Dims = None  #: Dimensions to be fixed in DataArray instances.
+    dtype: Dtype = None  #: Datatype to be fixed in DataArray instances.
 
     def __new__(cls, data: Any, **kwargs) -> xr.DataArray:
         data = np.asarray(data, dtype=cls.dtype)
