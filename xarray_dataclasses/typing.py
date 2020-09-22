@@ -39,6 +39,22 @@ class DataArrayMeta(type):
 
         return type(name, (cls,), dict(dims=dims, dtype=dtype))
 
+    def __instancecheck__(cls, inst: Any) -> bool:
+        if not isinstance(inst, xr.DataArray):
+            return False
+
+        if cls.dims is None:
+            is_equal_dims = True  # do not evaluate
+        else:
+            is_equal_dims = inst.dims == cls.dims
+
+        if cls.dtype is None:
+            is_equal_dtype = True  # do not evaluate
+        else:
+            is_equal_dtype = inst.dtype == cls.dtype
+
+        return is_equal_dims and is_equal_dtype
+
 
 class DataArray(metaclass=DataArrayMeta):
     dims: Dims = None
