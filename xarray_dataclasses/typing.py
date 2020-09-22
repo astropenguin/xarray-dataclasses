@@ -35,17 +35,12 @@ class DataArrayMeta(type):
         if dtype is not None:
             dtype = np.dtype(dtype)
 
-        namespace = dict(dims=dims, dtype=dtype)
-        return type(cls.__name__, (cls,), namespace)
-
-    def __str__(cls) -> str:
-        if cls.dims is None and cls.dtype is None:
-            return cls.__name__
+        if dims is None and dtype is None:
+            name = cls.__name__
         else:
-            return f"{cls.__name__}[{cls.dims!s}, {cls.dtype!s}]"
+            name = f"{cls.__name__}[{dims!s}, {dtype!s}]"
 
-    def __repr__(cls) -> str:
-        return f"{__name__}.{cls!s}"
+        return type(name, (cls,), dict(dims=dims, dtype=dtype))
 
 
 class DataArray(metaclass=DataArrayMeta):
