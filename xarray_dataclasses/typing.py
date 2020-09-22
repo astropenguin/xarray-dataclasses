@@ -35,10 +35,14 @@ class DataArrayMeta(type):
         namespace = dict(dims=dims, dtype=dtype)
         return type(cls.__name__, (cls,), namespace)
 
+    def __str__(cls) -> str:
+        if cls.dims is None and cls.dtype is None:
+            return cls.__name__
+        else:
+            return f"{cls.__name__}[{cls.dims!s}, {cls.dtype!s}]"
+
     def __repr__(cls) -> str:
-        dims = str(cls.dims).replace("'", "")
-        dtype = str(cls.dtype)
-        return f"DataArray[{dims}, {dtype}]"
+        return f"{__name__}.{cls!s}"
 
 
 class DataArray(metaclass=DataArrayMeta):
