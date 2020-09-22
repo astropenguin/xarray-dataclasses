@@ -23,9 +23,6 @@ class DataArrayMeta(type):
     def __getitem__(cls, options: Tuple[Dims, Dtype]) -> Type:
         dims, dtype = options
 
-        if dims is None:
-            dims = ()
-
         if isinstance(dims, str):
             dims = (dims,)
 
