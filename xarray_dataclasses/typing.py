@@ -45,6 +45,6 @@ class DataArrayMeta(type):
 
 
 class DataArray(metaclass=DataArrayMeta):
-    def __new__(cls, data: Any) -> xr.DataArray:
+    def __new__(cls, data: Any, **kwargs) -> xr.DataArray:
         data = np.asarray(data, dtype=cls.dtype)
-        return xr.DataArray(data, dims=cls.dims)
+        return xr.DataArray(data, dims=cls.dims, **kwargs)
