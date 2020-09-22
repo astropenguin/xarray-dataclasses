@@ -21,7 +21,10 @@ class DataArrayMeta(type):
     dtype: Dtype = None
 
     def __getitem__(cls, options: Tuple[Dims, Dtype]) -> Type:
-        dims, dtype = options
+        try:
+            dims, dtype = options
+        except (ValueError, TypeError):
+            raise ValueError("Both dims and dtype must be specified.")
 
         if isinstance(dims, str):
             dims = (dims,)
