@@ -59,7 +59,41 @@ class DataArrayMeta(type):
 
 
 class DataArray(metaclass=DataArrayMeta):
-    """Type hint for xarray.DataArray."""
+    """Type hint for ``xarray.DataArray``.
+
+    Args:
+        data: Values for a ``DataArray`` instance.
+        kwargs: Options passed to the ``DataArray()``.
+
+    Returns:
+        ``DataArray`` with fixed ``dims`` and ``dtype``.
+
+    Examples:
+        To fix ``dims`` to be ``('x', 'y')``::
+
+            DataArray[('x', 'y'), None]
+
+        To fix ``dtype`` to be ``float``::
+
+            DataArray[None, float]
+
+        To fix both ``dims`` and ``dtype``::
+
+            DataArray[('x', 'y'), float]
+
+        Not to fix neither ``dims`` nor ``dtype``::
+
+            DataArray # or DataArray[None, None]
+
+        A type can be instantiated::
+
+            DataArray["x", float]([0, 1, 2])
+
+            # <xarray.DataArray (x: 3)>
+            # array([0., 1., 2.])
+            # Dimensions without coordinates: x
+
+    """
 
     dims: Dims = None  #: Dimensions to be fixed in DataArray instances.
     dtype: Dtype = None  #: Datatype to be fixed in DataArray instances.
