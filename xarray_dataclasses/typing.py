@@ -63,7 +63,7 @@ class DataArray(metaclass=DataArrayMeta):
 
     Args:
         data: Values for a ``DataArray`` instance.
-        kwargs: Options passed to the ``DataArray()``.
+        kwargs: Options passed to ``DataArray()``.
 
     Returns:
         ``DataArray`` with fixed ``dims`` and ``dtype``.
