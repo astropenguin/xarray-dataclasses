@@ -54,10 +54,18 @@ def is_dataarrayclass(obj: Any) -> bool:
     except (KeyError, ValueError):
         return False
 
-    data_dims = set(data_field.type.dims)
+    try:
+        data_dims = set(data_field.type.dims)
+    except TypeError:
+        data_dims = set()  # type.dims is None
 
     for field in get_coords_fields(obj).values():
-        if set(field.type.dims) > data_dims:
+        try:
+            coord_dims = set(field.type.dims)
+        except TypeError:
+            coord_dims = set()  # type.dims is None
+
+        if not coord_dims <= data_dims:
             return False
 
     return True
