@@ -62,3 +62,17 @@ def get_data_field(obj: DataArrayClass) -> Field:
         raise ValueError("Data field has an invalid type.")
 
     return data_field
+
+
+def get_coords_fields(obj: DataArrayClass) -> Dict[str, Field]:
+    """Return fields of DataArray coordinates.
+
+    Args:
+        obj: Dataarrayclass or its instance.
+
+    Returns:
+        Fields of DataArray coordinates.
+
+    """
+    items = obj.__dataclass_fields__.items()
+    return {k: v for k, v in items if issubclass(v.type, DataArray)}
