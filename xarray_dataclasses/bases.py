@@ -5,7 +5,7 @@ __all__ = [
 
 
 # standard library
-from dataclasses import is_dataclass
+from dataclasses import dataclass, is_dataclass
 from typing import Any
 
 
@@ -18,12 +18,14 @@ DATA = "data"
 
 
 # main features
+@dataclass
 class DataArrayClass:
     """Base class for dataclasses."""
 
+    data: DataArray
+
     def __init_subclass__(cls) -> None:
-        if not is_dataarrayclass(cls):
-            raise ValueError("Not a valid dataarrayclass.")
+        dataclass(cls)
 
 
 def is_dataarrayclass(obj: Any) -> bool:
