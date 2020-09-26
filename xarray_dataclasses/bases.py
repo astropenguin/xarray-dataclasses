@@ -1,4 +1,7 @@
-__all__ = ["is_dataarrayclass"]
+__all__ = [
+    "DataArrayClass",
+    "is_dataarrayclass",
+]
 
 
 # standard library
@@ -15,6 +18,14 @@ DATA = "data"
 
 
 # main features
+class DataArrayClass:
+    """Base class for dataclasses."""
+
+    def __init_subclass__(cls) -> None:
+        if not is_dataarrayclass(cls):
+            raise ValueError("Not a valid dataarrayclass.")
+
+
 def is_dataarrayclass(obj: Any) -> bool:
     """Return True if obj is a valid dataarrayclass."""
     if not is_dataclass(obj):
