@@ -38,4 +38,27 @@ def is_dataarrayclass(obj: Any) -> bool:
     if DATA not in fields:
         return False
 
-    return issubclass(fields[DATA].type, DataArray)
+# helper features
+def get_data_field(obj: DataArrayClass) -> Field:
+    """Return data field if it exists and is valid.
+
+    Args:
+        obj: Dataarrayclass or its instance.
+
+    Returns:
+        Data field if it exists and is valid.
+
+    Raises:
+        KeyError: Raised if data field does not exist.
+        ValueError: Raised if data field has an invalid type.
+
+    """
+    try:
+        data_field = obj.__dataclass_fields__[DATA]
+    except KeyError:
+        raise KeyError("Data field does not exist.")
+
+    if not issubclass(data_field.type, DataArray):
+        raise ValueError("Data field has an invalid type.")
+
+    return data_field
