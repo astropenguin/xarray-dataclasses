@@ -5,8 +5,8 @@ __all__ = [
 
 
 # standard library
-from dataclasses import dataclass, is_dataclass
-from typing import Any
+from dataclasses import dataclass, Field, is_dataclass
+from typing import Any, Dict
 
 
 # dependencies
