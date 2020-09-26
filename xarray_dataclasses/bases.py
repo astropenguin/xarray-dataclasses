@@ -43,7 +43,7 @@ def is_dataarrayclass(obj: Any) -> bool:
 
     Returns:
         ``True`` if ``obj`` is a valid dataarrayclass
-            or its instance or ``False`` otherwise.
+        or its instance or ``False`` otherwise.
 
     """
     if not is_dataclass(obj):
