@@ -29,14 +29,39 @@ class DataArrayClass:
 
 
 def is_dataarrayclass(obj: Any) -> bool:
-    """Return True if obj is a valid dataarrayclass."""
+    """Check if obj is a dataarrayclass or its instance.
+
+    It returns ``True`` if ``obj`` fulfills all the
+    following conditions or ``False`` otherwise.
+
+    1. ``obj`` is a Python's dataclass.
+    2. ``obj`` has a valid data field.
+    3. All ``dims`` of coords are subsets of data's.
+
+    Args:
+        obj: Object to be checked.
+
+    Returns:
+        ``True`` if ``obj`` is a valid dataarrayclass
+            or its instance or ``False`` otherwise.
+
+    """
     if not is_dataclass(obj):
         return False
 
-    fields = obj.__dataclass_fields__
-
-    if DATA not in fields:
+    try:
+        data_field = get_data_field(obj)
+    except (KeyError, ValueError):
         return False
+
+    data_dims = set(data_field.type.dims)
+
+    for field in get_coords_fields(obj).values():
+        if set(field.type.dims) > data_dims:
+            return False
+
+    return True
+
 
 # helper features
 def get_data_field(obj: DataArrayClass) -> Field:
