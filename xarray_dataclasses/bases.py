@@ -39,7 +39,7 @@ class DataArrayClassMeta(type):
 
 @dataclass
 class DataArrayClass(metaclass=DataArrayClassMeta):
-    """Base class for dataclasses."""
+    """Base class for dataarrayclasses."""
 
     data: DataArray  #: Values for a ``DataArray`` instance.
 
