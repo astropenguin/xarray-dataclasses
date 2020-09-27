@@ -34,9 +34,9 @@ def is_dataarrayclass(obj: Any) -> bool:
     It returns ``True`` if ``obj`` fulfills all the
     following conditions or ``False`` otherwise.
 
-    1. ``obj`` is a Python's dataclass.
-    2. ``obj`` has a valid data field.
-    3. All ``dims`` of coords are subsets of data's.
+    1. ``obj`` is a Python's native dataclass.
+    2. ``obj`` has a data field whose type is DataArray.
+    3. All ``dims`` of coords are subsets of data ``dims``.
 
     Args:
         obj: Object to be checked.
@@ -54,18 +54,23 @@ def is_dataarrayclass(obj: Any) -> bool:
     except (KeyError, ValueError):
         return False
 
-    try:
-        data_dims = set(data_field.type.dims)
-    except TypeError:
-        data_dims = set()  # type.dims is None
+    data_dims = data_field.type.dims
+
+    if data_dims is None:
+        data_dims_set = set()
+    else:
+        data_dims_set = set(data_dims)
 
     for field in get_coords_fields(obj).values():
-        try:
-            coord_dims = set(field.type.dims)
-        except TypeError:
-            return False  # type.dims is None
+        coord_dims = field.type.dims
 
-        if not coord_dims <= data_dims:
+        # Coord dims must be fixed.
+        if coord_dims is None:
+            return False
+
+        # Coord dims must be empty if data dims is not fixed.
+        # Otherwise, it must be a subset of data dims.
+        if not set(coord_dims).issubset(data_dims_set):
             return False
 
     return True
