@@ -18,8 +18,25 @@ DATA = "data"
 
 
 # main features
+class DataArrayClassMeta(type):
+    """Metaclass of ``DataArrayClass``."""
+
+    def __instancecheck__(cls, inst: Any) -> bool:
+        if not isinstance(inst, get_data_field(cls).type):
+            return False
+
+        for name, field in get_coords_fields(cls).items():
+            if name not in inst.coords:
+                return False
+
+            if not isinstance(inst.coords[name], field.type):
+                return False
+
+        return True
+
+
 @dataclass
-class DataArrayClass:
+class DataArrayClass(metaclass=DataArrayClassMeta):
     """Base class for dataclasses."""
 
     data: DataArray
