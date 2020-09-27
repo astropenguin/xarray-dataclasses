@@ -39,7 +39,7 @@ class DataArrayClassMeta(type):
 class DataArrayClass(metaclass=DataArrayClassMeta):
     """Base class for dataclasses."""
 
-    data: DataArray
+    data: DataArray  #: Values for a ``DataArray`` instance.
 
     def __init_subclass__(cls) -> None:
         dataclass(cls)
