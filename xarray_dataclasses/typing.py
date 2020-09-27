@@ -2,7 +2,7 @@ __all__ = ["DataArray"]
 
 
 # standard library
-from typing import Any, Optional, Sequence, Tuple, Type, Union
+from typing import Any, Optional, Sequence, Tuple, Union
 
 
 # dependencies
@@ -12,14 +12,14 @@ import xarray as xr
 
 # type aliases
 Dims = Optional[Sequence[str]]
-Dtype = Optional[Union[Type, str]]
+Dtype = Optional[Union[type, str]]
 
 
 # main features
 class DataArrayMeta(type):
-    """Metaclass for the DataArray class."""
+    """Metaclass of ``DataArray``."""
 
-    def __getitem__(cls, options: Tuple[Dims, Dtype]) -> Type:
+    def __getitem__(cls, options: Tuple[Dims, Dtype]) -> type:
         try:
             dims, dtype = options
         except (ValueError, TypeError):
@@ -46,12 +46,12 @@ class DataArrayMeta(type):
             return False
 
         if cls.dims is None:
-            is_equal_dims = True  # do not evaluate
+            is_equal_dims = True  # Do not evaluate.
         else:
             is_equal_dims = inst.dims == cls.dims
 
         if cls.dtype is None:
-            is_equal_dtype = True  # do not evaluate
+            is_equal_dtype = True  # Do not evaluate.
         else:
             is_equal_dtype = inst.dtype == cls.dtype
 
