@@ -4,8 +4,10 @@ __version__ = "0.1.1"
 
 
 # submodules
+from . import bases
 from . import typing
 
 
 # aliases
+from .bases import *
 from .typing import *
