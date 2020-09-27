@@ -17,7 +17,7 @@ Dtype = Optional[Union[type, str]]
 
 # main features
 class DataArrayMeta(type):
-    """Metaclass for the DataArray class."""
+    """Metaclass of ``DataArray``."""
 
     def __getitem__(cls, options: Tuple[Dims, Dtype]) -> type:
         try:
@@ -46,12 +46,12 @@ class DataArrayMeta(type):
             return False
 
         if cls.dims is None:
-            is_equal_dims = True  # do not evaluate
+            is_equal_dims = True  # Do not evaluate.
         else:
             is_equal_dims = inst.dims == cls.dims
 
         if cls.dtype is None:
-            is_equal_dtype = True  # do not evaluate
+            is_equal_dtype = True  # Do not evaluate.
         else:
             is_equal_dtype = inst.dtype == cls.dtype
 
