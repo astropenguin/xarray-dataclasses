@@ -11,3 +11,7 @@ from . import typing
 # aliases
 from .bases import *
 from .typing import *
+
+
+# for sphinx docs
+__all__ = dir()
