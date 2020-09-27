@@ -6,10 +6,12 @@ __all__ = [
 
 # standard library
 from dataclasses import dataclass, Field, is_dataclass
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 
 # dependencies
+import numpy as np
+import xarray as xr
 from .typing import DataArray
 
 
@@ -40,6 +42,36 @@ class DataArrayClass(metaclass=DataArrayClassMeta):
     """Base class for dataclasses."""
 
     data: DataArray  #: Values for a ``DataArray`` instance.
+
+    def to_dataarray(
+        self,
+        name: Optional[str] = None,
+        attrs: Optional[dict] = None,
+    ) -> xr.DataArray:
+        """Convert the instance to a ``DataArray`` instance.
+
+        Args:
+            name: Name of the ``DataArray`` instance.
+            attrs: Attributes of the ``DataArray`` instance.
+
+        Returns:
+            ``DataArray`` instance with fixed ``dims`` and ``dtype``.
+
+        """
+        da = get_data_field(self).type(self.data, name=name, attrs=attrs)
+
+        for name, field in get_coords_fields(self).items():
+            shape = [da.sizes[dim] for dim in field.type.dims]
+            value = getattr(self, name)
+
+            try:
+                coord = field.type(value)
+            except ValueError:
+                coord = field.type(np.full(shape, value))
+
+            da.coords[name] = coord
+
+        return da
 
     def __init_subclass__(cls) -> None:
         dataclass(cls)
