@@ -107,5 +107,9 @@ def get_coords_fields(obj: DataArrayClass) -> Dict[str, Field]:
         Fields of DataArray coordinates.
 
     """
-    items = obj.__dataclass_fields__.items()
-    return {k: v for k, v in items if issubclass(v.type, DataArray)}
+
+    def condition(name, field):
+        return name != DATA and issubclass(field.type, DataArray)
+
+    fields = obj.__dataclass_fields__
+    return {k: v for k, v in fields.items() if condition(k, v)}
