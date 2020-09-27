@@ -74,7 +74,19 @@ class DataArrayClass(metaclass=DataArrayClassMeta):
         return da
 
     def __init_subclass__(cls) -> None:
+        """Check if subclass is a valid dataarrayclass."""
+
+        init_error = ValueError(
+            "Failed to initialize a subclass. "
+            "Please check if the following conditions are fulfilled. "
+            "1. The subclass has a data field whose type is DataArray. "
+            "2. All ``dims`` of coords are subsets of data ``dims``."
+        )
+
         dataclass(cls)
+
+        if not is_dataarrayclass(cls):
+            raise init_error
 
 
 def is_dataarrayclass(obj: Any) -> bool:
