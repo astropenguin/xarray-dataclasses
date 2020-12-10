@@ -2,17 +2,23 @@ __all__ = ["DataArray"]
 
 
 # standard library
-from typing import Any, Optional, Sequence, Tuple, Union
+from typing import Any, Dict, Hashable, Mapping, Optional, Sequence, Tuple, Union
 
 
 # dependencies
 import numpy as np
+import pandas as pd
 import xarray as xr
+from typing_extensions import TypeAlias
 
 
 # type aliases
-Dims = Optional[Sequence[str]]
-Dtype = Optional[Union[type, str]]
+Attrs: TypeAlias = Optional[Mapping]
+Coords: TypeAlias = Optional[Union[Sequence[tuple], Mapping[Hashable, Any]]]
+Dims: TypeAlias = Union[Sequence[Hashable], Hashable]
+Dtype: TypeAlias = Optional[Union[type, str]]
+Indexes: TypeAlias = Optional[Dict[Hashable, pd.Index]]
+Name: TypeAlias = Optional[Hashable]
 
 
 # main features
@@ -98,6 +104,18 @@ class DataArray(metaclass=DataArrayMeta):
     dims: Dims = None  #: Dimensions to be fixed in DataArray instances.
     dtype: Dtype = None  #: Datatype to be fixed in DataArray instances.
 
-    def __new__(cls, data: Any, **kwargs) -> xr.DataArray:
-        data = np.asarray(data, dtype=cls.dtype)
-        return xr.DataArray(data, dims=cls.dims, **kwargs)
+    def __new__(
+        cls,
+        data: Any,
+        coords: Coords = None,
+        dims: Dims = None,
+        name: Name = None,
+        attrs: Attrs = None,
+        indexes: Indexes = None,
+        fastpath: bool = False,
+    ) -> xr.DataArray:
+        """Create a DataArray instance with fixed dims and dtype."""
+        data = np.array(data, cls.dtype)
+        dims = dims if cls.dims is None else cls.dims
+
+        return xr.DataArray(data, coords, dims, name, attrs, indexes, fastpath)
