@@ -1,9 +1,4 @@
-__all__ = [
-    "empty",
-    "zeros",
-    "ones",
-    "full",
-]
+__all__ = ["empty", "zeros", "ones", "full"]
 
 
 # standard library
