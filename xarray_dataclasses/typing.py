@@ -25,7 +25,7 @@ Name: TypeAlias = Optional[Hashable]
 class DataArrayMeta(type):
     """Metaclass of the type hint for xarray.DataArray."""
 
-    def __getitem__(cls, options: Tuple[Dims, Dtype]) -> type:
+    def __getitem__(cls, options: Tuple[Dims, Dtype]) -> "DataArrayMeta":
         try:
             dims, dtype = options
         except (ValueError, TypeError):
