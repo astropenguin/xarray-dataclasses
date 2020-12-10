@@ -23,7 +23,7 @@ Name: TypeAlias = Optional[Hashable]
 
 # main features
 class DataArrayMeta(type):
-    """Metaclass of ``DataArray``."""
+    """Metaclass of the type hint for xarray.DataArray."""
 
     def __getitem__(cls, options: Tuple[Dims, Dtype]) -> type:
         try:
@@ -65,14 +65,24 @@ class DataArrayMeta(type):
 
 
 class DataArray(metaclass=DataArrayMeta):
-    """Type hint for ``xarray.DataArray``.
+    """Type hint for xarray.DataArray.
+
+    As shown in the examples, it enables to specify fixed dimension(s)
+    (``dims``) and datatype (``dtype``) of ``xarray.DataArray``.
+    Users can use it to create a ``DataArray`` instance with fixed
+    dimension(s) and datatype in the same manner as ``xarray.DataArray``.
 
     Args:
-        data: Values for a ``DataArray`` instance.
-        kwargs: Options passed to ``DataArray()``.
+        data: Values of a ``DataArray`` instance.
+            They are cast to ``dtype`` if it is specified in a hint.
+        coords: Coordinates of a ``DataArray`` instance.
+        dims: Dimension(s) of a ``DataArray`` instance.
+            It is ignored if ``dims`` is specified in a hint.
+        name: Name of a ``DataArray`` instance.
+        attrs: Attributes of a ``DataArray`` instance.
 
     Returns:
-        ``DataArray`` with fixed ``dims`` and ``dtype``.
+        ``DataArray`` instance with fixed ``dims`` and ``dtype``.
 
     Examples:
         To fix ``dims`` to be ``('x', 'y')``::
