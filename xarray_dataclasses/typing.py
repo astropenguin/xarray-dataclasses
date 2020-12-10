@@ -34,7 +34,7 @@ class DataArrayMeta(type):
         if isinstance(dims, str):
             dims = (dims,)
 
-        if isinstance(dims, list):
+        if dims is not None:
             dims = tuple(dims)
 
         if dtype is not None:
