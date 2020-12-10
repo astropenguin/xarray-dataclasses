@@ -12,6 +12,8 @@ documentation = "https://astropenguin.github.io/xarray-dataclasses/"
 python = "^3.6"
 dataclasses = { version = "^0.7", python = "~3.6" }
 numpy = "^1.18"
+pandas = ">=0.25"
+typing-extensions = "^3.7"
 xarray = "^0.15"
 
 [tool.poetry.dev-dependencies]

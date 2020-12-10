@@ -2,24 +2,30 @@ __all__ = ["DataArray"]
 
 
 # standard library
-from typing import Any, Optional, Sequence, Tuple, Union
+from typing import Any, Dict, Hashable, Mapping, Optional, Sequence, Tuple, Union
 
 
 # dependencies
 import numpy as np
+import pandas as pd
 import xarray as xr
+from typing_extensions import TypeAlias
 
 
 # type aliases
-Dims = Optional[Sequence[str]]
-Dtype = Optional[Union[type, str]]
+Attrs: TypeAlias = Optional[Mapping]
+Coords: TypeAlias = Optional[Union[Sequence[tuple], Mapping[Hashable, Any]]]
+Dims: TypeAlias = Union[Sequence[Hashable], Hashable]
+Dtype: TypeAlias = Optional[Union[type, str]]
+Indexes: TypeAlias = Optional[Dict[Hashable, pd.Index]]
+Name: TypeAlias = Optional[Hashable]
 
 
 # main features
 class DataArrayMeta(type):
-    """Metaclass of ``DataArray``."""
+    """Metaclass of the type hint for xarray.DataArray."""
 
-    def __getitem__(cls, options: Tuple[Dims, Dtype]) -> type:
+    def __getitem__(cls, options: Tuple[Dims, Dtype]) -> "DataArrayMeta":
         try:
             dims, dtype = options
         except (ValueError, TypeError):
@@ -28,7 +34,7 @@ class DataArrayMeta(type):
         if isinstance(dims, str):
             dims = (dims,)
 
-        if isinstance(dims, list):
+        if dims is not None:
             dims = tuple(dims)
 
         if dtype is not None:
@@ -59,14 +65,24 @@ class DataArrayMeta(type):
 
 
 class DataArray(metaclass=DataArrayMeta):
-    """Type hint for ``xarray.DataArray``.
+    """Type hint for xarray.DataArray.
+
+    As shown in the examples, it enables to specify fixed dimension(s)
+    (``dims``) and datatype (``dtype``) of ``xarray.DataArray``.
+    Users can use it to create a ``DataArray`` instance with fixed
+    dimension(s) and datatype in the same manner as ``xarray.DataArray``.
 
     Args:
-        data: Values for a ``DataArray`` instance.
-        kwargs: Options passed to ``DataArray()``.
+        data: Values of a ``DataArray`` instance.
+            They are cast to ``dtype`` if it is specified in a hint.
+        coords: Coordinates of a ``DataArray`` instance.
+        dims: Dimension(s) of a ``DataArray`` instance.
+            It is ignored if ``dims`` is specified in a hint.
+        name: Name of a ``DataArray`` instance.
+        attrs: Attributes of a ``DataArray`` instance.
 
     Returns:
-        ``DataArray`` with fixed ``dims`` and ``dtype``.
+        ``DataArray`` instance with fixed ``dims`` and ``dtype``.
 
     Examples:
         To fix ``dims`` to be ``('x', 'y')``::
@@ -98,6 +114,18 @@ class DataArray(metaclass=DataArrayMeta):
     dims: Dims = None  #: Dimensions to be fixed in DataArray instances.
     dtype: Dtype = None  #: Datatype to be fixed in DataArray instances.
 
-    def __new__(cls, data: Any, **kwargs) -> xr.DataArray:
-        data = np.asarray(data, dtype=cls.dtype)
-        return xr.DataArray(data, dims=cls.dims, **kwargs)
+    def __new__(
+        cls,
+        data: Any,
+        coords: Coords = None,
+        dims: Dims = None,
+        name: Name = None,
+        attrs: Attrs = None,
+        indexes: Indexes = None,
+        fastpath: bool = False,
+    ) -> xr.DataArray:
+        """Create a DataArray instance with fixed dims and dtype."""
+        data = np.array(data, cls.dtype)
+        dims = dims if cls.dims is None else cls.dims
+
+        return xr.DataArray(data, coords, dims, name, attrs, indexes, fastpath)
