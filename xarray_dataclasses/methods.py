@@ -63,7 +63,6 @@ def ones(
     name: Name = None,
     attrs: Attrs = None,
 ) -> xr.DataArray:
-    return np.ones(shape, dtype, order)
     return new(np.ones(shape, dtype, order), name, attrs)
 
 
