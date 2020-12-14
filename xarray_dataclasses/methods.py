@@ -2,9 +2,12 @@
 from typing import Any
 
 
-# dependencies
+# third-party packages
 import numpy as np
 import xarray as xr
+
+
+# sub-modules/packages
 from .typing import Attrs, Dtype, Name, Shape, Order
 
 
