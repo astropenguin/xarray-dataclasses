@@ -2,13 +2,13 @@
 from typing import Any, Hashable, Mapping, Optional, Sequence, Tuple, Union
 
 
-# dependencies
+# third-party packages
 import numpy as np
 import xarray as xr
 from typing_extensions import TypeAlias
 
 
-# type aliases
+# type hints
 Attrs: TypeAlias = Optional[Mapping]
 Coords: TypeAlias = Optional[Union[Sequence[tuple], Mapping[Hashable, Any]]]
 Dims: TypeAlias = Optional[Union[Sequence[Hashable], Hashable]]
@@ -16,7 +16,6 @@ Dtype: TypeAlias = Optional[Union[type, str]]
 Name: TypeAlias = Optional[Hashable]
 
 
-# main features
 class DataArrayMeta(type):
     """Metaclass of the type hint for xarray.DataArray."""
 
