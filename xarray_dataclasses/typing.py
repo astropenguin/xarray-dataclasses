@@ -1,6 +1,3 @@
-__all__ = ["DataArray"]
-
-
 # standard library
 from typing import Any, Hashable, Mapping, Optional, Sequence, Tuple, Union
 
