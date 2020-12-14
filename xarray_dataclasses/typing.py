@@ -14,7 +14,7 @@ from typing_extensions import TypeAlias
 # type aliases
 Attrs: TypeAlias = Optional[Mapping]
 Coords: TypeAlias = Optional[Union[Sequence[tuple], Mapping[Hashable, Any]]]
-Dims: TypeAlias = Union[Sequence[Hashable], Hashable]
+Dims: TypeAlias = Optional[Union[Sequence[Hashable], Hashable]]
 Dtype: TypeAlias = Optional[Union[type, str]]
 Name: TypeAlias = Optional[Hashable]
 
