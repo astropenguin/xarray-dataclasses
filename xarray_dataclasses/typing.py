@@ -5,14 +5,19 @@ from typing import Any, Hashable, Mapping, Optional, Sequence, Tuple, Union
 # third-party packages
 import numpy as np
 import xarray as xr
-from typing_extensions import TypeAlias
+from typing_extensions import Literal, TypeAlias
 
 
-# type hints
+# type hints for numpy
+Dtype: TypeAlias = Optional[Union[np.dtype, type, str]]
+Order: TypeAlias = Literal["C", "F"]
+Shape: TypeAlias = Sequence[int]
+
+
+# type hints for xarray
 Attrs: TypeAlias = Optional[Mapping]
-Coords: TypeAlias = Optional[Union[Sequence[tuple], Mapping[Hashable, Any]]]
+Coords: TypeAlias = Optional[Union[Sequence[Tuple], Mapping[Hashable, Any]]]
 Dims: TypeAlias = Optional[Union[Sequence[Hashable], Hashable]]
-Dtype: TypeAlias = Optional[Union[type, str]]
 Name: TypeAlias = Optional[Hashable]
 
 
