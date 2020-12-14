@@ -2,25 +2,18 @@ __all__ = ["new", "empty", "zeros", "ones", "full"]
 
 
 # standard library
-from typing import Any, Optional, Sequence, Union
+from typing import Any
 
 
 # dependencies
 import numpy as np
 import xarray as xr
-from typing_extensions import Literal
-from .typing import Name, Attrs
+from .typing import Attrs, Dtype, Name, Shape, Order
 
 
 # constants
 C: str = "C"
 F: str = "F"
-
-
-# type aliases
-Shape = Sequence[int]
-Dtype = Optional[Union[type, str]]
-Order = Literal[C, F]
 
 
 # main features
