@@ -9,8 +9,7 @@ from .typing import Attrs, Dtype, Name, Shape, Order
 
 
 # constants
-C: str = "C"
-F: str = "F"
+ORDER: Order = "C"
 
 
 # main features
@@ -27,7 +26,7 @@ def empty(
     shape: Shape,
     *,
     dtype: Dtype = None,
-    order: Order = C,
+    order: Order = ORDER,
     name: Name = None,
     attrs: Attrs = None,
 ) -> xr.DataArray:
@@ -38,7 +37,7 @@ def zeros(
     shape: Shape,
     *,
     dtype: Dtype = None,
-    order: Order = C,
+    order: Order = ORDER,
     name: Name = None,
     attrs: Attrs = None,
 ) -> xr.DataArray:
@@ -49,7 +48,7 @@ def ones(
     shape: Shape,
     *,
     dtype: Dtype = None,
-    order: Order = C,
+    order: Order = ORDER,
     name: Name = None,
     attrs: Attrs = None,
 ) -> xr.DataArray:
@@ -61,7 +60,7 @@ def full(
     fill_value: Any,
     *,
     dtype: Dtype = None,
-    order: Order = C,
+    order: Order = ORDER,
     name: Name = None,
     attrs: Attrs = None,
 ) -> xr.DataArray:
