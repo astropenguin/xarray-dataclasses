@@ -9,23 +9,30 @@ from .typing import DataArray, Dims, Dtype
 
 
 # helper features
-def add_dataarray_init(
-    cls: type,
-    dims: Dims,
-    dtype: Dtype,
-    func: Callable,
-) -> type:
+def get_dataarray_init(func: Callable, dims: Dims, dtype: Dtype) -> Callable:
+    """Returns a DataArray initializer with fixed dims and dtype."""
     sig = signature(func)
-    Typed = DataArray[dims, dtype]
+    TypedArray = DataArray[dims, dtype]
 
-    @staticmethod
+    for par in sig.parameters.values():
+        if par.annotation == par.empty:
+            raise ValueError("Type hint must be specified for all args.")
+
+        if par.annotation == par.VAR_POSITIONAL:
+            raise ValueError("Positional args cannot be used.")
+
+        if par.annotation == par.VAR_KEYWORD:
+            raise ValueError("Keyword args cannot be used.")
+
     @wraps(func)
-    def wrapper(*args, **kwargs) -> Typed:
+    def dataarray_init(*args, **kwargs) -> TypedArray:
         for key in kwargs.keys():
             if key not in sig.parameters:
                 kwargs.pop(key)
 
-        return Typed(func(*args, **kwargs))
+        return TypedArray[dims, dtype](func(*args, **kwargs))
+
+    return dataarray_init
 
     cls.__dataarray_init__ = wrapper
     return cls
