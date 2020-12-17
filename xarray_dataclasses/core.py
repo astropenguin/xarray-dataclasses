@@ -51,3 +51,10 @@ def update_annotations(cls: type, based_on: Callable) -> None:
         **cls.__annotations__,
         **trailing_annotations,
     }
+
+
+def update_defaults(cls: type, based_on: Callable) -> None:
+    """Update class defaults based on a DataArray initializer."""
+    for par in signature(based_on).parameters.values():
+        if not par.default == par.empty:
+            setattr(cls, par.name, par.default)
