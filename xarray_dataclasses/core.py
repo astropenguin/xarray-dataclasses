@@ -25,14 +25,14 @@ def get_initializer(func: Callable, dims: Dims, dtype: Dtype) -> Callable:
             raise ValueError("Keyword args cannot be used.")
 
     @wraps(func)
-    def dataarray_init(*args, **kwargs) -> TypedArray:
+    def wrapper(*args, **kwargs) -> TypedArray:
         for key in kwargs.keys():
             if key not in sig.parameters:
                 kwargs.pop(key)
 
-        return TypedArray[dims, dtype](func(*args, **kwargs))
+        return TypedArray(func(*args, **kwargs))
 
-    return dataarray_init
+    return wrapper
 
 
 def update_annotations(cls: type, based_on: Callable) -> None:
