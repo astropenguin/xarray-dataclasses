@@ -9,8 +9,8 @@ from .typing import DataArray, Dims, Dtype
 
 
 # helper features
-def get_dataarray_init(func: Callable, dims: Dims, dtype: Dtype) -> Callable:
-    """Returns a DataArray initializer with fixed dims and dtype."""
+def get_initializer(func: Callable, dims: Dims, dtype: Dtype) -> Callable:
+    """Create a DataArray initializer with fixed dims and dtype."""
     sig = signature(func)
     TypedArray = DataArray[dims, dtype]
 
@@ -33,6 +33,3 @@ def get_dataarray_init(func: Callable, dims: Dims, dtype: Dtype) -> Callable:
         return TypedArray[dims, dtype](func(*args, **kwargs))
 
     return dataarray_init
-
-    cls.__dataarray_init__ = wrapper
-    return cls
