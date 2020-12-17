@@ -18,10 +18,10 @@ def get_dataarray_init(func: Callable, dims: Dims, dtype: Dtype) -> Callable:
         if par.annotation == par.empty:
             raise ValueError("Type hint must be specified for all args.")
 
-        if par.annotation == par.VAR_POSITIONAL:
+        if par.kind == par.VAR_POSITIONAL:
             raise ValueError("Positional args cannot be used.")
 
-        if par.annotation == par.VAR_KEYWORD:
+        if par.kind == par.VAR_KEYWORD:
             raise ValueError("Keyword args cannot be used.")
 
     @wraps(func)
