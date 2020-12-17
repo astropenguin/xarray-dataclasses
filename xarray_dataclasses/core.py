@@ -33,3 +33,21 @@ def get_initializer(func: Callable, dims: Dims, dtype: Dtype) -> Callable:
         return TypedArray[dims, dtype](func(*args, **kwargs))
 
     return dataarray_init
+
+
+def update_annotations(cls: type, based_on: Callable) -> None:
+    """Update class annotations based on a DataArray initializer."""
+    leading_annotations = {}
+    trailing_annotations = {}
+
+    for par in signature(based_on).parameters.values():
+        if par.kind == par.KEYWORD_ONLY:
+            trailing_annotations[par.name] = par.annotation
+        else:
+            leading_annotations[par.name] = par.annotation
+
+    cls.__annotations__ = {
+        **leading_annotations,
+        **cls.__annotations__,
+        **trailing_annotations,
+    }
