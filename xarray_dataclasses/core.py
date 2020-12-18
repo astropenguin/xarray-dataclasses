@@ -9,9 +9,9 @@ from .typing import DataArray, Dims, Dtype
 
 
 # helper features
-def get_initializer(func: Callable, dims: Dims, dtype: Dtype) -> Callable:
-    """Create a DataArray initializer with fixed dims and dtype."""
-    sig = signature(func)
+def get_creator(creator: Callable, dims: Dims, dtype: Dtype) -> Callable:
+    """Create a DataArray creator with fixed dims and dtype."""
+    sig = signature(creator)
     TypedArray = DataArray[dims, dtype]
 
     for par in sig.parameters.values():
@@ -24,13 +24,13 @@ def get_initializer(func: Callable, dims: Dims, dtype: Dtype) -> Callable:
         if par.kind == par.VAR_KEYWORD:
             raise ValueError("Variadic keyword args cannot be used.")
 
-    @wraps(func)
+    @wraps(creator)
     def wrapper(*args, **kwargs) -> TypedArray:
         for key in kwargs.keys():
             if key not in sig.parameters:
                 kwargs.pop(key)
 
-        return TypedArray(func(*args, **kwargs))
+        return TypedArray(creator(*args, **kwargs))
 
     return wrapper
 
