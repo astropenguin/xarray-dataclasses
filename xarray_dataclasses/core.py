@@ -1,17 +1,30 @@
 # standard library
-from dataclasses import Field
+from dataclasses import Field, _DataclassParams
 from functools import wraps
 from inspect import signature
-from typing import Any, Callable
+from typing import Any, Callable, Dict
 
 
 # third-party packages
 import numpy as np
 import xarray as xr
+from typing_extensions import Protocol
 
 
 # sub-modules/packages
 from .typing import DataArray, Dims, Dtype
+
+
+# main features
+class DataArrayClass(Protocol):
+    """Type hint for DataArray classes."""
+
+    # special attributes of dataclass
+    __dataclass_fields__: Dict[str, Field]
+    __dataclass_params__: _DataclassParams
+
+    # special attributes of DataArray class
+    __dataarray_creator__: Callable
 
 
 # helper features
