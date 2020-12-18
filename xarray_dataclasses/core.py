@@ -19,10 +19,10 @@ def get_initializer(func: Callable, dims: Dims, dtype: Dtype) -> Callable:
             raise ValueError("Type hint must be specified for all args.")
 
         if par.kind == par.VAR_POSITIONAL:
-            raise ValueError("Positional args cannot be used.")
+            raise ValueError("Variadic positional args cannot be used.")
 
         if par.kind == par.VAR_KEYWORD:
-            raise ValueError("Keyword args cannot be used.")
+            raise ValueError("Variadic keyword args cannot be used.")
 
     @wraps(func)
     def wrapper(*args, **kwargs) -> TypedArray:
