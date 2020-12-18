@@ -1,7 +1,13 @@
 # standard library
+from dataclasses import Field
 from functools import wraps
 from inspect import signature
-from typing import Callable
+from typing import Any, Callable
+
+
+# third-party packages
+import numpy as np
+import xarray as xr
 
 
 # sub-modules/packages
@@ -58,3 +64,10 @@ def update_defaults(cls: type, based_on: Callable) -> None:
     for par in signature(based_on).parameters.values():
         if not par.default == par.empty:
             setattr(cls, par.name, par.default)
+
+
+def set_coord(dataarray: xr.DataArray, field: Field, value: Any) -> None:
+    """Set a coord to a DataArray based on field information."""
+    dims = field.type.dims
+    shape = tuple(dataarray.sizes[dim] for dim in dims)
+    dataarray.coords[field.name] = dims, field.type(np.full(shape, value))
