@@ -11,7 +11,7 @@ from typing_extensions import Literal, TypeAlias
 # type hints for numpy
 Dtype: TypeAlias = Optional[Union[np.dtype, type, str]]
 Order: TypeAlias = Literal["C", "F"]
-Shape: TypeAlias = Sequence[int]
+Shape: TypeAlias = Union[Sequence[int], int]
 
 
 # type hints for xarray
