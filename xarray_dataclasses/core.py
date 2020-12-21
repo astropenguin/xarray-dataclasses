@@ -42,7 +42,7 @@ def dataarrayclass(
     dims: Dims = None,
     dtype: Dtype = None,
     creator: Callable = DEFAULT_CREATOR,
-) -> Callable[type, DataArrayClass]:
+) -> Callable[[type], DataArrayClass]:
     """Create a decorator to convert a class to a DataArray class.
 
     Args:
