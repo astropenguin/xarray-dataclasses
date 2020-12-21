@@ -1,6 +1,5 @@
 # standard library
 from dataclasses import Field, _DataclassParams
-from functools import wraps
 from inspect import signature
 from typing import Any, Callable, Dict
 
@@ -12,6 +11,7 @@ from typing_extensions import Protocol, TypeAlias
 
 # sub-modules/packages
 from .typing import DataArray, Dims, Dtype
+from .utils import copy_wraps
 
 
 # type hints
@@ -45,7 +45,7 @@ def get_creator(creator: Callable, dims: Dims, dtype: Dtype) -> DataArrayCreator
         if par.kind == par.VAR_KEYWORD:
             raise ValueError("Variadic keyword args cannot be used.")
 
-    @wraps(creator)
+    @copy_wraps(creator)
     def wrapper(*args, **kwargs) -> TypedArray:
         for key in kwargs.keys():
             if key not in sig.parameters:
@@ -53,6 +53,7 @@ def get_creator(creator: Callable, dims: Dims, dtype: Dtype) -> DataArrayCreator
 
         return TypedArray(creator(*args, **kwargs))
 
+    wrapper.__annotations__["return"] = TypedArray
     return wrapper
 
 
