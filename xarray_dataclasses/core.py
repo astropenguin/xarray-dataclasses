@@ -65,7 +65,7 @@ def get_creator(creator: Callable, dims: Dims, dtype: Dtype) -> DataArrayCreator
 
     @copy_wraps(creator)
     def wrapper(*args, **kwargs) -> TypedArray:
-        for key in kwargs.keys():
+        for key in tuple(kwargs.keys()):
             if key not in sig.parameters:
                 kwargs.pop(key)
 
