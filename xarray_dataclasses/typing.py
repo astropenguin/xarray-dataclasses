@@ -1,4 +1,4 @@
-__all__ = ["Attrs", "Coords", "DataArray", "Dims", "Dtype", "Name", "Order", "Shape"]
+__all__ = ["DataArray"]
 
 
 # standard library
