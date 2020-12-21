@@ -1,5 +1,5 @@
 # standard library
-from dataclasses import Field, _DataclassParams
+from dataclasses import asdict, Field, _DataclassParams
 from inspect import signature
 from typing import Any, Callable, Dict
 
@@ -27,6 +27,21 @@ class DataArrayClass(Protocol):
 
     # special attributes of DataArray class
     __dataarray_creator__: DataArrayCreator
+
+
+# main features
+def to_dataarray(inst: DataArrayClass) -> DataArray:
+    """Convert a DataArray class instance to a DataArray."""
+    dataarray = inst.__dataarray_creator__(**asdict(inst))
+
+    for field in inst.__dataclass_fields__.values():
+        if not issubclass(field.type, DataArray):
+            continue
+
+        value = getattr(inst, field.name)
+        set_coord(dataarray, field, value)
+
+    return dataarray
 
 
 # helper features
