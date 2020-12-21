@@ -7,7 +7,6 @@ from typing import Any, Callable, Dict
 
 # third-party packages
 import numpy as np
-import xarray as xr
 from typing_extensions import Protocol
 
 
@@ -79,7 +78,7 @@ def update_defaults(cls: type, based_on: Callable) -> None:
             setattr(cls, par.name, par.default)
 
 
-def set_coord(dataarray: xr.DataArray, field: Field, value: Any) -> None:
+def set_coord(dataarray: DataArray, field: Field, value: Any) -> None:
     """Set a coord to a DataArray based on field information."""
     dims = field.type.dims
     shape = tuple(dataarray.sizes[dim] for dim in dims)
