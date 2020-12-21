@@ -35,6 +35,9 @@ def to_dataarray(inst: DataArrayClass) -> DataArray:
     dataarray = inst.__dataarray_creator__(**asdict(inst))
 
     for field in inst.__dataclass_fields__.values():
+        if not isinstance(field.type, type):
+            continue
+
         if not issubclass(field.type, DataArray):
             continue
 
