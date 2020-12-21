@@ -7,14 +7,17 @@ from typing import Any, Callable, Dict
 
 # third-party packages
 import numpy as np
-from typing_extensions import Protocol
+from typing_extensions import Protocol, TypeAlias
 
 
 # sub-modules/packages
 from .typing import DataArray, Dims, Dtype
 
 
-# main features
+# type hints
+DataArrayCreator: TypeAlias = Callable[..., DataArray]
+
+
 class DataArrayClass(Protocol):
     """Type hint for DataArray classes."""
 
@@ -23,11 +26,11 @@ class DataArrayClass(Protocol):
     __dataclass_params__: _DataclassParams
 
     # special attributes of DataArray class
-    __dataarray_creator__: Callable
+    __dataarray_creator__: DataArrayCreator
 
 
 # helper features
-def get_creator(creator: Callable, dims: Dims, dtype: Dtype) -> Callable:
+def get_creator(creator: Callable, dims: Dims, dtype: Dtype) -> DataArrayCreator:
     """Create a DataArray creator with fixed dims and dtype."""
     sig = signature(creator)
     TypedArray = DataArray[dims, dtype]
