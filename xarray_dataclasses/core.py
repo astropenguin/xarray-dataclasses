@@ -1,3 +1,6 @@
+__all__ = ["dataarrayclass", "is_dataarrayclass", "to_dataarray"]
+
+
 # standard library
 from dataclasses import asdict, dataclass, Field, _DataclassParams
 from inspect import signature

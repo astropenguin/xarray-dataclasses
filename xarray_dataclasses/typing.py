@@ -1,3 +1,6 @@
+__all__ = ["Attrs", "Coords", "DataArray", "Dims", "Dtype", "Name", "Order", "Shape"]
+
+
 # standard library
 from typing import Any, Hashable, Mapping, Optional, Sequence, Tuple, Union
 
