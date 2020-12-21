@@ -4,11 +4,10 @@ from typing import Any
 
 # third-party packages
 import numpy as np
-import xarray as xr
 
 
 # sub-modules/packages
-from .typing import Attrs, Dtype, Name, Shape, Order
+from .typing import Attrs, DataArray, Dtype, Name, Shape, Order
 
 
 # constants
@@ -21,8 +20,8 @@ def new(
     *,
     name: Name = None,
     attrs: Attrs = None,
-) -> xr.DataArray:
-    return xr.DataArray(data, name=name, attrs=attrs)
+) -> DataArray:
+    return DataArray(data, name=name, attrs=attrs)
 
 
 def empty(
@@ -32,7 +31,7 @@ def empty(
     order: Order = C_ORDER,
     name: Name = None,
     attrs: Attrs = None,
-) -> xr.DataArray:
+) -> DataArray:
     return new(np.empty(shape, dtype, order), name, attrs)
 
 
@@ -43,7 +42,7 @@ def zeros(
     order: Order = C_ORDER,
     name: Name = None,
     attrs: Attrs = None,
-) -> xr.DataArray:
+) -> DataArray:
     return new(np.zeros(shape, dtype, order), name, attrs)
 
 
@@ -54,7 +53,7 @@ def ones(
     order: Order = C_ORDER,
     name: Name = None,
     attrs: Attrs = None,
-) -> xr.DataArray:
+) -> DataArray:
     return new(np.ones(shape, dtype, order), name, attrs)
 
 
@@ -66,5 +65,5 @@ def full(
     order: Order = C_ORDER,
     name: Name = None,
     attrs: Attrs = None,
-) -> xr.DataArray:
+) -> DataArray:
     return new(np.full(shape, fill_value, dtype, order), name, attrs)
