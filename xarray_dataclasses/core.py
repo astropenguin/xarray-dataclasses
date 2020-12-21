@@ -1,5 +1,5 @@
 # standard library
-from dataclasses import asdict, Field, _DataclassParams
+from dataclasses import asdict, dataclass, Field, _DataclassParams
 from inspect import signature
 from typing import Any, Callable, Dict
 
@@ -10,8 +10,13 @@ from typing_extensions import Protocol, TypeAlias
 
 
 # sub-modules/packages
+from .methods import new
 from .typing import DataArray, Dims, Dtype
 from .utils import copy_wraps
+
+
+# constants
+DEFAULT_CREATOR = new
 
 
 # type hints
@@ -30,6 +35,35 @@ class DataArrayClass(Protocol):
 
 
 # main features
+def dataarrayclass(
+    dims: Dims = None,
+    dtype: Dtype = None,
+    creator: Callable = DEFAULT_CREATOR,
+) -> Callable[type, DataArrayClass]:
+    """Create a decorator to convert a class to a DataArray class.
+
+    Args:
+        dims: Dimensions to be fixed in a DataArray instance.
+        dtype: Datatype to be fixed in a DataArray instance.
+        creator: Function to create an initial DataArray instance.
+
+    Returns:
+        A decorator to convert a class to a DataArray class.
+
+    """
+
+    def wrapper(cls: type) -> type:
+        dataarray_creator = get_creator(creator, dims, dtype)
+
+        cls.__dataarray_creator__ = staticmethod(dataarray_creator)
+        update_annotations(cls, dataarray_creator)
+        update_defaults(cls, dataarray_creator)
+
+        return dataclass(cls)
+
+    return wrapper
+
+
 def to_dataarray(inst: DataArrayClass) -> DataArray:
     """Convert a DataArray class instance to a DataArray."""
     dataarray = inst.__dataarray_creator__(**asdict(inst))
