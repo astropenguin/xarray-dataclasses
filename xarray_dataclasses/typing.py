@@ -2,26 +2,28 @@ __all__ = ["DataArray"]
 
 
 # standard library
-from typing import Any, Dict, Hashable, Mapping, Optional, Sequence, Tuple, Union
+from typing import Any, Hashable, Mapping, Optional, Sequence, Tuple, Union
 
 
-# dependencies
+# third-party packages
 import numpy as np
-import pandas as pd
 import xarray as xr
-from typing_extensions import TypeAlias
+from typing_extensions import Literal, TypeAlias
 
 
-# type aliases
+# type hints for numpy
+Dtype: TypeAlias = Optional[Union[np.dtype, type, str]]
+Order: TypeAlias = Literal["C", "F"]
+Shape: TypeAlias = Union[Sequence[int], int]
+
+
+# type hints for xarray
 Attrs: TypeAlias = Optional[Mapping]
-Coords: TypeAlias = Optional[Union[Sequence[tuple], Mapping[Hashable, Any]]]
-Dims: TypeAlias = Union[Sequence[Hashable], Hashable]
-Dtype: TypeAlias = Optional[Union[type, str]]
-Indexes: TypeAlias = Optional[Dict[Hashable, pd.Index]]
+Coords: TypeAlias = Optional[Union[Sequence[Tuple], Mapping[Hashable, Any]]]
+Dims: TypeAlias = Optional[Union[Sequence[Hashable], Hashable]]
 Name: TypeAlias = Optional[Hashable]
 
 
-# main features
 class DataArrayMeta(type):
     """Metaclass of the type hint for xarray.DataArray."""
 
@@ -45,7 +47,10 @@ class DataArrayMeta(type):
         else:
             name = f"{cls.__name__}[{dims!s}, {dtype!s}]"
 
-        return type(name, (cls,), dict(dims=dims, dtype=dtype))
+        namespace = cls.__dict__.copy()
+        namespace.update(dims=dims, dtype=dtype)
+
+        return DataArrayMeta(name, (cls,), namespace)
 
     def __instancecheck__(cls, inst: Any) -> bool:
         if not isinstance(inst, xr.DataArray):
@@ -64,7 +69,7 @@ class DataArrayMeta(type):
         return is_equal_dims and is_equal_dtype
 
 
-class DataArray(metaclass=DataArrayMeta):
+class DataArray(xr.DataArray, metaclass=DataArrayMeta):
     """Type hint for xarray.DataArray.
 
     As shown in the examples, it enables to specify fixed dimension(s)
@@ -111,6 +116,7 @@ class DataArray(metaclass=DataArrayMeta):
 
     """
 
+    __slots__: Tuple[str, ...] = ()  #: Do not allow to add any values.
     dims: Dims = None  #: Dimensions to be fixed in DataArray instances.
     dtype: Dtype = None  #: Datatype to be fixed in DataArray instances.
 
@@ -121,11 +127,9 @@ class DataArray(metaclass=DataArrayMeta):
         dims: Dims = None,
         name: Name = None,
         attrs: Attrs = None,
-        indexes: Indexes = None,
-        fastpath: bool = False,
     ) -> xr.DataArray:
         """Create a DataArray instance with fixed dims and dtype."""
         data = np.array(data, cls.dtype)
         dims = dims if cls.dims is None else cls.dims
 
-        return xr.DataArray(data, coords, dims, name, attrs, indexes, fastpath)
+        return xr.DataArray(data, coords, dims, name, attrs)

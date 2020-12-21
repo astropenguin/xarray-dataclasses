@@ -1,55 +1,73 @@
-__all__ = ["empty", "zeros", "ones", "full"]
-
-
 # standard library
-from typing import Any, Optional, Sequence, Union
+from typing import Any
 
 
-# dependencies
+# third-party packages
 import numpy as np
-from typing_extensions import Literal
+
+
+# sub-modules/packages
+from .typing import Attrs, DataArray, Dtype, Name, Shape, Order
 
 
 # constants
-C: str = "C"
-F: str = "F"
-
-
-# type aliases
-Shape = Sequence[int]
-Dtype = Optional[Union[type, str]]
-Order = Literal[C, F]
+C_ORDER: Order = "C"
 
 
 # main features
+def new(
+    data: Any,
+    *,
+    name: Name = None,
+    attrs: Attrs = None,
+) -> DataArray:
+    return DataArray(data, name=name, attrs=attrs)
+
+
 def empty(
     shape: Shape,
+    *,
     dtype: Dtype = None,
-    order: Order = C,
-) -> np.ndarray:
-    return np.empty(shape, dtype, order)
+    order: Order = C_ORDER,
+    name: Name = None,
+    attrs: Attrs = None,
+) -> DataArray:
+    data = np.empty(shape, dtype, order)
+    return new(data, name=name, attrs=attrs)
 
 
 def zeros(
     shape: Shape,
+    *,
     dtype: Dtype = None,
-    order: Order = C,
-) -> np.ndarray:
-    return np.zeros(shape, dtype, order)
+    order: Order = C_ORDER,
+    name: Name = None,
+    attrs: Attrs = None,
+) -> DataArray:
+    data = np.zeros(shape, dtype, order)
+    return new(data, name=name, attrs=attrs)
 
 
 def ones(
     shape: Shape,
+    *,
     dtype: Dtype = None,
-    order: Order = C,
-) -> np.ndarray:
-    return np.ones(shape, dtype, order)
+    order: Order = C_ORDER,
+    name: Name = None,
+    attrs: Attrs = None,
+) -> DataArray:
+    data = np.ones(shape, dtype, order)
+    return new(data, name=name, attrs=attrs)
 
 
 def full(
     shape: Shape,
     fill_value: Any,
+    *,
     dtype: Dtype = None,
-    order: Order = C,
-) -> np.ndarray:
-    return np.full(shape, fill_value, dtype, order)
+    order: Order = C_ORDER,
+    name: Name = None,
+    attrs: Attrs = None,
+) -> DataArray:
+    data = np.full(shape, fill_value, dtype, order)
+    return new(data, name=name, attrs=attrs)
