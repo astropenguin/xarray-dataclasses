@@ -32,7 +32,8 @@ def empty(
     name: Name = None,
     attrs: Attrs = None,
 ) -> DataArray:
-    return new(np.empty(shape, dtype, order), name, attrs)
+    data = np.empty(shape, dtype, order)
+    return new(data, name=name, attrs=attrs)
 
 
 def zeros(
@@ -43,7 +44,8 @@ def zeros(
     name: Name = None,
     attrs: Attrs = None,
 ) -> DataArray:
-    return new(np.zeros(shape, dtype, order), name, attrs)
+    data = np.zeros(shape, dtype, order)
+    return new(data, name=name, attrs=attrs)
 
 
 def ones(
@@ -54,7 +56,8 @@ def ones(
     name: Name = None,
     attrs: Attrs = None,
 ) -> DataArray:
-    return new(np.ones(shape, dtype, order), name, attrs)
+    data = np.ones(shape, dtype, order)
+    return new(data, name=name, attrs=attrs)
 
 
 def full(
@@ -66,4 +69,5 @@ def full(
     name: Name = None,
     attrs: Attrs = None,
 ) -> DataArray:
-    return new(np.full(shape, fill_value, dtype, order), name, attrs)
+    data = np.full(shape, fill_value, dtype, order)
+    return new(data, name=name, attrs=attrs)
