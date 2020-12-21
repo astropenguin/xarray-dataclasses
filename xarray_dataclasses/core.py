@@ -64,6 +64,11 @@ def dataarrayclass(
     return wrapper
 
 
+def is_dataarrayclass(inst: Any) -> bool:
+    """Check if an instance is DataArray class."""
+    return isinstance(inst, DataArrayClass)
+
+
 def to_dataarray(inst: DataArrayClass) -> DataArray:
     """Convert a DataArray class instance to a DataArray."""
     dataarray = inst.__dataarray_creator__(**asdict(inst))
