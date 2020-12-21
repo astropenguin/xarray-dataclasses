@@ -44,7 +44,10 @@ class DataArrayMeta(type):
         else:
             name = f"{cls.__name__}[{dims!s}, {dtype!s}]"
 
-        return type(name, (cls,), dict(dims=dims, dtype=dtype))
+        namespace = cls.__dict__.copy()
+        namespace.update(dims=dims, dtype=dtype)
+
+        return DataArrayMeta(name, (cls,), namespace)
 
     def __instancecheck__(cls, inst: Any) -> bool:
         if not isinstance(inst, xr.DataArray):
@@ -63,7 +66,7 @@ class DataArrayMeta(type):
         return is_equal_dims and is_equal_dtype
 
 
-class DataArray(metaclass=DataArrayMeta):
+class DataArray(xr.DataArray, metaclass=DataArrayMeta):
     """Type hint for xarray.DataArray.
 
     As shown in the examples, it enables to specify fixed dimension(s)
@@ -110,6 +113,7 @@ class DataArray(metaclass=DataArrayMeta):
 
     """
 
+    __slots__: Tuple[str, ...] = ()  #: Do not allow to add any values.
     dims: Dims = None  #: Dimensions to be fixed in DataArray instances.
     dtype: Dtype = None  #: Datatype to be fixed in DataArray instances.
 

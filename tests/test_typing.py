@@ -35,6 +35,15 @@ testdata_isinstance = [
     (dataarray, DataArray["y", float], False),
 ]
 
+testdata_issubclass = [
+    (DataArray, xr.DataArray, True),
+    (DataArray["x", None], xr.DataArray, True),
+    (DataArray["x", None], DataArray, True),
+    (xr.DataArray, DataArray, False),
+    (xr.DataArray, DataArray["x", None], False),
+    (DataArray, DataArray["x", None], False),
+]
+
 
 # test functions
 @mark.parametrize("dims, expected", testdata_dims)
@@ -50,3 +59,8 @@ def test_dtype(dtype, expected):
 @mark.parametrize("dataarray, type_, expected", testdata_isinstance)
 def test_isinstance(dataarray, type_, expected):
     assert isinstance(dataarray, type_) == expected
+
+
+@mark.parametrize("subcls, cls, expected", testdata_issubclass)
+def test_issubclass(subcls, cls, expected):
+    assert issubclass(subcls, cls) == expected
