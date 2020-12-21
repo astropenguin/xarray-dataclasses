@@ -1,10 +1,11 @@
-__all__ = ["copy_func"]
+__all__ = ["copy_func", "copy_wraps"]
 
 
 # standard library
 from copy import copy, deepcopy
+from functools import wraps, WRAPPER_ASSIGNMENTS, WRAPPER_UPDATES
 from types import FunctionType
-from typing import Callable
+from typing import Callable, Tuple
 
 
 # main features
@@ -40,3 +41,12 @@ def copy_func(func: Callable, deep: bool = False) -> Callable:
     copied.__qualname__ = func.__qualname__
 
     return copied
+
+
+def copy_wraps(
+    wrapped: Callable,
+    assigned: Tuple[str, ...] = WRAPPER_ASSIGNMENTS,
+    updated: Tuple[str, ...] = WRAPPER_UPDATES,
+) -> Callable:
+    """Same as functools.wraps but uses a copied function."""
+    return wraps(copy_func(wrapped), assigned, updated)
