@@ -1,11 +1,11 @@
 # standard library
-from dataclasses import field, MISSING
+from dataclasses import field, Field, MISSING, _DataclassParams
 from enum import auto, Flag
-from typing import Any
+from typing import Any, Dict
 
 
 # third-party packages
-from typing_extensions import Annotated, Final, get_args, get_origin
+from typing_extensions import Annotated, Final, get_args, get_origin, Protocol
 
 
 # sub-modules
@@ -25,6 +25,22 @@ class FieldKind(Flag):
     COORD = auto()  #: Member in coordinates of DataArray.
     DATA = auto()  #: Data (values) of DataArray.
     NAME = auto()  #: Name of DataArray.
+
+
+# type hints
+class DataClass(Protocol):
+    """Type hint for dataclasses."""
+
+    __dataclass_fields__: Dict[str, Field]
+    __dataclass_params__: _DataclassParams
+
+
+class DataArrayClass(Protocol):
+    """Type hint for DataArray classes."""
+
+    data: DataArray
+    __dataclass_fields__: Dict[str, Field]
+    __dataclass_params__: _DataclassParams
 
 
 # helper features
