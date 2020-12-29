@@ -53,7 +53,7 @@ def cast_fields(inst: DataArrayClass) -> DataArrayClass:
 
     def setattr(obj, name, value):
         """Local setattr function (for frozen instances)."""
-        super(type(inst), inst).__setattr__(name, value)
+        super(type(obj), obj).__setattr__(name, value)
 
     for name, field in inst.__dataclass_fields__.items():
         if field.metadata[FIELD_KIND] == FieldKind.ATTR:
