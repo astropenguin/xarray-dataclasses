@@ -126,3 +126,13 @@ def set_fields(cls: Type[C]) -> Type[C]:
         setattr(cls, name, field)
 
     return cls
+
+
+def set_post_init(cls: Type[C]) -> Type[C]:
+    """Set __post_init__ method to a class."""
+
+    def __post_init__(self) -> None:
+        cast_fields(self)
+
+    cls.__post_init__ = __post_init__
+    return cls
