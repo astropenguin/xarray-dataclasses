@@ -48,6 +48,23 @@ class DataArrayClass(Protocol):
 
 
 # helper features
+def cast_fields(inst: DataArrayClass) -> DataArrayClass:
+    """Cast dataclass fields of an instance."""
+
+    def setattr(obj, name, value):
+        """Local setattr function (for frozen instances)."""
+        super(type(inst), inst).__setattr__(name, value)
+
+    for name, field in inst.__dataclass_fields__.items():
+        if field.metadata[FIELD_KIND] == FieldKind.ATTR:
+            continue
+
+        value = getattr(inst, name)
+        setattr(inst, name, field.type(value))
+
+    return inst
+
+
 def infer_field_kind(name: str, hint: Any) -> FieldKind:
     """Return field kind inferred from name and type hint."""
     if get_origin(hint) == Annotated:
