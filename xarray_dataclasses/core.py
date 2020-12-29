@@ -17,10 +17,12 @@ NAME_FIELD: Final[str] = "name"
 
 
 class FieldKind(Flag):
-    ATTR = auto()
-    COORD = auto()
-    DATA = auto()
-    NAME = auto()
+    """Enum for specifying kinds of dataclass fields."""
+
+    ATTR = auto()  #: Member in attributes of DataArray.
+    COORD = auto()  #: Member in coordinates of DataArray.
+    DATA = auto()  #: Data (values) of DataArray.
+    NAME = auto()  #: Name of DataArray.
 
 
 # helper features
