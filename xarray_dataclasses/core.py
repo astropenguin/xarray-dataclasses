@@ -1,5 +1,6 @@
 # standard library
-from dataclasses import field, Field, MISSING, _DataclassParams
+from dataclasses import Field, MISSING, _DataclassParams
+from dataclasses import field as get_field
 from enum import auto, Flag
 from typing import Any, Dict, Type, TypeVar
 
@@ -73,6 +74,7 @@ def set_fields(cls: Type[C]) -> Type[C]:
         default = getattr(cls, name, MISSING)
         metadata = {FIELD_KIND: infer_field_kind(name, hint)}
 
-        setattr(cls, name, field(default=default, metadata=metadata))
+        field = get_field(default=default, metadata=metadata)
+        setattr(cls, name, field)
 
     return cls
