@@ -1,7 +1,7 @@
 # standard library
 from dataclasses import field, Field, MISSING, _DataclassParams
 from enum import auto, Flag
-from typing import Any, Dict
+from typing import Any, Dict, Type, TypeVar
 
 
 # third-party packages
@@ -28,6 +28,9 @@ class FieldKind(Flag):
 
 
 # type hints
+C = TypeVar("C")
+
+
 class DataClass(Protocol):
     """Type hint for dataclasses."""
 
@@ -64,10 +67,12 @@ def infer_field_kind(name: str, hint: Any) -> FieldKind:
     return FieldKind.COORD
 
 
-def set_fields(cls: type) -> None:
+def set_fields(cls: Type[C]) -> Type[C]:
     """Set dataclass fields to a class."""
     for name, hint in cls.__annotations__.items():
         default = getattr(cls, name, MISSING)
         metadata = {FIELD_KIND: infer_field_kind(name, hint)}
 
         setattr(cls, name, field(default=default, metadata=metadata))
+
+    return cls
