@@ -29,7 +29,7 @@ class FieldKind(Flag):
 
 
 # type hints
-C = TypeVar("C", type)
+C = TypeVar("C")
 
 
 class DataClass(Protocol):
