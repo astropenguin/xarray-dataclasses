@@ -65,6 +65,37 @@ def cast_fields(inst: DataArrayClass) -> DataArrayClass:
     return inst
 
 
+def check_fields(cls: Type[DataClass]) -> Type[DataClass]:
+    """Check if a dataclass is valid for DataArray class."""
+    fields = cls.__dataclass_fields__
+
+    # all fields must have field kinds
+    for field in fields.values():
+        try:
+            field.metadata[FIELD_KIND]
+        except KeyError:
+            raise KeyError("All fields must have field kinds.")
+
+    # class must have data field with data kind
+    try:
+        data_field = fields[DATA_FIELD]
+    except KeyError:
+        raise KeyError("Class must have data field.")
+
+    if data_field.metadata[FIELD_KIND] != FieldKind.DATA:
+        raise ValueError("Data field must have data kind.")
+
+    # all dims of coord fields must be subset of data dims
+    for field in fields.values():
+        if field.metadata[FIELD_KIND] != FieldKind.COORD:
+            continue
+
+        if set(field.type.dims) > set(data_field.type.dims):
+            raise ValueError("Coord dims must be subset of data dims.")
+
+    return cls
+
+
 def infer_field_kind(name: str, hint: Any) -> FieldKind:
     """Return field kind inferred from name and type hint."""
     if get_origin(hint) == Annotated:
