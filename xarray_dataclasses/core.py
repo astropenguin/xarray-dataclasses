@@ -69,29 +69,30 @@ def check_fields(cls: Type[DataClass]) -> Type[DataClass]:
     """Check if a dataclass is valid for DataArray class."""
     fields = cls.__dataclass_fields__
 
-    # all fields must have field kinds
+    # 1. all fields must have field kinds
     for field in fields.values():
-        try:
-            field.metadata[FIELD_KIND]
-        except KeyError:
+        if FIELD_KIND not in field.metadata:
             raise KeyError("All fields must have field kinds.")
 
-    # class must have data field with data kind
-    try:
-        data_field = fields[DATA_FIELD]
-    except KeyError:
+    # 2. class must have data field
+    if DATA_FIELD not in fields:
         raise KeyError("Class must have data field.")
+
+    # 3. data field must have data kind
+    data_field = fields[DATA_FIELD]
 
     if data_field.metadata[FIELD_KIND] != FieldKind.DATA:
         raise ValueError("Data field must have data kind.")
 
-    # all dims of coord fields must be subset of data dims
+    # 4. all coord dims must be subset of data dims
+    data_dims = set(data_field.type.dims)
+
     for field in fields.values():
         if field.metadata[FIELD_KIND] != FieldKind.COORD:
             continue
 
-        if set(field.type.dims) > set(data_field.type.dims):
-            raise ValueError("Coord dims must be subset of data dims.")
+        if not set(field.type.dims).issubset(data_dims):
+            raise ValueError("All coord dims must be subset of data dims.")
 
     return cls
 
