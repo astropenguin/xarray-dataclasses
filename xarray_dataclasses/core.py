@@ -119,11 +119,17 @@ def infer_field_kind(name: str, hint: Any) -> FieldKind:
 def set_fields(cls: Type[C]) -> Type[C]:
     """Set dataclass fields to a class."""
     for name, hint in cls.__annotations__.items():
-        default = getattr(cls, name, MISSING)
-        metadata = {FIELD_KIND: infer_field_kind(name, hint)}
+        value = getattr(cls, name, MISSING)
+        field_kind = infer_field_kind(name, hint)
 
-        field = get_field(default=default, metadata=metadata)
-        setattr(cls, name, field)
+        if isinstance(value, Field):
+            metadata = value.metadata.copy()
+            metadata[FIELD_KIND] = field_kind
+            value.metadata = MappingProxyType(metadata)
+        else:
+            metadata = {FIELD_KIND: field_kind}
+            field = get_field(default=value, metadata=metadata)
+            setattr(cls, name, field)
 
     return cls
 
