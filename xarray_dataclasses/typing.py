@@ -22,7 +22,7 @@ import xarray as xr
 from typing_extensions import Literal, Protocol
 
 
-# type hints for dataclasses
+# type hints (dataclasses)
 class DataClass(Protocol):
     """Type hint for dataclasses."""
 
@@ -33,13 +33,13 @@ class DataClass(Protocol):
 DataClassDecorator = Callable[[type], DataClass]
 
 
-# type hints for numpy
+# type hints (numpy)
 Dtype = Optional[Union[np.dtype, type, str]]
 Order = Literal["C", "F"]
 Shape = Union[Sequence[int], int]
 
 
-# type hints for xarray
+# type hints (xarray)
 Attrs = Optional[Mapping]
 Coords = Optional[Union[Sequence[Tuple], Mapping[Hashable, Any]]]
 Dims = Optional[Union[Sequence[Hashable], Hashable]]
@@ -153,5 +153,4 @@ class DataArray(xr.DataArray, metaclass=DataArrayMeta):
         """Create a DataArray instance with fixed dims and dtype."""
         data = np.array(data, cls.dtype)
         dims = dims if cls.dims is None else cls.dims
-
         return xr.DataArray(data, coords, dims, name, attrs)
