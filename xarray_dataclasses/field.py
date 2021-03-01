@@ -1,4 +1,4 @@
-__all__ = ["set_fields", "XarrayField"]
+__all__ = ["FieldKind", "set_fields", "XarrayMetadata"]
 
 
 # standard library
@@ -24,7 +24,7 @@ class FieldKind(Enum):
 
 
 @dataclass(frozen=True)
-class XarrayField:
+class XarrayMetadata:
     """Metadata for xarray-related fields."""
 
     kind: FieldKind  #: Kind of a field.
@@ -73,7 +73,7 @@ def infer_field_kind(name: str, hint: Any) -> FieldKind:
 def set_field(cls: type, name: str, hint: Any) -> type:
     """Set dataclass field to a class with given name."""
     kind = infer_field_kind(name, hint)
-    metadata = dict(xarray=XarrayField(kind))
+    metadata = dict(xarray=XarrayMetadata(kind))
 
     obj = getattr(cls, name, MISSING)
 
