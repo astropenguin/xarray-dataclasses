@@ -1,4 +1,4 @@
-__all__ = ["set_fields"]
+__all__ = ["set_fields", "XarrayField"]
 
 
 # standard library
