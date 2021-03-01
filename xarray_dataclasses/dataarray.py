@@ -30,7 +30,43 @@ def dataarrayclass(
     unsafe_hash: bool = False,
     frozen: bool = False,
 ) -> Union[DataClass, DataClassDecorator]:
-    """Convert class to a DataArray class."""
+    """Class decorator to create a DataArray class.
+
+    Args:
+        cls: Class to be decorated.
+        init: Same as the ``init`` parameter of ``dataclass()``.
+        repr: Same as the ``repr`` parameter of ``dataclass()``.
+        eq: Same as the ``eq`` parameter of ``dataclass()``.
+        order: Same as the ``order`` parameter of ``dataclass()``.
+        unsafe_hash: Same as the ``unsafe_hash`` parameter of ``dataclass()``.
+        frozen: Same as the ``frozen`` parameter of ``dataclass()``.
+
+    Returns:
+        DataArray class or class decorator with fixed parameters.
+
+    Examples:
+        To create a DataArray class to represent images::
+
+            from xarray_dataclasses import DataArray, dataarrayclass
+
+
+            @dataarrayclass
+            class Image:
+                \"\"\"DataArray class to represent images.\"\"\"
+
+                data: DataArray[('x', 'y'), float]
+                x: DataArray['x', int]
+                y: DataArray['y', int]
+
+        To create a DataArray instance::
+
+            image = Image.new([[0, 1], [2, 3]], x=[0, 1], y=[0, 1])
+
+        To create a DataArray instance filled with ones::
+
+            ones = Image.ones((2, 2), x=[0, 1], y=[0, 1])
+
+    """
 
     set_options = dataclass(
         init=init,
@@ -66,7 +102,23 @@ def asdataarray(obj: DataClass) -> DataArray:
 
 
 def is_dataarrayclass(obj: Any) -> bool:
-    """Check if object is a DataArray class or its instance."""
+    """Check if object is a DataArray class or its instance.
+
+    It returns ``True`` if ``obj`` fulfills all the
+    following conditions or ``False`` otherwise.
+
+    1. ``obj`` is a Python's native dataclass or its instance.
+    2. ``obj`` has a data field whose type is DataArray.
+    3. All fields in ``obj`` have an xarray-related metadata.
+
+    Args:
+        obj: Object to be checked.
+
+    Returns:
+        ``True`` if ``obj`` fulfills the conditions above
+        or ``False`` otherwise.
+
+    """
     # obj must be a dataclass or its instance
     if not is_dataclass(obj):
         return False
