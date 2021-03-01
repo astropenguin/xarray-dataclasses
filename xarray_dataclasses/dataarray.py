@@ -2,26 +2,15 @@ __all__ = ["dataarrayclass", "asdataarray"]
 
 
 # standard library
-from dataclasses import dataclass, Field, _DataclassParams
-from typing import Any, Callable, Dict, Optional, Union
+from dataclasses import dataclass, Field
+from typing import Any, Optional, Union
 
 
 # third-party packages
 import numpy as np
 import xarray as xr
-from typing_extensions import Protocol
 from .field import Kind, set_fields
-
-
-# type hints
-class DataClass(Protocol):
-    """Type hint for dataclasses."""
-
-    __dataclass_fields__: Dict[str, Field]
-    __dataclass_params__: _DataclassParams
-
-
-DataClassDecorator = Callable[[type], DataClass]
+from .typing import DataClass, DataClassDecorator
 
 
 # main features
