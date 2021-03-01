@@ -33,7 +33,7 @@ def dataarrayclass(
     unsafe_hash: bool = False,
     frozen: bool = False,
 ) -> Union[DataClass, DataClassDecorator]:
-    """Class decorator for creating DataArray class."""
+    """Convert class to a DataArray class."""
 
     set_options = dataclass(
         init=init,
@@ -44,12 +44,12 @@ def dataarrayclass(
         frozen=frozen,
     )
 
-    def to_dataclass(cls: type) -> type:
+    def to_dataclass(cls: type) -> DataClass:
         set_fields(cls)
         set_options(cls)
         return cls
 
-    if cls is None:
-        return to_dataclass
+    if cls is not None:
+        return to_dataclass(cls)  # DataClass
     else:
-        return to_dataclass(cls)
+        return to_dataclass  # DataClassDecorator
