@@ -5,16 +5,12 @@ __all__ = ["set_fields"]
 from dataclasses import dataclass, field, Field, MISSING
 from enum import auto, Enum
 from types import MappingProxyType
-from typing import Any, Optional, TypeVar, Type
+from typing import Any, Optional
 
 
 # third-party packages
 from typing_extensions import Annotated, get_args, get_origin
 from .typing import DataArray
-
-
-# type hints
-C = TypeVar("C")
 
 
 # data classes
@@ -32,7 +28,7 @@ class Xarray:
 
 
 # main features
-def set_fields(cls: Type[C]) -> Type[C]:
+def set_fields(cls: type) -> type:
     """Set dataclass fields to class."""
     for name, hint in cls.__annotations__.items():
         set_field(cls, name, hint)
@@ -61,7 +57,7 @@ def infer_kind(name: str, hint: Any) -> Kind:
     return Kind.COORD
 
 
-def set_field(cls: Type[C], name: str, hint: Any) -> Type[C]:
+def set_field(cls: type, name: str, hint: Any) -> type:
     """Set dataclass field to class with given name."""
     kind = infer_kind(name, hint)
     metadata = dict(xarray=Xarray(kind))
