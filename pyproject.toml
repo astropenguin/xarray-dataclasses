@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "xarray-dataclasses"
-version = "0.1.2"
+version = "0.2.0"
 description = "xarray extension for dataarray classes"
 authors = ["Akio Taniguchi <taniguchi@a.phys.nagoya-u.ac.jp>"]
 license = "MIT"
@@ -24,5 +24,5 @@ pytest = "^6.2"
 sphinx = "^3.5"
 
 [build-system]
-requires = ["poetry>=0.12"]
+requires = ["poetry>=1.0.0"]
 build-backend = "poetry.masonry.api"
