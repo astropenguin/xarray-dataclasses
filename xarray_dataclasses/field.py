@@ -43,21 +43,30 @@ def set_fields(cls: type) -> type:
 # helper features
 def infer_field_kind(name: str, hint: Any) -> FieldKind:
     """Infer field kind from given name and type hint."""
+    # unwrap annotated type hint (if so)
     if get_origin(hint) == Annotated:
         hint = get_args(hint)[0]
 
+    # data: DataArray -> data field
     if name.upper() == FieldKind.DATA.name:
-        return FieldKind.DATA
+        if issubclass(hint, DataArray):
+            return FieldKind.DATA
 
+        raise ValueError("Data type must be DataArray.")
+
+    # name: Any -> name field
     if name.upper() == FieldKind.NAME.name:
         return FieldKind.NAME
 
+    # subscribed type -> attr field
     if get_origin(hint) is not None:
         return FieldKind.ATTR
 
+    # not DataArray -> attr field
     if not issubclass(hint, DataArray):
         return FieldKind.ATTR
 
+    # DataArray -> coord field
     return FieldKind.COORD
 
 
