@@ -63,19 +63,25 @@ def set_value(dataarray: xr.DataArray, field: Field, value: Any) -> xr.DataArray
     """Set value to a DataArray instance according to given field."""
     kind = field.metadata["xarray"].kind
 
+    if kind == Kind.DATA:
+        return dataarray
+
     if kind == Kind.ATTR:
         dataarray.attrs[field.name] = value
-    elif kind == Kind.COORD:
+        return dataarray
+
+    if kind == Kind.NAME:
+        dataarray.name = value
+        return dataarray
+
+    if kind == Kind.COORD:
         try:
             coord = field.type(value)
         except ValueError:
             shape = tuple(dataarray.sizes[dim] for dim in field.type.dims)
             coord = field.type(np.full(shape, value))
-        finally:
-            dataarray.coords[field.name] = coord
-    elif kind == Kind.DATA:
-        pass
-    elif kind == Kind.NAME:
-        dataarray.name = value
 
-    return dataarray
+        dataarray.coords[field.name] = coord
+        return dataarray
+
+    raise ValueError(f"Unsupported kind: {kind}")
