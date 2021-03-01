@@ -84,4 +84,4 @@ def set_value(dataarray: xr.DataArray, field: Field, value: Any) -> xr.DataArray
         dataarray.coords[field.name] = coord
         return dataarray
 
-    raise ValueError(f"Unsupported kind: {kind}")
+    raise ValueError(f"Unsupported field kind: {kind}")
