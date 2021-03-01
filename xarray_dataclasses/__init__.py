@@ -12,7 +12,7 @@ from . import utils
 
 
 # aliases
-from .core import *
+from .dataarray import *
 from .typing import *
 
 
