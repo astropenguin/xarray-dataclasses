@@ -1,37 +1,17 @@
+__all__ = ["dataarrayclass"]
+
+
 # standard library
-from dataclasses import Field, MISSING, _DataclassParams
-from dataclasses import field as get_field
-from enum import auto, Flag
-from typing import Any, Dict, Type, TypeVar
+from dataclasses import dataclass, Field, _DataclassParams
+from typing import Callable, Dict, Optional, Union
 
 
 # third-party packages
-from typing_extensions import Annotated, Final, get_args, get_origin, Protocol
-
-
-# sub-modules
-from .typing import DataArray
-
-
-# constants
-DATA_FIELD: Final[str] = "data"
-FIELD_KIND: Final[str] = "field_kind"
-NAME_FIELD: Final[str] = "name"
-
-
-class FieldKind(Flag):
-    """Enum for specifying kinds of dataclass fields."""
-
-    ATTR = auto()  #: Member in attributes of DataArray.
-    COORD = auto()  #: Member in coordinates of DataArray.
-    DATA = auto()  #: Data (values) of DataArray.
-    NAME = auto()  #: Name of DataArray.
+from typing_extensions import Protocol
+from .field import set_fields
 
 
 # type hints
-C = TypeVar("C")
-
-
 class DataClass(Protocol):
     """Type hint for dataclasses."""
 
@@ -39,107 +19,37 @@ class DataClass(Protocol):
     __dataclass_params__: _DataclassParams
 
 
-class DataArrayClass(Protocol):
-    """Type hint for DataArray classes."""
-
-    data: DataArray
-    __dataclass_fields__: Dict[str, Field]
-    __dataclass_params__: _DataclassParams
+DataClassDecorator = Callable[[type], DataClass]
 
 
-# helper features
-def cast_fields(inst: DataArrayClass) -> DataArrayClass:
-    """Cast dataclass fields of an instance."""
+# main features
+def dataarrayclass(
+    cls: Optional[type] = None,
+    *,
+    init: bool = True,
+    repr: bool = True,
+    eq: bool = True,
+    order: bool = False,
+    unsafe_hash: bool = False,
+    frozen: bool = False,
+) -> Union[DataClass, DataClassDecorator]:
+    """Class decorator for creating DataArray class."""
 
-    def setattr(obj, name, value):
-        """Local setattr function (for frozen instances)."""
-        super(type(obj), obj).__setattr__(name, value)
+    set_options = dataclass(
+        init=init,
+        repr=repr,
+        eq=eq,
+        order=order,
+        unsafe_hash=unsafe_hash,
+        frozen=frozen,
+    )
 
-    for name, field in inst.__dataclass_fields__.items():
-        if field.metadata[FIELD_KIND] == FieldKind.ATTR:
-            continue
+    def to_dataclass(cls: type) -> type:
+        set_fields(cls)
+        set_options(cls)
+        return cls
 
-        value = getattr(inst, name)
-        setattr(inst, name, field.type(value))
-
-    return inst
-
-
-def check_fields(cls: Type[DataClass]) -> Type[DataClass]:
-    """Check if a dataclass is valid for DataArray class."""
-    fields = cls.__dataclass_fields__
-
-    # 1. all fields must have field kinds
-    for field in fields.values():
-        if FIELD_KIND not in field.metadata:
-            raise KeyError("All fields must have field kinds.")
-
-    # 2. class must have data field
-    if DATA_FIELD not in fields:
-        raise KeyError("Class must have data field.")
-
-    # 3. data field must have data kind
-    data_field = fields[DATA_FIELD]
-
-    if data_field.metadata[FIELD_KIND] != FieldKind.DATA:
-        raise ValueError("Data field must have data kind.")
-
-    # 4. all coord dims must be subset of data dims
-    data_dims = set(data_field.type.dims)
-
-    for field in fields.values():
-        if field.metadata[FIELD_KIND] != FieldKind.COORD:
-            continue
-
-        if not set(field.type.dims).issubset(data_dims):
-            raise ValueError("All coord dims must be subset of data dims.")
-
-    return cls
-
-
-def infer_field_kind(name: str, hint: Any) -> FieldKind:
-    """Return field kind inferred from name and type hint."""
-    if get_origin(hint) == Annotated:
-        hint = get_args(hint)[0]
-
-    if name == DATA_FIELD:
-        return FieldKind.DATA
-
-    if name == NAME_FIELD:
-        return FieldKind.NAME
-
-    if get_origin(hint) is not None:
-        return FieldKind.ATTR
-
-    if not issubclass(hint, DataArray):
-        return FieldKind.ATTR
-
-    return FieldKind.COORD
-
-
-def set_fields(cls: Type[C]) -> Type[C]:
-    """Set dataclass fields to a class."""
-    for name, hint in cls.__annotations__.items():
-        value = getattr(cls, name, MISSING)
-        field_kind = infer_field_kind(name, hint)
-
-        if isinstance(value, Field):
-            metadata = value.metadata.copy()
-            metadata[FIELD_KIND] = field_kind
-            value.metadata = MappingProxyType(metadata)
-        else:
-            metadata = {FIELD_KIND: field_kind}
-            field = get_field(default=value, metadata=metadata)
-            setattr(cls, name, field)
-
-    return cls
-
-
-def set_post_init(cls: Type[C]) -> Type[C]:
-    """Set __post_init__ method to a class."""
-
-    def __post_init__(self) -> None:
-        cast_fields(self)
-
-    cls.__post_init__ = __post_init__
-    return cls
+    if cls is None:
+        return to_dataclass
+    else:
+        return to_dataclass(cls)
