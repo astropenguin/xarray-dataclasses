@@ -9,7 +9,7 @@ from typing import Any, Optional, Union
 # third-party packages
 import numpy as np
 import xarray as xr
-from .field import Kind, set_fields
+from .field import FieldKind, set_fields
 from .typing import DataClass, DataClassDecorator
 
 
@@ -63,18 +63,18 @@ def set_value(dataarray: xr.DataArray, field: Field, value: Any) -> xr.DataArray
     """Set value to a DataArray instance according to given field."""
     kind = field.metadata["xarray"].kind
 
-    if kind == Kind.DATA:
+    if kind == FieldKind.DATA:
         return dataarray
 
-    if kind == Kind.ATTR:
+    if kind == FieldKind.ATTR:
         dataarray.attrs[field.name] = value
         return dataarray
 
-    if kind == Kind.NAME:
+    if kind == FieldKind.NAME:
         dataarray.name = value
         return dataarray
 
-    if kind == Kind.COORD:
+    if kind == FieldKind.COORD:
         try:
             coord = field.type(value)
         except ValueError:

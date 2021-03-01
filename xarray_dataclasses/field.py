@@ -14,7 +14,9 @@ from .typing import DataArray
 
 
 # data classes
-class Kind(Enum):
+class FieldKind(Enum):
+    """Kind of xarray-related fields."""
+
     ATTR = auto()  #: Attribute member of a DataArray.
     COORD = auto()  #: Coordinate member of a DataArray.
     DATA = auto()  #: Data of a DataArray.
@@ -22,9 +24,11 @@ class Kind(Enum):
 
 
 @dataclass(frozen=True)
-class Xarray:
-    kind: Kind
-    doc: Optional[str] = None
+class XarrayField:
+    """Metadata for xarray-related fields."""
+
+    kind: FieldKind  #: Kind of a field.
+    doc: Optional[str] = None  #: Docstring of a field.
 
 
 # main features
@@ -37,30 +41,30 @@ def set_fields(cls: type) -> type:
 
 
 # helper features
-def infer_kind(name: str, hint: Any) -> Kind:
+def infer_field_kind(name: str, hint: Any) -> FieldKind:
     """Infer field kind from given name and type hint."""
     if get_origin(hint) == Annotated:
         hint = get_args(hint)[0]
 
-    if name.upper() == Kind.DATA.name:
-        return Kind.DATA
+    if name.upper() == FieldKind.DATA.name:
+        return FieldKind.DATA
 
-    if name.upper() == Kind.NAME.name:
-        return Kind.NAME
+    if name.upper() == FieldKind.NAME.name:
+        return FieldKind.NAME
 
     if get_origin(hint) is not None:
-        return Kind.ATTR
+        return FieldKind.ATTR
 
     if not issubclass(hint, DataArray):
-        return Kind.ATTR
+        return FieldKind.ATTR
 
-    return Kind.COORD
+    return FieldKind.COORD
 
 
 def set_field(cls: type, name: str, hint: Any) -> type:
     """Set dataclass field to a class with given name."""
-    kind = infer_kind(name, hint)
-    metadata = dict(xarray=Xarray(kind))
+    kind = infer_field_kind(name, hint)
+    metadata = dict(xarray=XarrayField(kind))
 
     obj = getattr(cls, name, MISSING)
 
