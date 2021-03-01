@@ -29,7 +29,7 @@ class Xarray:
 
 # main features
 def set_fields(cls: type) -> type:
-    """Set dataclass fields to class."""
+    """Set dataclass fields to a class."""
     for name, hint in cls.__annotations__.items():
         set_field(cls, name, hint)
 
@@ -38,7 +38,7 @@ def set_fields(cls: type) -> type:
 
 # helper features
 def infer_kind(name: str, hint: Any) -> Kind:
-    """Infer kind from name and type hint."""
+    """Infer field kind from given name and type hint."""
     if get_origin(hint) == Annotated:
         hint = get_args(hint)[0]
 
@@ -58,7 +58,7 @@ def infer_kind(name: str, hint: Any) -> Kind:
 
 
 def set_field(cls: type, name: str, hint: Any) -> type:
-    """Set dataclass field to class with given name."""
+    """Set dataclass field to a class with given name."""
     kind = infer_kind(name, hint)
     metadata = dict(xarray=Xarray(kind))
 
