@@ -13,6 +13,11 @@ from .field import FieldKind, set_fields, XarrayMetadata
 from .typing import DataClass, DataClassDecorator
 
 
+# constants
+DATA: str = "data"
+XARRAY: str = "xarray"
+
+
 # main features
 def dataarrayclass(
     cls: Optional[type] = None,
@@ -49,7 +54,7 @@ def dataarrayclass(
 def asdataarray(obj: DataClass) -> xr.DataArray:
     """Convert dataclass instance to a DataArray instance."""
     fields = obj.__dataclass_fields__
-    dataarray = fields["data"].type(obj.data)
+    dataarray = fields[DATA].type(obj.data)
 
     for field in fields.values():
         value = getattr(obj, field.name)
@@ -68,19 +73,19 @@ def is_dataarrayclass(obj: Any) -> bool:
     fields = obj.__dataclass_fields__
 
     for field in fields.values():
-        metadata = field.metadata.get("xarray")
+        metadata = field.metadata.get(XARRAY)
 
         if not isinstance(metadata, XarrayMetadata):
             return False
 
     # at least data field must be defined
-    return "data" in fields
+    return DATA in fields
 
 
 # helper features
 def set_value(dataarray: xr.DataArray, field: Field, value: Any) -> xr.DataArray:
     """Set value to a DataArray instance according to given field."""
-    kind = field.metadata["xarray"].kind
+    kind = field.metadata[XARRAY].kind
 
     if kind == FieldKind.DATA:
         return dataarray
