@@ -6,7 +6,6 @@ __version__ = "0.1.2"
 # submodules
 from . import dataarray
 from . import field
-from . import methods
 from . import typing
 from . import utils
 
