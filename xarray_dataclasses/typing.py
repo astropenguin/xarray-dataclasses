@@ -8,20 +8,20 @@ from typing import Any, Hashable, Mapping, Optional, Sequence, Tuple, Union
 # third-party packages
 import numpy as np
 import xarray as xr
-from typing_extensions import Literal, TypeAlias
+from typing_extensions import Literal
 
 
 # type hints for numpy
-Dtype: TypeAlias = Optional[Union[np.dtype, type, str]]
-Order: TypeAlias = Literal["C", "F"]
-Shape: TypeAlias = Union[Sequence[int], int]
+Dtype = Optional[Union[np.dtype, type, str]]
+Order = Literal["C", "F"]
+Shape = Union[Sequence[int], int]
 
 
 # type hints for xarray
-Attrs: TypeAlias = Optional[Mapping]
-Coords: TypeAlias = Optional[Union[Sequence[Tuple], Mapping[Hashable, Any]]]
-Dims: TypeAlias = Optional[Union[Sequence[Hashable], Hashable]]
-Name: TypeAlias = Optional[Hashable]
+Attrs = Optional[Mapping]
+Coords = Optional[Union[Sequence[Tuple], Mapping[Hashable, Any]]]
+Dims = Optional[Union[Sequence[Hashable], Hashable]]
+Name = Optional[Hashable]
 
 
 class DataArrayMeta(type):
