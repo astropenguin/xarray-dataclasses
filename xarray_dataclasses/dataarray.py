@@ -66,12 +66,12 @@ def set_value(dataarray: xr.DataArray, field: Field, value: Any) -> xr.DataArray
     if kind == FieldKind.DATA:
         return dataarray
 
-    if kind == FieldKind.ATTR:
-        dataarray.attrs[field.name] = value
-        return dataarray
-
     if kind == FieldKind.NAME:
         dataarray.name = value
+        return dataarray
+
+    if kind == FieldKind.ATTR:
+        dataarray.attrs[field.name] = value
         return dataarray
 
     if kind == FieldKind.COORD:
