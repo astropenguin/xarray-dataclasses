@@ -4,7 +4,7 @@ __version__ = "0.1.2"
 
 
 # submodules
-from . import core
+from . import dataarray
 from . import field
 from . import methods
 from . import typing
