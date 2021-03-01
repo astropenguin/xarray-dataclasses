@@ -9,7 +9,7 @@ xarray extension for dataarray classes
 
 ## TL;DR
 
-xarray-dataclasses is a third-party Python package which helps to create custom DataArray classes in the same manner as [the Python's native dataclass].
+xarray-dataclasses is a third-party Python package which helps to create DataArray classes in the same manner as [the Python's native dataclass].
 Here is an introduction code of what the package provides:
 
 ```python
@@ -28,10 +28,10 @@ class Image:
 The key features are:
 
 ```python
-# create a custom DataArray
+# create a DataArray instance
 image = Image.new([[0, 1], [2, 3]], x=[0, 1], y=[0, 1])
 
-# create a custom DataArray filled with ones
+# create a DataArray instance filled with ones
 ones = Image.ones((2, 2), x=[0, 1], y=[0, 1])
 ```
 
