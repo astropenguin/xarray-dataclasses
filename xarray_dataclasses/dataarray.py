@@ -8,9 +8,8 @@ from typing import Any, Optional, Union
 
 # third-party packages
 import numpy as np
-import xarray as xr
 from .field import FieldKind, set_fields, XarrayMetadata
-from .typing import DataClass, DataClassDecorator, Order, Shape
+from .typing import DataArray, DataClass, DataClassDecorator, Order, Shape
 from .utils import copy_wraps
 
 
@@ -54,7 +53,7 @@ def dataarrayclass(
         return to_dataclass  # DataClassDecorator
 
 
-def asdataarray(obj: DataClass) -> xr.DataArray:
+def asdataarray(obj: DataClass) -> DataArray:
     """Convert dataclass instance to a DataArray instance."""
     fields = obj.__dataclass_fields__
     dataarray = fields[DATA].type(obj.data)
@@ -86,7 +85,7 @@ def is_dataarrayclass(obj: Any) -> bool:
 
 
 # helper features
-def set_value(dataarray: xr.DataArray, field: Field, value: Any) -> xr.DataArray:
+def set_value(dataarray: DataArray, field: Field, value: Any) -> DataArray:
     """Set value to a DataArray instance according to given field."""
     kind = field.metadata[XARRAY].kind
 
