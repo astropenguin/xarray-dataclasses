@@ -1,15 +1,15 @@
-__all__ = ["dataarrayclass", "asdataarray"]
+__all__ = ["asdataarray", "dataarrayclass", "is_dataarrayclass"]
 
 
 # standard library
-from dataclasses import dataclass, Field
+from dataclasses import dataclass, Field, is_dataclass
 from typing import Any, Optional, Union
 
 
 # third-party packages
 import numpy as np
 import xarray as xr
-from .field import FieldKind, set_fields
+from .field import FieldKind, set_fields, XarrayMetadata
 from .typing import DataClass, DataClassDecorator
 
 
@@ -56,6 +56,25 @@ def asdataarray(obj: DataClass) -> xr.DataArray:
         set_value(dataarray, field, value)
 
     return dataarray
+
+
+def is_dataarrayclass(obj: Any) -> bool:
+    """Check if object is a DataArray class or its instance."""
+    # obj must be a dataclass or its instance
+    if not is_dataclass(obj):
+        return False
+
+    # all fields must have an xarray-related metadata
+    fields = obj.__dataclass_fields__
+
+    for field in fields.values():
+        metadata = field.metadata.get("xarray")
+
+        if not isinstance(metadata, XarrayMetadata):
+            return False
+
+    # at least data field must be defined
+    return "data" in fields
 
 
 # helper features
