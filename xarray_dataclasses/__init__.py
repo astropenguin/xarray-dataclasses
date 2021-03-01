@@ -3,15 +3,16 @@ __author__ = "Akio Taniguchi"
 __version__ = "0.1.2"
 
 
-# sub-modules
-from . import utils
-from . import typing
+# submodules
+from . import dataarray
+from . import field
 from . import methods
-from . import core
+from . import typing
+from . import utils
 
 
 # aliases
-from .core import *
+from .dataarray import *
 from .typing import *
 
 

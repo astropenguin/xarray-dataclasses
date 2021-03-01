@@ -1,4 +1,4 @@
-# dependencies
+# third-party packages
 import numpy as np
 import xarray as xr
 from pytest import mark

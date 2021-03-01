@@ -1,18 +1,23 @@
-# dependencies
+# third-party packages
 from pytest import mark
-from xarray_dataclasses.core import dataarrayclass, is_dataarrayclass
+from xarray_dataclasses.dataarray import dataarrayclass, is_dataarrayclass
 from xarray_dataclasses.typing import DataArray
 
 
 # test datasets
-@dataarrayclass(("x", "y"), float)
+DIMS = "x", "y", "z"
+
+
+@dataarrayclass
 class Base:
+    data: DataArray[DIMS[:2], float]
     x: DataArray["x", int] = 0
     y: DataArray["y", int] = 0
 
 
-@dataarrayclass(("x", "y", "z"), float)
+@dataarrayclass
 class Extended(Base):
+    data: DataArray[DIMS, float]
     z: DataArray["z", int] = 0
 
 
