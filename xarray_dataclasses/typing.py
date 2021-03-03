@@ -80,9 +80,9 @@ class DataArrayMeta(type):
 class DataArray(xr.DataArray, metaclass=DataArrayMeta):
     """Type hint for xarray.DataArray."""
 
+    __slots__: Tuple[()] = ()
     dims: Hints.Dims = None
     dtype: Dtype = None
-    __slots__: Tuple[()] = ()
 
     def __new__(
         cls,
