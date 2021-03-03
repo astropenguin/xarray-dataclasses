@@ -34,10 +34,10 @@ Hints = type("Hints", (), xr.DataArray.__init__.__annotations__)
 class DataArrayMeta(type):
     """Metaclass of the type hint for DataArray."""
 
-    def __getitem__(cls, options: Tuple[Hints.dims, Dtype]) -> DataArrayMeta:
+    def __getitem__(cls, key: Tuple[Hints.dims, Dtype]) -> DataArrayMeta:
         """Define the behavior of DataArray[dims, dtype]."""
         try:
-            dims, dtype = options
+            dims, dtype = key
         except (ValueError, TypeError):
             raise ValueError("Both dims and dtype must be specified.")
 
@@ -59,20 +59,20 @@ class DataArrayMeta(type):
         namespace.update(dims=dims, dtype=dtype)
         return DataArrayMeta(name, (cls,), namespace)
 
-    def __instancecheck__(cls, inst: Any) -> bool:
-        """Define the behavior of isinstance(inst, DataArray)."""
-        if not isinstance(inst, xr.DataArray):
+    def __instancecheck__(cls, obj: Any) -> bool:
+        """Define the behavior of isinstance(obj, DataArray)."""
+        if not isinstance(obj, xr.DataArray):
             return False
 
         if cls.dims is None:
             is_equal_dims = True  # Do not evaluate.
         else:
-            is_equal_dims = inst.dims == cls.dims
+            is_equal_dims = obj.dims == cls.dims
 
         if cls.dtype is None:
             is_equal_dtype = True  # Do not evaluate.
         else:
-            is_equal_dtype = inst.dtype == cls.dtype
+            is_equal_dtype = obj.dtype == cls.dtype
 
         return is_equal_dims and is_equal_dtype
 
