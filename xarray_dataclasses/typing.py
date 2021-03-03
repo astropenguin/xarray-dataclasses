@@ -6,7 +6,7 @@ __all__ = ["Attr", "Coord", "Data", "Name"]
 
 # standard library
 from dataclasses import Field, _DataclassParams
-from typing import Any, Callable, Dict, Generic, Optional, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, Generic, Tuple, TypeVar, Union
 
 
 # third-party packages
@@ -29,7 +29,7 @@ DataClassDecorator = Callable[[type], DataClass]
 
 # type hints (xarray)
 T = TypeVar("T")
-Dtype = Optional[Union[np.dtype, type, str]]
+Dtype = Union[np.dtype, type, str, None]
 Hints = type("Hints", (), xr.DataArray.__init__.__annotations__)
 
 
@@ -82,9 +82,9 @@ class DataArrayMeta(type):
 class DataArray(xr.DataArray, metaclass=DataArrayMeta):
     """Type hint for xarray.DataArray."""
 
-    __slots__: Tuple[()] = ()
     dims: Hints.Dims = None
     dtype: Dtype = None
+    __slots__ = ()
 
     def __new__(
         cls,
@@ -102,12 +102,13 @@ class DataArray(xr.DataArray, metaclass=DataArrayMeta):
 class Coord(DataArray):
     """Type hint for coordinates of DataArray."""
 
-    __slots__: Tuple[()] = ()
+    __slots__ = ()
 
 
 class Data(DataArray):
     """Type hint for data variables of DataArray."""
 
+    __slots__ = ()
 
 
 class Attr(Generic[T]):
