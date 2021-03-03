@@ -17,13 +17,14 @@ from typing_extensions import Protocol
 
 # type hints (dataclasses)
 class DataClass(Protocol):
-    """Type hint for dataclasses."""
+    """Type hint for dataclass and its instance."""
 
     __dataclass_fields__: Dict[str, Field]
     __dataclass_params__: _DataclassParams
 
 
 DataClassDecorator = Callable[[type], DataClass]
+"""Type hint for decorator that generates a dataclass."""
 
 
 # type hints (xarray)
