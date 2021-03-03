@@ -3,13 +3,13 @@ __all__ = ["DataArray"]
 
 # standard library
 from dataclasses import Field, _DataclassParams
-from typing import Any, Callable, Dict, Optional, Tuple, Sequence, Union
+from typing import Any, Callable, Dict, Optional, Tuple, Union
 
 
 # third-party packages
 import numpy as np
 import xarray as xr
-from typing_extensions import Literal, Protocol
+from typing_extensions import Protocol
 
 
 # type hints (dataclasses)
@@ -23,13 +23,8 @@ class DataClass(Protocol):
 DataClassDecorator = Callable[[type], DataClass]
 
 
-# type hints (numpy)
-Dtype = Optional[Union[np.dtype, type, str]]
-Order = Literal["C", "F"]
-Shape = Union[Sequence[int], int]
-
-
 # type hints (xarray)
+Dtype = Optional[Union[np.dtype, type, str]]
 Hints = type("Hints", (), xr.DataArray.__init__.__annotations__)
 
 

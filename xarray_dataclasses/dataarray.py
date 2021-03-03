@@ -3,20 +3,26 @@ __all__ = ["asdataarray", "dataarrayclass", "is_dataarrayclass"]
 
 # standard library
 from dataclasses import dataclass, Field, is_dataclass
-from typing import Any, Optional, Union
+from typing import Any, Optional, Sequence, Union
 
 
 # third-party packages
 import numpy as np
+from typing_extensions import Literal
 from .field import FieldKind, set_fields, XarrayMetadata
-from .typing import DataArray, DataClass, DataClassDecorator, Order, Shape
+from .typing import DataArray, DataClass, DataClassDecorator
 from .utils import copy_wraps
 
 
 # constants
-C_ORDER: Order = "C"
+C: str = "C"
 DATA: str = "data"
 XARRAY: str = "xarray"
+
+
+# type hints
+Order = Literal["C", "F"]
+Shape = Union[Sequence[int], int]
 
 
 # main features
@@ -177,20 +183,20 @@ def set_shorthands(cls: DataClass) -> DataClass:
 
     new.__annotations__["return"] = DataType
 
-    def empty(cls, shape: Shape, order: Order = C_ORDER, **kwargs) -> DataType:
+    def empty(cls, shape: Shape, order: Order = C, **kwargs) -> DataType:
         data = np.empty(shape, order=order)
         return asdataarray(cls(data=data, **kwargs))
 
-    def zeros(cls, shape: Shape, order: Order = C_ORDER, **kwargs) -> DataType:
+    def zeros(cls, shape: Shape, order: Order = C, **kwargs) -> DataType:
         data = np.zeros(shape, order=order)
         return asdataarray(cls(data=data, **kwargs))
 
-    def ones(cls, shape: Shape, order: Order = C_ORDER, **kwargs) -> DataType:
+    def ones(cls, shape: Shape, order: Order = C, **kwargs) -> DataType:
         data = np.ones(shape, order=order)
         return asdataarray(cls(data=data, **kwargs))
 
     def full(
-        cls, shape: Shape, fill_value: Any, order: Order = C_ORDER, **kwargs
+        cls, shape: Shape, fill_value: Any, order: Order = C, **kwargs
     ) -> DataType:
         data = np.full(shape, fill_value, order=order)
         return asdataarray(cls(data=data, **kwargs))
