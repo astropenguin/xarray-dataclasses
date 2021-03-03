@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 __all__ = ["DataArray"]
 
 
@@ -31,7 +34,7 @@ Hints = type("Hints", (), xr.DataArray.__init__.__annotations__)
 class DataArrayMeta(type):
     """Metaclass of the type hint for DataArray."""
 
-    def __getitem__(cls, options: Tuple[Hints.dims, Dtype]) -> "DataArrayMeta":
+    def __getitem__(cls, options: Tuple[Hints.dims, Dtype]) -> DataArrayMeta:
         """Define the behavior of DataArray[dims, dtype]."""
         try:
             dims, dtype = options
