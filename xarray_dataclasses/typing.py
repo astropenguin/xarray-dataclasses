@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 
-__all__ = ["DataArray"]
+__all__ = ["Coord", "Data"]
 
 
 # standard library
@@ -96,3 +96,15 @@ class DataArray(xr.DataArray, metaclass=DataArrayMeta):
         data = np.array(data, cls.dtype)
         dims = cls.dims if cls.dims is not None else dims
         return xr.DataArray(data, coords, dims, name, attrs)
+
+
+class Coord(DataArray):
+    """Type hint for coordinates of DataArray."""
+
+    __slots__: Tuple[()] = ()
+
+
+class Data(DataArray):
+    """Type hint for data variables of DataArray."""
+
+    __slots__: Tuple[()] = ()
