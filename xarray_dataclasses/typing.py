@@ -152,44 +152,73 @@ Examples:
 
 
 # runtime functions (internal)
-def is_dataarraylike(obj: Any) -> bool:
-    """Check if type alias is DataArrayLike[...]."""
-    if not get_args(obj):
-        return False
+def is_attr(obj: Any) -> bool:
+    """Check if object is Attr[T]."""
+    args = get_args(obj)
 
-    alias, *metadata = get_args(obj)
-    return metadata[0] in (Xarray.COORD, Xarray.DATA)
+    if len(args) < 2:
+        return False
+    else:
+        return args[1] == Xarray.ATTR
+
+
+def is_coord(obj: Any) -> bool:
+    """Check if object is Coord[T, D]."""
+    args = get_args(obj)
+
+    if len(args) < 2:
+        return False
+    else:
+        return args[1] == Xarray.COORD
+
+
+def is_data(obj: Any) -> bool:
+    """Check if object is Data[T, D]."""
+    args = get_args(obj)
+
+    if len(args) < 2:
+        return False
+    else:
+        return args[1] == Xarray.DATA
+
+
+def is_name(obj: Any) -> bool:
+    """Check if object is Name[T]."""
+    args = get_args(obj)
+
+    if len(args) < 2:
+        return False
+    else:
+        return args[1] == Xarray.NAME
 
 
 def get_dims(obj: Any) -> Tuple[str, ...]:
-    """Extract dimensions from type alias."""
-    if not is_dataarraylike(obj):
-        raise ValueError("Invalid type hint.")
+    """Extract dimensions from Coord[T, D] or Data[T, D]."""
+    if not (is_coord(obj) or is_data(obj)):
+        raise ValueError("obj must be either Coord or Data.")
 
     dtype, dims = get_args(get_args(get_args(obj)[0])[0])
 
-    # dims -> ForwardRef(string)
-    if isinstance(dims, ForwardRef):
-        return tuple(dims.__forward_arg__.split(","))
-
-    # dims -> Literal[string]
-    if get_origin(dims) == Literal:
-        return get_args(dims)
-
-    # dims -> Tuple[Literal[string], ...]
-    return tuple(get_args(dim)[0] for dim in get_args(dims))
+    if get_origin(dims) == tuple:
+        return tuple(get_string(dim) for dim in get_args(dims))
+    else:
+        return (get_string(dims),)
 
 
 def get_dtype(obj: Any) -> np.dtype:
-    """Extract data type from type alias."""
-    if not is_dataarraylike(obj):
-        raise ValueError("Invalid type hint.")
+    """Extract data type from Coord[T, D] or Data[T, D]."""
+    if not (is_coord(obj) or is_data(obj)):
+        raise ValueError("obj must be either Coord or Data.")
 
     dtype, dims = get_args(get_args(get_args(obj)[0])[0])
+    return np.dtype(get_string(dtype))
 
-    # dtype -> ForwardRef(string)
-    if isinstance(dtype, ForwardRef):
-        return np.dtype(dtype.__forward_arg__)
 
-    # dtype -> type itself
-    return np.dtype(dtype)
+def get_string(obj: T) -> Union[T, str]:
+    """Extract string from Literal[...] or ForwardRef(...)."""
+    if get_origin(obj) == Literal:
+        return str(get_args(obj)[0])
+    elif isinstance(obj, ForwardRef):
+        return str(obj.__forward_arg__)
+    else:
+        return obj
