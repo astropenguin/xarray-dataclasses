@@ -4,13 +4,13 @@ __all__ = ["Attr", "Coord", "Data", "Name"]
 # standard library
 from enum import auto, Enum
 from functools import wraps
-from typing import ForwardRef, Generic, Sequence, Tuple, TypeVar, Union
+from typing import Any, ForwardRef, Generic, Sequence, Tuple, TypeVar, Union
 
 
 # third-party packages
 import numpy as np
 import xarray as xr
-from typing_extensions import Annotated, get_args, get_origin, Literal, TypeAlias
+from typing_extensions import Annotated, get_args, get_origin, Literal
 
 
 # constants
@@ -152,21 +152,21 @@ Examples:
 
 
 # runtime functions (internal)
-def is_dataarraylike(alias: TypeAlias) -> bool:
+def is_dataarraylike(obj: Any) -> bool:
     """Check if type alias is DataArrayLike[...]."""
-    if not get_args(alias):
+    if not get_args(obj):
         return False
 
-    alias, *metadata = get_args(alias)
+    alias, *metadata = get_args(obj)
     return metadata[0] in (Xarray.COORD, Xarray.DATA)
 
 
-def get_dims(alias: TypeAlias) -> Tuple[str, ...]:
+def get_dims(obj: Any) -> Tuple[str, ...]:
     """Extract dimensions from type alias."""
-    if not is_dataarraylike(alias):
+    if not is_dataarraylike(obj):
         raise ValueError("Invalid type hint.")
 
-    dtype, dims = get_args(get_args(get_args(alias)[0])[0])
+    dtype, dims = get_args(get_args(get_args(obj)[0])[0])
 
     # dims -> ForwardRef(string)
     if isinstance(dims, ForwardRef):
@@ -180,12 +180,12 @@ def get_dims(alias: TypeAlias) -> Tuple[str, ...]:
     return tuple(get_args(dim)[0] for dim in get_args(dims))
 
 
-def get_dtype(alias: TypeAlias) -> np.dtype:
+def get_dtype(obj: Any) -> np.dtype:
     """Extract data type from type alias."""
-    if not is_dataarraylike(alias):
+    if not is_dataarraylike(obj):
         raise ValueError("Invalid type hint.")
 
-    dtype, dims = get_args(get_args(get_args(alias)[0])[0])
+    dtype, dims = get_args(get_args(get_args(obj)[0])[0])
 
     # dtype -> ForwardRef(string)
     if isinstance(dtype, ForwardRef):
