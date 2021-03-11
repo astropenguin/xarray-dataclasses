@@ -9,7 +9,7 @@ from typing import Callable, Sequence
 
 
 # main features
-def copy_func(func: FunctionType, deep: bool = False) -> Callable:
+def copy_func(func: FunctionType, deep: bool = False) -> FunctionType:
     """Copy a function as a different object.
 
     Args:
