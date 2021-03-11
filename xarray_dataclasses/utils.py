@@ -8,7 +8,7 @@ from types import FunctionType
 from typing import Callable, Sequence
 
 
-# main features
+# utility functions (internal)
 def copy_func(func: FunctionType, deep: bool = False) -> FunctionType:
     """Copy a function as a different object.
 

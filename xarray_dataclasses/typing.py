@@ -13,7 +13,7 @@ import xarray as xr
 from typing_extensions import Annotated, get_args, get_origin, Literal
 
 
-# constants
+# constants (internal)
 class Xarray(Enum):
     """Identifiers of type hints for xarray."""
 
@@ -23,7 +23,7 @@ class Xarray(Enum):
     NAME = auto()  #: Name of DataArray.
 
 
-# type variables
+# type variables (internal)
 T = TypeVar("T")  #: Type variable for data types.
 D = TypeVar("D")  #: Type variable for dimensions.
 
