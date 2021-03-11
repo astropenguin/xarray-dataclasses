@@ -4,7 +4,7 @@ __all__ = ["Attr", "Coord", "Data", "Name"]
 # standard library
 from enum import auto, Enum
 from functools import wraps
-from typing import Any, ForwardRef, Generic, Sequence, Tuple, TypeVar, Union
+from typing import Any, ForwardRef, Generic, Optional, Sequence, Tuple, TypeVar, Union
 
 
 # third-party packages
@@ -15,7 +15,7 @@ from typing_extensions import Annotated, get_args, get_origin, Literal
 
 # constants
 class Xarray(Enum):
-    """Identification for public type hints."""
+    """Identifiers of type hints for xarray."""
 
     ATTR = auto()  #: Attribute member of DataArray or Dataset.
     COORD = auto()  #: Coordinate member of DataArray or Dataset.
@@ -25,7 +25,7 @@ class Xarray(Enum):
 
 # type variables
 T = TypeVar("T")  #: Type variable for data types.
-D = TypeVar("D")  #: Type valiable for dimensions.
+D = TypeVar("D")  #: Type variable for dimensions.
 
 
 # type hints (internal)
@@ -154,42 +154,22 @@ Examples:
 # runtime functions (internal)
 def is_attr(obj: Any) -> bool:
     """Check if object is Attr[T]."""
-    args = get_args(obj)
-
-    if len(args) < 2:
-        return False
-    else:
-        return args[1] == Xarray.ATTR
+    return _has_xarray_id(obj, Xarray.ATTR)
 
 
 def is_coord(obj: Any) -> bool:
     """Check if object is Coord[T, D]."""
-    args = get_args(obj)
-
-    if len(args) < 2:
-        return False
-    else:
-        return args[1] == Xarray.COORD
+    return _has_xarray_id(obj, Xarray.COORD)
 
 
 def is_data(obj: Any) -> bool:
     """Check if object is Data[T, D]."""
-    args = get_args(obj)
-
-    if len(args) < 2:
-        return False
-    else:
-        return args[1] == Xarray.DATA
+    return _has_xarray_id(obj, Xarray.DATA)
 
 
 def is_name(obj: Any) -> bool:
     """Check if object is Name[T]."""
-    args = get_args(obj)
-
-    if len(args) < 2:
-        return False
-    else:
-        return args[1] == Xarray.NAME
+    return _has_xarray_id(obj, Xarray.NAME)
 
 
 def get_dims(obj: Any) -> Tuple[str, ...]:
@@ -199,26 +179,38 @@ def get_dims(obj: Any) -> Tuple[str, ...]:
 
     dtype, dims = get_args(get_args(get_args(obj)[0])[0])
 
-    if get_origin(dims) == tuple:
-        return tuple(get_string(dim) for dim in get_args(dims))
+    if get_origin(dims) is tuple:
+        return tuple(_unwrap(dim) for dim in get_args(dims))
     else:
-        return (get_string(dims),)
+        return (_unwrap(dims),)
 
 
-def get_dtype(obj: Any) -> np.dtype:
+def get_dtype(obj: Any) -> Optional[np.dtype]:
     """Extract data type from Coord[T, D] or Data[T, D]."""
     if not (is_coord(obj) or is_data(obj)):
         raise ValueError("obj must be either Coord or Data.")
 
     dtype, dims = get_args(get_args(get_args(obj)[0])[0])
-    return np.dtype(get_string(dtype))
 
-
-def get_string(obj: T) -> Union[T, str]:
-    """Extract string from Literal[...] or ForwardRef(...)."""
-    if get_origin(obj) == Literal:
-        return str(get_args(obj)[0])
-    elif isinstance(obj, ForwardRef):
-        return str(obj.__forward_arg__)
+    if dtype is Any or dtype is None:
+        return None
     else:
-        return obj
+        return np.dtype(_unwrap(dtype))
+
+
+# helper functions (internal)
+def _has_xarray_id(obj: Any, id: Xarray) -> bool:
+    """Check if object has identifier of xarray."""
+    args = get_args(obj)
+    return (len(args) > 1) and (args[1] is id)
+
+
+def _unwrap(obj: T) -> Union[T, str]:
+    """Extract string from type hint if possible."""
+    if get_origin(obj) is Literal:
+        return str(get_args(obj)[0])
+
+    if isinstance(obj, ForwardRef):
+        return str(obj.__forward_arg__)
+
+    return obj
