@@ -200,13 +200,13 @@ def get_dtype(obj: Any) -> Optional[np.dtype]:
 
 # helper functions (internal)
 def _has_xarray_id(obj: Any, id: Xarray) -> bool:
-    """Check if object has identifier of xarray."""
+    """Check if object has given identifier of xarray."""
     args = get_args(obj)
     return (len(args) > 1) and (args[1] is id)
 
 
 def _unwrap(obj: T) -> Union[T, str]:
-    """Extract string from type hint if possible."""
+    """Extract string from a type hint if possible."""
     if get_origin(obj) is Literal:
         return str(get_args(obj)[0])
 
