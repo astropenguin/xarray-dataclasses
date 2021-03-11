@@ -29,8 +29,10 @@ def copy_func(func: FunctionType, deep: bool = False) -> FunctionType:
     )
 
     # mutable attributes are copied by the given method
+    copier: Callable
+
     if deep:
-        copier: Callable = deepcopy
+        copier = deepcopy
     else:
         copier = copy
 
