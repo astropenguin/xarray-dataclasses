@@ -12,13 +12,13 @@ from .typing import is_attr, is_coord, is_data, is_name
 
 
 # type hints
-DataClassDict = Dict[str, Any]  #: Type alias for dataclass fields.
-
-
 class DataClass(Protocol):
     """Type hint for dataclass and its instance."""
 
     __dataclass_fields__: Dict[str, Field]
+
+
+DataClassDict = Dict[str, Any]
 
 
 # helper functions (internal)
