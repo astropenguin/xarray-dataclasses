@@ -162,32 +162,32 @@ Examples:
 
 
 # runtime functions (internal)
-def is_attr(obj: Any) -> bool:
-    """Check if object is Attr[T]."""
-    return _has_xarray_id(obj, Xarray.ATTR)
+def is_attr(type_: Any) -> bool:
+    """Check if type is Attr[T]."""
+    return _has_xarray_id(type_, Xarray.ATTR)
 
 
-def is_coord(obj: Any) -> bool:
-    """Check if object is Coord[T, D]."""
-    return _has_xarray_id(obj, Xarray.COORD)
+def is_coord(type_: Any) -> bool:
+    """Check if type is Coord[T, D]."""
+    return _has_xarray_id(type_, Xarray.COORD)
 
 
-def is_data(obj: Any) -> bool:
-    """Check if object is Data[T, D]."""
-    return _has_xarray_id(obj, Xarray.DATA)
+def is_data(type_: Any) -> bool:
+    """Check if type is Data[T, D]."""
+    return _has_xarray_id(type_, Xarray.DATA)
 
 
-def is_name(obj: Any) -> bool:
-    """Check if object is Name[T]."""
-    return _has_xarray_id(obj, Xarray.NAME)
+def is_name(type_: Any) -> bool:
+    """Check if type is Name[T]."""
+    return _has_xarray_id(type_, Xarray.NAME)
 
 
-def get_dims(obj: Type[DataArrayLike]) -> Tuple[str, ...]:
+def get_dims(type_: Type[DataArrayLike]) -> Tuple[str, ...]:
     """Extract dimensions from DataArrayLike[T, D]."""
-    if get_origin(obj) is Annotated:
-        obj = get_args(obj)[0]
+    if get_origin(type_) is Annotated:
+        type_ = get_args(type_)[0]
 
-    dtype, dims = get_args(get_args(obj)[0])
+    dtype, dims = get_args(get_args(type_)[0])
 
     if get_origin(dims) is tuple:
         return tuple(_unwrap(dim) for dim in get_args(dims))
@@ -195,12 +195,12 @@ def get_dims(obj: Type[DataArrayLike]) -> Tuple[str, ...]:
         return (_unwrap(dims),)
 
 
-def get_dtype(obj: Type[DataArrayLike]) -> Optional[np.dtype]:
+def get_dtype(type_: Type[DataArrayLike]) -> Optional[np.dtype]:
     """Extract data type from DataArrayLike[T, D]."""
-    if get_origin(obj) is Annotated:
-        obj = get_args(obj)[0]
+    if get_origin(type_) is Annotated:
+        type_ = get_args(type_)[0]
 
-    dtype, dims = get_args(get_args(obj)[0])
+    dtype, dims = get_args(get_args(type_)[0])
 
     if dtype is Any or dtype is None:
         return None
@@ -209,18 +209,18 @@ def get_dtype(obj: Type[DataArrayLike]) -> Optional[np.dtype]:
 
 
 # helper functions (internal)
-def _has_xarray_id(obj: Any, id: Xarray) -> bool:
-    """Check if object has given identifier of xarray."""
-    args = get_args(obj)
+def _has_xarray_id(type_: Any, id: Xarray) -> bool:
+    """Check if type has given identifier of xarray."""
+    args = get_args(type_)
     return (len(args) > 1) and (args[1] is id)
 
 
-def _unwrap(obj: T) -> Union[T, str]:
+def _unwrap(type_: T) -> Union[T, str]:
     """Extract string from a type hint if possible."""
-    if get_origin(obj) is Literal:
-        return str(get_args(obj)[0])
+    if get_origin(type_) is Literal:
+        return str(get_args(type_)[0])
 
-    if isinstance(obj, ForwardRef):
-        return str(obj.__forward_arg__)
+    if isinstance(type_, ForwardRef):
+        return str(type_.__forward_arg__)
 
-    return obj
+    return type_
