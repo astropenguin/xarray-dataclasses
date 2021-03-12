@@ -4,7 +4,17 @@ __all__ = ["Attr", "Coord", "Data", "Name"]
 # standard library
 from enum import auto, Enum
 from functools import wraps
-from typing import Any, ForwardRef, Generic, Optional, Sequence, Tuple, TypeVar, Union
+from typing import (
+    Any,
+    ForwardRef,
+    Generic,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
 
 
 # third-party packages
@@ -172,12 +182,12 @@ def is_name(obj: Any) -> bool:
     return _has_xarray_id(obj, Xarray.NAME)
 
 
-def get_dims(obj: Any) -> Tuple[str, ...]:
-    """Extract dimensions from Coord[T, D] or Data[T, D]."""
-    if not (is_coord(obj) or is_data(obj)):
-        raise ValueError("obj must be either Coord or Data.")
+def get_dims(obj: Type[DataArrayLike]) -> Tuple[str, ...]:
+    """Extract dimensions from DataArrayLike[T, D]."""
+    if get_origin(obj) is Annotated:
+        obj = get_args(obj)[0]
 
-    dtype, dims = get_args(get_args(get_args(obj)[0])[0])
+    dtype, dims = get_args(get_args(obj)[0])
 
     if get_origin(dims) is tuple:
         return tuple(_unwrap(dim) for dim in get_args(dims))
@@ -185,12 +195,12 @@ def get_dims(obj: Any) -> Tuple[str, ...]:
         return (_unwrap(dims),)
 
 
-def get_dtype(obj: Any) -> Optional[np.dtype]:
-    """Extract data type from Coord[T, D] or Data[T, D]."""
-    if not (is_coord(obj) or is_data(obj)):
-        raise ValueError("obj must be either Coord or Data.")
+def get_dtype(obj: Type[DataArrayLike]) -> Optional[np.dtype]:
+    """Extract data type from DataArrayLike[T, D]."""
+    if get_origin(obj) is Annotated:
+        obj = get_args(obj)[0]
 
-    dtype, dims = get_args(get_args(get_args(obj)[0])[0])
+    dtype, dims = get_args(get_args(obj)[0])
 
     if dtype is Any or dtype is None:
         return None
