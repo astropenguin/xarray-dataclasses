@@ -1,6 +1,16 @@
 # standard library
 from dataclasses import Field
-from typing import Any, Callable, Dict, Iterable, Mapping, Optional, Tuple, Type
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Hashable,
+    Iterable,
+    Mapping,
+    Optional,
+    Tuple,
+    Type,
+)
 
 
 # third-party packages
@@ -28,6 +38,20 @@ class DataClass(Protocol):
     __dataclass_fields__: Dict[str, Field]
 
 
+# runtime function (internal)
+def get_attrs(inst: DataClass) -> Dict[str, Any]:
+    """Return attrs for a DataArray or Dataset instance."""
+    return {f.name: v for f, v in _gen_fields(inst, is_attr)}
+
+
+def get_name(inst: DataClass) -> Hashable:
+    """Return name for a DataArray instance."""
+    try:
+        return _get_one(dict(_gen_fields(inst, is_name)))
+    except ValueError:
+        raise ValueError("Exactly one Name-type value is allowed.")
+
+
 # helper functions (internal)
 def _gen_fields(
     inst: DataClass, type_filter: Optional[Callable[..., bool]] = None
@@ -51,7 +75,7 @@ def _gen_fields(
 def _get_one(obj: Mapping) -> Any:
     """Return value of mapping if it has an exactly one entry."""
     if len(obj) != 1:
-        raise ValueError("obj must have an exactly one entry.")
+        raise ValueError("obj must have exactly one entry.")
 
     return next(iter(obj.values()))
 
