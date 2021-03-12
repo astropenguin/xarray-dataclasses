@@ -40,14 +40,14 @@ class DataClass(Protocol):
 
 
 # runtime function (internal)
-def get_attrs(inst: DataClass) -> Dict[str, Any]:
+def get_attrs(inst: DataClass) -> Dict[Hashable, Any]:
     """Return attrs for a DataArray or Dataset instance."""
     return {f.name: v for f, v in _gen_fields(inst, is_attr)}
 
 
 def get_coords(
     inst: DataClass, bound_to: Union[xr.DataArray, xr.Dataset]
-) -> Dict[str, xr.DataArray]:
+) -> Dict[Hashable, xr.DataArray]:
     """Return coords for a DataArray or Dataset instance.
 
     Args:
@@ -58,8 +58,8 @@ def get_coords(
         Dictionary of DataArray instances to be bounded.
 
     """
-    coords = {}
     sizes = bound_to.sizes
+    coords: Dict[Hashable, xr.DataArray] = {}
 
     for field, value in _gen_fields(inst, is_coord):
         try:
