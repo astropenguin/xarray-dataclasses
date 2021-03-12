@@ -222,6 +222,6 @@ def _unwrap(type_: T) -> Union[T, str]:
         return str(get_args(type_)[0])
 
     if isinstance(type_, ForwardRef):
-        return str(type_.__forward_arg__)
+        return type_.__forward_arg__
 
     return type_
