@@ -73,36 +73,14 @@ def get_coords(
     return coords
 
 
-def get_data(
-    inst: DataClass, allow_multiple: bool = False
-) -> Union[Dict[str, xr.DataArray], xr.DataArray]:
-    """Return data for a DataArray or Dataset instance.
-
-    Args:
-        inst: A dataclass instance.
-        allow_multiple: If False, exactly one Data-type value is allowed
-            in a dataclass instance and a DataArray instance is returned.
-            Otherwise, a dictionary of DataArray instances is returned.
-
-    Returns:
-        A DataArray instance: If ``allow_multiple == False``.
-        A dictionary of DataArray instances: Otherwise.
-
-    Raises:
-        ValueError: Raised when ``allow_multiple == False`` and
-            not one Data-type values are found in a dataclass instance.
-
-    """
-    fields = _gen_fields(inst, is_data)
-    data = {f.name: _dataarray(f.type, v) for f, v in fields}
-
-    if allow_multiple:
-        return data
-
+def get_data(inst: DataClass) -> xr.DataArray:
+    """Return data for a DataArray instance."""
     try:
-        return _get_one(data)
+        field, value = _get_one(dict(_gen_fields(inst, is_data)))
     except ValueError:
         raise ValueError("Exactly one Data-type value is allowed.")
+
+    return _dataarray(field.type, value)
 
 
 def get_name(inst: DataClass) -> Hashable:
