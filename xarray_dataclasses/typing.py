@@ -8,6 +8,7 @@ from typing import (
     Any,
     ForwardRef,
     Generic,
+    Hashable,
     Optional,
     Sequence,
     Tuple,
@@ -182,7 +183,7 @@ def is_name(type_: Any) -> bool:
     return _has_xarray_id(type_, Xarray.NAME)
 
 
-def get_dims(type_: Type[DataArrayLike]) -> Tuple[str, ...]:
+def get_dims(type_: Type[DataArrayLike]) -> Tuple[Hashable, ...]:
     """Extract dimensions from DataArrayLike[T, D]."""
     if get_origin(type_) is Annotated:
         type_ = get_args(type_)[0]
