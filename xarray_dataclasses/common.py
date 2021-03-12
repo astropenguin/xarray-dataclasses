@@ -1,14 +1,24 @@
 # standard library
 from dataclasses import Field
-from typing import Any, Callable, Dict, Iterable, Mapping, Optional, Tuple
+from typing import Any, Callable, Dict, Iterable, Mapping, Optional, Tuple, Type
 
 
 # third-party packages
+import numpy as np
+import xarray as xr
 from typing_extensions import Protocol
 
 
 # submodules
-from .typing import is_attr, is_coord, is_data, is_name
+from .typing import (
+    DataArrayLike,
+    get_dims,
+    get_dtype,
+    is_attr,
+    is_coord,
+    is_data,
+    is_name,
+)
 
 
 # type hints
@@ -44,3 +54,9 @@ def _get_one(obj: Mapping) -> Any:
         raise ValueError("obj must have an exactly one entry.")
 
     return next(iter(obj.values()))
+
+
+def _dataarray(type_: Type[DataArrayLike], obj: DataArrayLike) -> xr.DataArray:
+    """Convert object to a DataArray instance according to given type."""
+    data = np.asarray(obj, dtype=get_dtype(type_))
+    return xr.DataArray(data, dims=get_dims(type_))
