@@ -45,6 +45,34 @@ def get_attrs(inst: DataClass) -> Dict[str, Any]:
     return {f.name: v for f, v in _gen_fields(inst, is_attr)}
 
 
+def get_coords(
+    inst: DataClass, bound_to: Union[xr.DataArray, xr.Dataset]
+) -> Dict[str, xr.DataArray]:
+    """Return coords for a DataArray or Dataset instance.
+
+    Args:
+        inst: A dataclass instance.
+        bound_to: A DataArray or Dataset instance to which coords are bound.
+
+    Returns:
+        Dictionary of DataArray instances to be bounded.
+
+    """
+    coords = {}
+    sizes = bound_to.sizes
+
+    for field, value in _gen_fields(inst, is_coord):
+        try:
+            coord = _dataarray(field.type, value)
+        except ValueError:
+            shape = tuple(sizes[dim] for dim in get_dims(field.type))
+            coord = _dataarray(field.type, np.full(shape, value))
+
+        coords[field.name] = coord
+
+    return coords
+
+
 def get_data(
     inst: DataClass, allow_multiple: bool = False
 ) -> Union[xr.DataArray, Dict[str, xr.DataArray]]:
