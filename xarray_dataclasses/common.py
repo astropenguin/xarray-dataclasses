@@ -1,6 +1,6 @@
 # standard library
 from dataclasses import Field
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple
+from typing import Any, Callable, Dict, Iterable, Mapping, Optional, Tuple
 
 
 # third-party packages
@@ -36,3 +36,11 @@ def _gen_fields(
     for name, field in inst.__dataclass_fields__.items():
         if type_filter is None or type_filter(field.type):
             yield field, getattr(inst, name)
+
+
+def _get_one(obj: Mapping) -> Any:
+    """Return value of mapping if it has an exactly one entry."""
+    if len(obj) != 1:
+        raise ValueError("obj must have an exactly one entry.")
+
+    return next(iter(obj.values()))
