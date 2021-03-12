@@ -75,14 +75,14 @@ def get_coords(
 
 def get_data(
     inst: DataClass, allow_multiple: bool = False
-) -> Union[xr.DataArray, Dict[str, xr.DataArray]]:
+) -> Union[Dict[str, xr.DataArray], xr.DataArray]:
     """Return data for a DataArray or Dataset instance.
 
     Args:
         inst: A dataclass instance.
         allow_multiple: If False, exactly one Data-type value is allowed
             in a dataclass instance and a DataArray instance is returned.
-            Otherwise, a dictionary of DataArray instance(s) is returned.
+            Otherwise, a dictionary of DataArray instances is returned.
 
     Returns:
         A DataArray instance: If ``allow_multiple == False``.
@@ -134,7 +134,7 @@ def _gen_fields(
 
 
 def _get_one(obj: Mapping) -> Any:
-    """Return value of mapping if it has an exactly one entry."""
+    """Return value of mapping if it has exactly one entry."""
     if len(obj) != 1:
         raise ValueError("obj must have exactly one entry.")
 
