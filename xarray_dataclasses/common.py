@@ -1,6 +1,6 @@
 # standard library
-from dataclasses import astuple, Field
-from typing import Any, Callable, Dict
+from dataclasses import Field
+from typing import Any, Callable, Dict, Iterable, Optional, Tuple
 
 
 # third-party packages
@@ -18,31 +18,21 @@ class DataClass(Protocol):
     __dataclass_fields__: Dict[str, Field]
 
 
-DataClassDict = Dict[str, Any]
-
-
 # helper functions (internal)
-def asdict_attr(inst: DataClass) -> DataClassDict:
-    """Return attr fields of a dataclass instance."""
-    return _asdict_by_type(inst, is_attr)
+def _gen_fields(
+    inst: DataClass, type_filter: Optional[Callable[..., bool]] = None
+) -> Iterable[Tuple[Field, Any]]:
+    """Generate field-value pairs from a dataclass instance.
 
+    Args:
+        inst: An instance of dataclass.
+        type_filter: If specified, only field-value pairs
+            s.t. ``type_filter(field.type) == True`` are yielded.
 
-def asdict_coord(inst: DataClass) -> DataClassDict:
-    """Return coord fields of a dataclass instance."""
-    return _asdict_by_type(inst, is_coord)
+    Yields:
+        Field-value pairs as tuple.
 
-
-def asdict_data(inst: DataClass) -> DataClassDict:
-    """Return data fields of a dataclass instance."""
-    return _asdict_by_type(inst, is_data)
-
-
-def asdict_name(inst: DataClass) -> DataClassDict:
-    """Return name fields of a dataclass instance."""
-    return _asdict_by_type(inst, is_name)
-
-
-def _asdict_by_type(inst: DataClass, checker: Callable[[Any], bool]) -> DataClassDict:
-    """Similar to asdict, but only has fields whose types are matched by checker."""
-    fields = inst.__dataclass_fields__
-    return {key: val for key, val in astuple(inst) if checker(fields[key].type)}
+    """
+    for name, field in inst.__dataclass_fields__.items():
+        if type_filter is None or type_filter(field.type):
+            yield field, getattr(inst, name)
