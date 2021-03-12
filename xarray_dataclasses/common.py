@@ -10,6 +10,7 @@ from typing import (
     Optional,
     Tuple,
     Type,
+    Union,
 )
 
 
@@ -42,6 +43,38 @@ class DataClass(Protocol):
 def get_attrs(inst: DataClass) -> Dict[str, Any]:
     """Return attrs for a DataArray or Dataset instance."""
     return {f.name: v for f, v in _gen_fields(inst, is_attr)}
+
+
+def get_data(
+    inst: DataClass, allow_multiple: bool = False
+) -> Union[xr.DataArray, Dict[str, xr.DataArray]]:
+    """Return data for a DataArray or Dataset instance.
+
+    Args:
+        inst: A dataclass instance.
+        allow_multiple: If False, exactly one Data-type value is allowed
+            in a dataclass instance and a DataArray instance is returned.
+            Otherwise, a dictionary of DataArray instance(s) is returned.
+
+    Returns:
+        A DataArray instance: If ``allow_multiple == False``.
+        A dictionary of DataArray instances: Otherwise.
+
+    Raises:
+        ValueError: Raised when ``allow_multiple == False`` and
+            not one Data-type values are found in a dataclass instance.
+
+    """
+    fields = _gen_fields(inst, is_data)
+    data = {f.name: _dataarray(f.type, v) for f, v in fields}
+
+    if allow_multiple:
+        return data
+
+    try:
+        return _get_one(data)
+    except ValueError:
+        raise ValueError("Exactly one Data-type value is allowed.")
 
 
 def get_name(inst: DataClass) -> Hashable:
