@@ -21,6 +21,7 @@ import numpy as np
 import xarray as xr
 from typing_extensions import (
     Annotated,
+    Final,
     get_args,
     get_origin,
     Literal,
@@ -29,6 +30,9 @@ from typing_extensions import (
 
 
 # constants (internal)
+NoneType: Final = type(None)
+
+
 class Xarray(Enum):
     """Identifiers of type hints for xarray."""
 
@@ -201,6 +205,9 @@ def get_dims(type_: Type[DataArrayLike]) -> Tuple[Hashable, ...]:
     dims = []
 
     for dim_ in get_args(dims_):
+        if dim_ == () or dim_ is NoneType:
+            continue
+
         if isinstance(dim_, ForwardRef):
             dims.append(dim_.__forward_arg__)
             continue
@@ -221,7 +228,7 @@ def get_dtype(type_: Type[DataArrayLike]) -> Optional[np.dtype]:
 
     dtype, dims_ = get_args(get_args(type_)[0])
 
-    if dtype is Any or dtype is None:
+    if dtype is Any:
         return None
 
     if isinstance(dtype, ForwardRef):
