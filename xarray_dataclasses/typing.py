@@ -197,7 +197,7 @@ def get_dims(type_: Type[DataArrayLike]) -> Tuple[Hashable, ...]:
     if get_origin(type_) is Annotated:
         type_ = get_args(type_)[0]
 
-    dtype, dims_ = get_args(get_args(type_)[0])
+    dtype_, dims_ = get_args(get_args(type_)[0])
 
     if get_origin(dims_) is not tuple:
         dims_ = Tuple[dims_]
@@ -226,15 +226,15 @@ def get_dtype(type_: Type[DataArrayLike]) -> Optional[np.dtype]:
     if get_origin(type_) is Annotated:
         type_ = get_args(type_)[0]
 
-    dtype, dims_ = get_args(get_args(type_)[0])
+    dtype_, dims_ = get_args(get_args(type_)[0])
 
-    if dtype is Any:
+    if dtype_ is Any:
         return None
 
-    if isinstance(dtype, ForwardRef):
-        return np.dtype(dtype.__forward_arg__)
+    if isinstance(dtype_, ForwardRef):
+        return np.dtype(dtype_.__forward_arg__)
 
-    if get_origin(dtype) is Literal:
-        return np.dtype(get_args(dtype)[0])
+    if get_origin(dtype_) is Literal:
+        return np.dtype(get_args(dtype_)[0])
 
-    return np.dtype(dtype)
+    return np.dtype(dtype_)
