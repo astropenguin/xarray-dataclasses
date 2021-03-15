@@ -123,5 +123,5 @@ def _to_dataarray(
         if sizes is None:
             raise error
 
-        shape = tuple(sizes[dim] for dim in dims)
-        return xr.DataArray(np.full(shape, data, dtype), dims=dims)
+    shape = tuple(sizes[dim] for dim in dims)
+    return xr.DataArray(np.full(shape, data, dtype), dims=dims)
