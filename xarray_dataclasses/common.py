@@ -63,23 +63,15 @@ def get_coords(
     return {f.name: _to_dataarray(v, f.type, sizes) for f, v in fields}
 
 
-def get_data(inst: DataClass) -> xr.DataArray:
-    """Return data for a DataArray instance."""
-    try:
-        field, value = next(iter(_gen_fields(inst, is_data)))
-    except StopIteration:
-        raise ValueError("Could not find data.")
-
-    return _to_dataarray(value, field.type)
+def get_data(inst: DataClass) -> Dict[Hashable, xr.DataArray]:
+    """Return Data-typed values for a DataArray or Dataset instance."""
+    fields = _gen_fields(inst, is_data)
+    return {f.name: _to_dataarray(v, f.type) for f, v in fields}
 
 
-def get_name(inst: DataClass) -> Optional[Hashable]:
-    """Return name for a DataArray instance."""
-    try:
-        field, value = next(iter(_gen_fields(inst, is_name)))
-        return value
-    except StopIteration:
-        return None
+def get_names(inst: DataClass) -> Dict[Hashable, Any]:
+    """Return Name-typed values for a DataArray or Dataset instance."""
+    return {f.name: v for f, v in _gen_fields(inst, is_name)}
 
 
 # helper functions (internal)
