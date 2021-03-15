@@ -209,7 +209,7 @@ def get_dims(type_: Type[DataArrayLike]) -> Tuple[Hashable, ...]:
             dims.append(get_args(dim_)[0])
             continue
 
-        raise TypeError(f"Cannot extract dimension from {dim_}.")
+        raise TypeError("Could not extract dimension.")
 
     return tuple(dims)
 
