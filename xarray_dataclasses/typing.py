@@ -3,11 +3,9 @@ __all__ = ["Attr", "Coord", "Data", "Name"]
 
 # standard library
 from enum import auto, Enum
-from functools import wraps
 from typing import (
     Any,
     ForwardRef,
-    Generic,
     Hashable,
     Optional,
     Sequence,
@@ -21,7 +19,13 @@ from typing import (
 # third-party packages
 import numpy as np
 import xarray as xr
-from typing_extensions import Annotated, get_args, get_origin, Literal
+from typing_extensions import (
+    Annotated,
+    get_args,
+    get_origin,
+    Literal,
+    Protocol,
+)
 
 
 # constants (internal)
@@ -35,25 +39,21 @@ class Xarray(Enum):
 
 
 # type variables (internal)
-T = TypeVar("T")  #: Type variable for data types.
-D = TypeVar("D")  #: Type variable for dimensions.
+T = TypeVar("T", covariant=True)  #: Type variable for data types.
+D = TypeVar("D", covariant=True)  #: Type variable for dimensions.
 
 
 # type hints (internal)
-class ndarray(Generic[T]):
-    """Generic version of numpy.ndarray."""
+class ndarray(Protocol[T]):
+    """Protocol version of numpy.ndarray."""
 
-    @wraps(np.ndarray)
-    def __new__(cls, *args, **kwargs):
-        return np.ndarray(*args, **kwargs)
+    __class__: Type[np.ndarray]  # type: ignore
 
 
-class DataArray(Generic[T, D]):
-    """Generic version of xarray.DataArray."""
+class DataArray(Protocol[T, D]):
+    """Protocol version of xarray.DataArray."""
 
-    @wraps(xr.DataArray)
-    def __new__(cls, *args, **kwargs):
-        return xr.DataArray(*args, **kwargs)
+    __class__: Type[xr.DataArray]  # type: ignore
 
 
 DataArrayLike = Union[DataArray[T, D], ndarray[T], Sequence[T], T]
