@@ -48,7 +48,7 @@ testdata_dtype = [
 
 
 # test functions
-@mark.parametrize("test, expected", testdata_dims)
+@mark.parametrize("dims, expected", testdata_dims)
 def test_dims(dims: Any, expected: Any) -> None:
     assert get_dims(DataArrayLike[Any, dims]) == expected  # type: ignore
 
