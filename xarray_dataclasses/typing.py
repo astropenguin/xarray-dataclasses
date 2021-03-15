@@ -37,6 +37,11 @@ class Xarray(Enum):
     DATA = auto()  #: Data of DataArray or variable of Dataset.
     NAME = auto()  #: Name of DataArray.
 
+    def isin(self, type_: Any) -> bool:
+        """Check if type is annotated by the identifier."""
+        args = get_args(type_)
+        return len(args) > 1 and self in args[1:]
+
 
 # type variables (internal)
 T = TypeVar("T", covariant=True)  #: Type variable for data types.
@@ -165,22 +170,22 @@ Examples:
 # runtime functions (internal)
 def is_attr(type_: Any) -> bool:
     """Check if type is Attr[T]."""
-    return _has_xarray_id(type_, Xarray.ATTR)
+    return Xarray.ATTR.isin(type_)
 
 
 def is_coord(type_: Any) -> bool:
     """Check if type is Coord[T, D]."""
-    return _has_xarray_id(type_, Xarray.COORD)
+    return Xarray.COORD.isin(type_)
 
 
 def is_data(type_: Any) -> bool:
     """Check if type is Data[T, D]."""
-    return _has_xarray_id(type_, Xarray.DATA)
+    return Xarray.DATA.isin(type_)
 
 
 def is_name(type_: Any) -> bool:
     """Check if type is Name[T]."""
-    return _has_xarray_id(type_, Xarray.NAME)
+    return Xarray.NAME.isin(type_)
 
 
 def get_dims(type_: Type[DataArrayLike]) -> Tuple[Hashable, ...]:
@@ -216,10 +221,3 @@ def get_dtype(type_: Type[DataArrayLike]) -> Optional[np.dtype]:
         return np.dtype(get_args(dtype)[0])
 
     return np.dtype(dtype)
-
-
-# helper functions (internal)
-def _has_xarray_id(type_: Any, id: Xarray) -> bool:
-    """Check if type has given identifier of xarray."""
-    args = get_args(type_)
-    return (len(args) > 1) and (args[1] is id)
