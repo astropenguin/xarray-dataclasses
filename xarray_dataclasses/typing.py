@@ -37,7 +37,7 @@ class Xarray(Enum):
     DATA = auto()  #: Data of DataArray or variable of Dataset.
     NAME = auto()  #: Name of DataArray.
 
-    def isin(self, type_: Any) -> bool:
+    def annotates(self, type_: Any) -> bool:
         """Check if type is annotated by the identifier."""
         args = get_args(type_)
         return len(args) > 1 and self in args[1:]
@@ -170,22 +170,22 @@ Examples:
 # runtime functions (internal)
 def is_attr(type_: Any) -> bool:
     """Check if type is Attr[T]."""
-    return Xarray.ATTR.isin(type_)
+    return Xarray.ATTR.annotates(type_)
 
 
 def is_coord(type_: Any) -> bool:
     """Check if type is Coord[T, D]."""
-    return Xarray.COORD.isin(type_)
+    return Xarray.COORD.annotates(type_)
 
 
 def is_data(type_: Any) -> bool:
     """Check if type is Data[T, D]."""
-    return Xarray.DATA.isin(type_)
+    return Xarray.DATA.annotates(type_)
 
 
 def is_name(type_: Any) -> bool:
     """Check if type is Name[T]."""
-    return Xarray.NAME.isin(type_)
+    return Xarray.NAME.annotates(type_)
 
 
 def get_dims(type_: Type[DataArrayLike]) -> Tuple[Hashable, ...]:
