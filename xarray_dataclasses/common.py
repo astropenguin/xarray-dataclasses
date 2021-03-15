@@ -32,7 +32,7 @@ from .typing import (
 )
 
 
-# type hints
+# type hints (internal)
 class DataClass(Protocol):
     """Type hint for dataclass and its instance."""
 
@@ -52,43 +52,26 @@ def get_coords(
 
     Args:
         inst: A dataclass instance.
-        bound_to: A DataArray or Dataset instance to which coords are bound.
+        bound_to: A DataArray or Dataset instance to bind.
 
     Returns:
         Dictionary of DataArray instances to be bounded.
 
     """
     sizes = bound_to.sizes
-    coords: Dict[Hashable, xr.DataArray] = {}
-
-    for field, value in _gen_fields(inst, is_coord):
-        try:
-            coord = _dataarray(field.type, value)
-        except ValueError:
-            shape = tuple(sizes[dim] for dim in get_dims(field.type))
-            coord = _dataarray(field.type, np.full(shape, value))
-
-        coords[field.name] = coord
-
-    return coords
+    fields = _gen_fields(inst, is_coord)
+    return {f.name: _to_dataarray(v, f.type, sizes) for f, v in fields}
 
 
 def get_data(inst: DataClass) -> xr.DataArray:
     """Return data for a DataArray instance."""
-    try:
-        field, value = _get_one(dict(_gen_fields(inst, is_data)))
-    except ValueError:
-        raise ValueError("Exactly one Data-type value is allowed.")
-
-    return _dataarray(field.type, value)
+    field, value = next(iter(_gen_fields(inst, is_data)))
+    return _to_dataarray(value, field.type)
 
 
 def get_name(inst: DataClass) -> Hashable:
     """Return name for a DataArray instance."""
-    try:
-        return _get_one(dict(_gen_fields(inst, is_name)))
-    except ValueError:
-        raise ValueError("Exactly one Name-type value is allowed.")
+    return next(iter(_gen_fields(inst, is_name)))[1]
 
 
 # helper functions (internal)
@@ -111,15 +94,34 @@ def _gen_fields(
             yield field, getattr(inst, name)
 
 
-def _get_one(obj: Mapping) -> Any:
-    """Return value of mapping if it has exactly one entry."""
-    if len(obj) != 1:
-        raise ValueError("obj must have exactly one entry.")
+def _to_dataarray(
+    data: DataArrayLike,
+    type_: Type[DataArrayLike],
+    sizes: Optional[Mapping[Hashable, int]] = None,
+) -> xr.DataArray:
+    """Create a DataArray instance from DataArrayLike object.
 
-    return next(iter(obj.values()))
+    Args:
+        data: DataArrayLike object.
+        type_: Type of ``data``. Must be DataArrayLike[T, D].
+        sizes: If specified, it is used for broadcasting ``data``.
 
+    Returns:
+        DataArray instance whose dtype and dims follow ``type_``.
 
-def _dataarray(type_: Type[DataArrayLike], obj: DataArrayLike) -> xr.DataArray:
-    """Convert object to a DataArray instance according to given type."""
-    data = np.asarray(obj, dtype=get_dtype(type_))
-    return xr.DataArray(data, dims=get_dims(type_))
+    Raises:
+        ValueError: Raised if ``sizes`` are not specified
+            when broadcasting ``data`` is necessary.
+
+    """
+    dims = get_dims(type_)
+    dtype = get_dtype(type_)
+
+    try:
+        return xr.DataArray(np.asarray(data, dtype), dims=dims)
+    except ValueError as error:
+        if sizes is None:
+            raise error
+
+        shape = tuple(sizes[dim] for dim in dims)
+        return xr.DataArray(np.full(shape, data, dtype), dims=dims)
