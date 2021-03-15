@@ -193,18 +193,25 @@ def get_dims(type_: Type[DataArrayLike]) -> Tuple[Hashable, ...]:
     if get_origin(type_) is Annotated:
         type_ = get_args(type_)[0]
 
-    dtype, dims = get_args(get_args(type_)[0])
+    dtype, dims_ = get_args(get_args(type_)[0])
 
-    if isinstance(dims, ForwardRef):
-        return (dims.__forward_arg__,)
+    if get_origin(dims_) is not tuple:
+        dims_ = Tuple[dims_]
 
-    if get_origin(dims) is Literal:
-        return get_args(dims)
+    dims = []
 
-    if get_origin(dims) is tuple:
-        return tuple(get_dims(dim)[0] for dim in get_args(dims))
+    for dim_ in get_args(dims_):
+        if isinstance(dim_, ForwardRef):
+            dims.append(dim_.__forward_arg__)
+            continue
 
-    raise TypeError("Invalid type for extracting dims.")
+        if get_origin(dim_) is Literal:
+            dims.append(get_args(dim_)[0])
+            continue
+
+        raise TypeError(f"Cannot extract dimension from {dim_}.")
+
+    return tuple(dims)
 
 
 def get_dtype(type_: Type[DataArrayLike]) -> Optional[np.dtype]:
@@ -212,10 +219,13 @@ def get_dtype(type_: Type[DataArrayLike]) -> Optional[np.dtype]:
     if get_origin(type_) is Annotated:
         type_ = get_args(type_)[0]
 
-    dtype, dims = get_args(get_args(type_)[0])
+    dtype, dims_ = get_args(get_args(type_)[0])
 
     if dtype is Any or dtype is None:
         return None
+
+    if isinstance(dtype, ForwardRef):
+        return np.dtype(dtype.__forward_arg__)
 
     if get_origin(dtype) is Literal:
         return np.dtype(get_args(dtype)[0])
