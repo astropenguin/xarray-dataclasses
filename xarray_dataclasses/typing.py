@@ -190,10 +190,16 @@ def get_dims(type_: Type[DataArrayLike]) -> Tuple[Hashable, ...]:
 
     dtype, dims = get_args(get_args(type_)[0])
 
+    if isinstance(dims, ForwardRef):
+        return (dims.__forward_arg__,)
+
+    if get_origin(dims) is Literal:
+        return get_args(dims)
+
     if get_origin(dims) is tuple:
-        return tuple(_unwrap(dim) for dim in get_args(dims))
-    else:
-        return (_unwrap(dims),)
+        return tuple(get_dims(dim)[0] for dim in get_args(dims))
+
+    raise TypeError("Invalid type for extracting dims.")
 
 
 def get_dtype(type_: Type[DataArrayLike]) -> Optional[np.dtype]:
@@ -205,8 +211,11 @@ def get_dtype(type_: Type[DataArrayLike]) -> Optional[np.dtype]:
 
     if dtype is Any or dtype is None:
         return None
-    else:
-        return np.dtype(_unwrap(dtype))
+
+    if get_origin(dtype) is Literal:
+        return np.dtype(get_args(dtype)[0])
+
+    return np.dtype(dtype)
 
 
 # helper functions (internal)
@@ -214,14 +223,3 @@ def _has_xarray_id(type_: Any, id: Xarray) -> bool:
     """Check if type has given identifier of xarray."""
     args = get_args(type_)
     return (len(args) > 1) and (args[1] is id)
-
-
-def _unwrap(type_: T) -> Union[T, str]:
-    """Extract string from a type hint if possible."""
-    if get_origin(type_) is Literal:
-        return str(get_args(type_)[0])
-
-    if isinstance(type_, ForwardRef):
-        return type_.__forward_arg__
-
-    return type_
