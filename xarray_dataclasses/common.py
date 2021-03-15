@@ -41,18 +41,18 @@ class DataClass(Protocol):
 
 # runtime function (internal)
 def get_attrs(inst: DataClass) -> Dict[Hashable, Any]:
-    """Return attrs for a DataArray or Dataset instance."""
+    """Return Attr-typed values for a DataArray or Dataset instance."""
     return {f.name: v for f, v in _gen_fields(inst, is_attr)}
 
 
 def get_coords(
     inst: DataClass, bound_to: Union[xr.DataArray, xr.Dataset]
 ) -> Dict[Hashable, xr.DataArray]:
-    """Return coords for a DataArray or Dataset instance.
+    """Return Coord-typed values for a DataArray or Dataset instance.
 
     Args:
-        inst: A dataclass instance.
-        bound_to: A DataArray or Dataset instance to bind.
+        inst: Dataclass instance.
+        bound_to: DataArray or Dataset instance to bind.
 
     Returns:
         Dictionary of DataArray instances to be bounded.
@@ -81,7 +81,7 @@ def _gen_fields(
     """Generate field-value pairs from a dataclass instance.
 
     Args:
-        inst: An instance of dataclass.
+        inst: Dataclass instance.
         type_filter: If specified, only field-value pairs
             s.t. ``type_filter(field.type) == True`` are yielded.
 
