@@ -193,7 +193,7 @@ def is_name(type_: Any) -> bool:
 
 
 def get_dims(type_: Type[DataArrayLike]) -> Tuple[Hashable, ...]:
-    """Extract dimensions from DataArrayLike[T, D]."""
+    """Extract dimensions (dims) from DataArrayLike[T, D]."""
     if get_origin(type_) is Annotated:
         type_ = get_args(type_)[0]
 
@@ -222,7 +222,7 @@ def get_dims(type_: Type[DataArrayLike]) -> Tuple[Hashable, ...]:
 
 
 def get_dtype(type_: Type[DataArrayLike]) -> Optional[np.dtype]:
-    """Extract data type from DataArrayLike[T, D]."""
+    """Extract data type (dtype) from DataArrayLike[T, D]."""
     if get_origin(type_) is Annotated:
         type_ = get_args(type_)[0]
 
