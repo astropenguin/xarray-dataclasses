@@ -192,7 +192,7 @@ def is_name(type_: Any) -> bool:
     return Xarray.NAME.annotates(type_)
 
 
-def get_dims(type_: Type[DataArrayLike]) -> Tuple[Hashable, ...]:
+def get_dims(type_: Type[DataArrayLike]) -> Tuple[str, ...]:
     """Extract dimensions (dims) from DataArrayLike[T, D]."""
     if get_origin(type_) is Annotated:
         type_ = get_args(type_)[0]
@@ -213,7 +213,7 @@ def get_dims(type_: Type[DataArrayLike]) -> Tuple[Hashable, ...]:
             continue
 
         if get_origin(dim_) is Literal:
-            dims.append(get_args(dim_)[0])
+            dims.append(str(get_args(dim_)[0]))
             continue
 
         raise TypeError("Could not extract dimension.")
