@@ -63,15 +63,31 @@ def get_coords(
     return {f.name: _to_dataarray(v, f.type, sizes) for f, v in fields}
 
 
-def get_data(inst: DataClass) -> Dict[Hashable, xr.DataArray]:
-    """Return Data-typed values for a DataArray or Dataset instance."""
+def get_data(inst: DataClass) -> xr.DataArray:
+    """Return Data-typed value for a DataArray instance."""
     fields = _gen_fields(inst, is_data)
-    return {f.name: _to_dataarray(v, f.type) for f, v in fields}
+    data = {f.name: _to_dataarray(v, f.type) for f, v in fields}
+
+    if len(data) > 1:
+        raise ValueError("Unique Data-typed value is allowed.")
+
+    if len(data) == 0:
+        raise ValueError("Could not find any Data-typed values.")
+
+    return next(iter(data.values()))
 
 
-def get_names(inst: DataClass) -> Dict[Hashable, Any]:
-    """Return Name-typed values for a DataArray or Dataset instance."""
-    return {f.name: v for f, v in _gen_fields(inst, is_name)}
+def get_name(inst: DataClass) -> Optional[Hashable]:
+    """Return Name-typed value for a DataArray or Dataset instance."""
+    names = {f.name: v for f, v in _gen_fields(inst, is_name)}
+
+    if len(names) > 1:
+        raise ValueError("Unique Name-typed value is allowed.")
+
+    if len(names) == 0:
+        return None
+
+    return next(iter(names.values()))
 
 
 # helper functions (internal)
