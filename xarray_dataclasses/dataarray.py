@@ -2,31 +2,38 @@ __all__ = ["asdataarray", "dataarrayclass", "is_dataarrayclass"]
 
 
 # standard library
-from dataclasses import dataclass, Field, is_dataclass
-from typing import Any, Optional, Sequence, Union
+from dataclasses import dataclass, is_dataclass
+from typing import Any, Callable, Optional, Sequence, Union
 
 
 # third-party packages
-import numpy as np
 import xarray as xr
 from typing_extensions import Literal
-from .field import FieldKind, set_fields, XarrayMetadata
-from .typing import DataClass, DataClassDecorator
+
+
+# submodules
+from .common import DataClass, get_attrs, get_coords, get_data, get_name
 from .utils import copy_wraps
 
 
-# constants
-C: str = "C"
-DATA: str = "data"
-XARRAY: str = "xarray"
-
-
-# type hints
+# type hints (internal)
 Order = Literal["C", "F"]
 Shape = Union[Sequence[int], int]
 
 
-# main features
+# runtime functions (public)
+def asdataarray(inst: DataClass) -> xr.DataArray:
+    """Create a DataArray instance from a DataArray class instance."""
+    dataarray = get_data(inst)
+    coords = get_coords(inst, dataarray)
+
+    dataarray.coords.update(coords)
+    dataarray.attrs = get_attrs(inst)
+    dataarray.name = get_name(inst)
+
+    return dataarray
+
+
 def dataarrayclass(
     cls: Optional[type] = None,
     *,
@@ -36,44 +43,8 @@ def dataarrayclass(
     order: bool = False,
     unsafe_hash: bool = False,
     frozen: bool = False,
-) -> Union[DataClass, DataClassDecorator]:
-    """Class decorator to create a DataArray class.
-
-    Args:
-        cls: Class to be decorated.
-        init: Same as the ``init`` parameter of ``dataclass()``.
-        repr: Same as the ``repr`` parameter of ``dataclass()``.
-        eq: Same as the ``eq`` parameter of ``dataclass()``.
-        order: Same as the ``order`` parameter of ``dataclass()``.
-        unsafe_hash: Same as the ``unsafe_hash`` parameter of ``dataclass()``.
-        frozen: Same as the ``frozen`` parameter of ``dataclass()``.
-
-    Returns:
-        DataArray class or class decorator with fixed parameters.
-
-    Examples:
-        To create a DataArray class to represent images::
-
-            from xarray_dataclasses import DataArray, dataarrayclass
-
-
-            @dataarrayclass
-            class Image:
-                \"\"\"DataArray class to represent images.\"\"\"
-
-                data: DataArray[('x', 'y'), float]
-                x: DataArray['x', int]
-                y: DataArray['y', int]
-
-        To create a DataArray instance::
-
-            image = Image.new([[0, 1], [2, 3]], x=[0, 1], y=[0, 1])
-
-        To create a DataArray instance filled with ones::
-
-            ones = Image.ones((2, 2), x=[0, 1], y=[0, 1])
-
-    """
+) -> Union[DataClass, Callable[[type], DataClass]]:
+    """Class decorator to create a DataArray class."""
 
     set_options = dataclass(
         init=init,
@@ -85,138 +56,35 @@ def dataarrayclass(
     )
 
     def to_dataclass(cls: type) -> DataClass:
-        set_fields(cls)
         set_options(cls)
         set_shorthands(cls)
-        return cls
+        return cls  # type: ignore
 
     if cls is not None:
-        return to_dataclass(cls)  # DataClass
+        return to_dataclass(cls)
     else:
-        return to_dataclass  # DataClassDecorator
-
-
-def asdataarray(obj: DataClass) -> xr.DataArray:
-    """Convert dataclass instance to a DataArray instance."""
-    fields = obj.__dataclass_fields__
-    dataarray = fields[DATA].type(obj.data)
-
-    for field in fields.values():
-        value = getattr(obj, field.name)
-        set_value(dataarray, field, value)
-
-    return dataarray
+        return to_dataclass
 
 
 def is_dataarrayclass(obj: Any) -> bool:
-    """Check if object is a DataArray class or its instance.
-
-    It returns ``True`` if ``obj`` fulfills all the
-    following conditions or ``False`` otherwise.
-
-    1. ``obj`` is a Python's native dataclass or its instance.
-    2. ``obj`` has a data field whose type is DataArray.
-    3. All fields in ``obj`` have an xarray-related metadata.
-
-    Args:
-        obj: Object to be checked.
-
-    Returns:
-        ``True`` if ``obj`` fulfills the conditions above
-        or ``False`` otherwise.
-
-    """
-    # obj must be a dataclass or its instance
-    if not is_dataclass(obj):
-        return False
-
-    # all fields must have an xarray-related metadata
-    fields = obj.__dataclass_fields__
-
-    for field in fields.values():
-        metadata = field.metadata.get(XARRAY)
-
-        if not isinstance(metadata, XarrayMetadata):
-            return False
-
-    # at least data field must be defined
-    return DATA in fields
+    """Check if object is a DataArray class or its instance."""
+    return is_dataclass(obj)
 
 
-# helper features
-def set_value(dataarray: xr.DataArray, field: Field, value: Any) -> xr.DataArray:
-    """Set value to a DataArray instance according to given field."""
-    kind = field.metadata[XARRAY].kind
-
-    if kind == FieldKind.DATA:
-        return dataarray
-
-    if kind == FieldKind.NAME:
-        dataarray.name = value
-        return dataarray
-
-    if kind == FieldKind.ATTR:
-        dataarray.attrs[field.name] = value
-        return dataarray
-
-    if kind == FieldKind.COORD:
-        try:
-            coord = field.type(value)
-        except ValueError:
-            shape = tuple(dataarray.sizes[dim] for dim in field.type.dims)
-            coord = field.type(np.full(shape, value))
-
-        dataarray.coords[field.name] = coord
-        return dataarray
-
-    raise ValueError(f"Unsupported field kind: {kind}")
-
-
-def set_shorthands(cls: DataClass) -> DataClass:
+# runtime functions (internal)
+def set_shorthands(cls: type) -> None:
     """Set shorthand methods to a DataArray class."""
 
-    # create methods
-    DataType = cls.__dataclass_fields__[DATA].type
+    new = copy_wraps(cls.__init__)(_new)  # type: ignore
+    new.__annotations__["return"] = xr.DataArray
 
-    @copy_wraps(cls.__init__)
-    def new(cls, *args, **kwargs):
-        return asdataarray(cls(*args, **kwargs))
+    if _new.__doc__ is not None:
+        new.__doc__ = _new.__doc__.format(cls=cls)
 
-    new.__annotations__["return"] = DataType
+    cls.new = classmethod(new)  # type: ignore
 
-    def empty(cls, shape: Shape, order: Order = C, **kwargs) -> DataType:
-        data = np.empty(shape, order=order)
-        return asdataarray(cls(data=data, **kwargs))
 
-    def zeros(cls, shape: Shape, order: Order = C, **kwargs) -> DataType:
-        data = np.zeros(shape, order=order)
-        return asdataarray(cls(data=data, **kwargs))
-
-    def ones(cls, shape: Shape, order: Order = C, **kwargs) -> DataType:
-        data = np.ones(shape, order=order)
-        return asdataarray(cls(data=data, **kwargs))
-
-    def full(
-        cls, shape: Shape, fill_value: Any, order: Order = C, **kwargs
-    ) -> DataType:
-        data = np.full(shape, fill_value, order=order)
-        return asdataarray(cls(data=data, **kwargs))
-
-    # add docstrings to methods
-    def doc(code: str) -> str:
-        return f"Shorthand for asdataarray({cls.__name__}({code}))."
-
-    new.__doc__ = doc("*args, **kwargs")
-    empty.__doc__ = doc("data=numpy.empty(shape), **kwargs")
-    zeros.__doc__ = doc("data=numpy.zeros(shape), **kwargs")
-    ones.__doc__ = doc("data=numpy.ones(shape), **kwargs")
-    full.__doc__ = doc("data=numpy.full(shape, fill_value), **kwargs")
-
-    # set methods to a class
-    cls.new = classmethod(new)
-    cls.empty = classmethod(empty)
-    cls.zeros = classmethod(zeros)
-    cls.ones = classmethod(ones)
-    cls.full = classmethod(full)
-
-    return cls
+# helper functions (internal)
+def _new(cls, *args, **kwargs) -> xr.DataArray:
+    """Shorthand for asdataarray({cls.__name__}(...))."""
+    return asdataarray(cls(*args, **kwargs))
