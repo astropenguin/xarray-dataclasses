@@ -65,13 +65,21 @@ def get_coords(
 
 def get_data(inst: DataClass) -> xr.DataArray:
     """Return data for a DataArray instance."""
-    field, value = next(iter(_gen_fields(inst, is_data)))
+    try:
+        field, value = next(iter(_gen_fields(inst, is_data)))
+    except StopIteration:
+        raise ValueError("Could not find data.")
+
     return _to_dataarray(value, field.type)
 
 
-def get_name(inst: DataClass) -> Hashable:
+def get_name(inst: DataClass) -> Optional[Hashable]:
     """Return name for a DataArray instance."""
-    return next(iter(_gen_fields(inst, is_name)))[1]
+    try:
+        field, value = next(iter(_gen_fields(inst, is_name)))
+        return value
+    except StopIteration:
+        return None
 
 
 # helper functions (internal)
