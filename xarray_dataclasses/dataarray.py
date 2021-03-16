@@ -1,8 +1,8 @@
-__all__ = ["asdataarray", "dataarrayclass", "is_dataarrayclass"]
+__all__ = ["asdataarray", "dataarrayclass"]
 
 
 # standard library
-from dataclasses import dataclass, is_dataclass
+from dataclasses import dataclass
 from typing import Any, Callable, Optional, Sequence, Union
 
 
@@ -72,11 +72,6 @@ def dataarrayclass(
         return to_dataclass(cls)
     else:
         return to_dataclass
-
-
-def is_dataarrayclass(obj: Any) -> bool:
-    """Check if object is a DataArray class or its instance."""
-    return is_dataclass(obj)
 
 
 # runtime functions (internal)
