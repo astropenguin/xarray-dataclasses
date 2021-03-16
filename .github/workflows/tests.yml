@@ -30,6 +30,8 @@ jobs:
         run: poetry run flake8 docs tests xarray_dataclasses
       - name: Format by Black
         run: poetry run black --check docs tests xarray_dataclasses
+        name: Type check by mypy
+        run: poetry run mypy docs tests xarray_dataclasses
       - name: Test by pytest
         run : poetry run pytest -v tests
       - name: Build docs
