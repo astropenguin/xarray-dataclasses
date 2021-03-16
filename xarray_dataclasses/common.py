@@ -10,6 +10,7 @@ from typing import (
     Optional,
     Tuple,
     Type,
+    TypeVar,
     Union,
 )
 
@@ -32,14 +33,21 @@ from .typing import (
 )
 
 
+# type variables (internal)
+T = TypeVar("T")
+
+
 # type hints (internal)
+ClassDecorator = Union[Type[T], Callable[[type], Type[T]]]
+
+
 class DataClass(Protocol):
     """Type hint for dataclass instance."""
 
+    __dataclass_fields__: Dict[str, Field]
+
     def __init__(self, *args, **kwargs) -> None:
         ...
-
-    __dataclass_fields__: Dict[str, Field]
 
 
 # runtime function (internal)
