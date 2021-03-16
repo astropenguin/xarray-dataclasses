@@ -89,6 +89,19 @@ def get_data(inst: DataClass) -> xr.DataArray:
     return next(iter(data.values()))
 
 
+def get_data_name(cls: Type[DataClass]) -> str:
+    """Return name of Data-typed field for a DataArray instance."""
+    fields = dict(_gen_fields(cls, is_data))
+
+    if len(fields) > 1:
+        raise ValueError("Unique Data-typed field is allowed.")
+
+    if len(fields) == 0:
+        raise ValueError("Could not find any Data-typed fields.")
+
+    return next(iter(fields)).name
+
+
 def get_data_vars(inst: DataClass) -> Dict[Hashable, xr.DataArray]:
     """Return Data-typed values for a Dataset instance."""
     fields = _gen_fields(inst, is_data)
@@ -102,7 +115,7 @@ def get_data_vars(inst: DataClass) -> Dict[Hashable, xr.DataArray]:
 
 
 def get_name(inst: DataClass) -> Optional[Hashable]:
-    """Return Name-typed value for a DataArray or Dataset instance."""
+    """Return Name-typed value for a DataArray instance."""
     names = {f.name: v for f, v in _gen_fields(inst, is_name)}
 
     if len(names) > 1:
@@ -112,19 +125,6 @@ def get_name(inst: DataClass) -> Optional[Hashable]:
         return None
 
     return next(iter(names.values()))
-
-
-def get_data_name(cls: Type[DataClass]) -> str:
-    """Return name of Data-typed field for a DataArray instance."""
-    fields = dict(_gen_fields(cls, is_data))
-
-    if len(fields) > 1:
-        raise ValueError("Unique Data-typed field is allowed.")
-
-    if len(fields) == 0:
-        raise ValueError("Could not find any Data-typed fields.")
-
-    return next(iter(fields)).name
 
 
 # helper functions (internal)
