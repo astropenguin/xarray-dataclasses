@@ -79,10 +79,10 @@ def dataarrayclass(
         set_shorthands(cls)
         return cls
 
-    if cls is not None:
-        return to_dataclass(cls)
-    else:
+    if cls is None:
         return to_dataclass
+    else:
+        return to_dataclass(cls)
 
 
 # runtime functions (internal)
