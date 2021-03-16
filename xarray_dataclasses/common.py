@@ -1,5 +1,5 @@
 # standard library
-from dataclasses import Field
+from dataclasses import Field, MISSING
 from typing import (
     Any,
     Callable,
@@ -90,6 +90,19 @@ def get_name(inst: DataClass) -> Optional[Hashable]:
     return next(iter(names.values()))
 
 
+def get_data_name(cls: DataClass) -> str:
+    """Return name of Data-typed field for a DataArray instance."""
+    fields = dict(_gen_fields(cls, is_data))
+
+    if len(fields) > 1:
+        raise ValueError("Unique Data-typed field is allowed.")
+
+    if len(fields) == 0:
+        raise ValueError("Could not find any Data-typed fields.")
+
+    return next(iter(fields)).name
+
+
 # helper functions (internal)
 def _gen_fields(
     inst: DataClass, type_filter: Optional[Callable[..., bool]] = None
@@ -107,7 +120,7 @@ def _gen_fields(
     """
     for name, field in inst.__dataclass_fields__.items():
         if type_filter is None or type_filter(field.type):
-            yield field, getattr(inst, name)
+            yield field, getattr(inst, name, MISSING)
 
 
 def _to_dataarray(
