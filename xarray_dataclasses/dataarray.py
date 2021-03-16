@@ -7,12 +7,20 @@ from typing import Any, Callable, Optional, Sequence, Union
 
 
 # third-party packages
+import numpy as np
 import xarray as xr
 from typing_extensions import Literal
 
 
 # submodules
-from .common import DataClass, get_attrs, get_coords, get_data, get_name
+from .common import (
+    DataClass,
+    get_attrs,
+    get_coords,
+    get_data,
+    get_name,
+    get_data_name,
+)
 from .utils import copy_wraps
 
 
@@ -75,16 +83,98 @@ def is_dataarrayclass(obj: Any) -> bool:
 def set_shorthands(cls: type) -> None:
     """Set shorthand methods to a DataArray class."""
 
-    new = copy_wraps(cls.__init__)(_new)  # type: ignore
-    new.__annotations__["return"] = xr.DataArray
+    @copy_wraps(cls.__init__)  # type: ignore
+    def new(cls, *args, **kwargs):
+        return asdataarray(cls(*args, **kwargs))
 
-    if _new.__doc__ is not None:
-        new.__doc__ = _new.__doc__.format(cls=cls)
+    new.__annotations__["return"] = xr.DataArray
+    new.__doc__ = (
+        "Create a DataArray instance. This is a shorthand for "
+        f"``asdataarray({cls.__name__}(*args, **kwargs))``."
+    )
 
     cls.new = classmethod(new)  # type: ignore
+    cls.empty = classmethod(empty)  # type: ignore
+    cls.zeros = classmethod(zeros)  # type: ignore
+    cls.ones = classmethod(ones)  # type: ignore
+    cls.full = classmethod(full)  # type: ignore
 
 
 # helper functions (internal)
-def _new(cls, *args, **kwargs) -> xr.DataArray:
-    """Shorthand for asdataarray({cls.__name__}(...))."""
-    return asdataarray(cls(*args, **kwargs))
+def empty(cls, shape: Shape, order: Order = "C", **kwargs) -> xr.DataArray:
+    """Create a DataArray instance without initializing data.
+
+    Args:
+        cls: DataArray class.
+        shape: Shape of the new DataArray instance.
+        order: Whether to store data in row-major (C-style)
+            or column-major (Fortran-style) order in memory.
+        kwargs: Args of the DataArray class except for data.
+
+    Returns:
+        A DataArray instance filled without initializing data.
+
+    """
+    name = get_data_name(cls)
+    data = np.empty(shape, order=order)
+    return asdataarray(cls(**{name: data}, **kwargs))
+
+
+def zeros(cls, shape: Shape, order: Order = "C", **kwargs) -> xr.DataArray:
+    """Create a DataArray instance filled with zeros.
+
+    Args:
+        cls: DataArray class.
+        shape: Shape of the new DataArray instance.
+        order: Whether to store data in row-major (C-style)
+            or column-major (Fortran-style) order in memory.
+        kwargs: Args of the DataArray class except for data.
+
+    Returns:
+        A DataArray instance filled with zeros.
+
+    """
+    name = get_data_name(cls)
+    data = np.zeros(shape, order=order)
+    return asdataarray(cls(**{name: data}, **kwargs))
+
+
+def ones(cls, shape: Shape, order: Order = "C", **kwargs) -> xr.DataArray:
+    """Create a DataArray instance filled with ones.
+
+    Args:
+        cls: DataArray class.
+        shape: Shape of the new DataArray instance.
+        order: Whether to store data in row-major (C-style)
+            or column-major (Fortran-style) order in memory.
+        kwargs: Args of the DataArray class except for data.
+
+    Returns:
+        A DataArray instance filled with ones.
+
+    """
+    name = get_data_name(cls)
+    data = np.ones(shape, order=order)
+    return asdataarray(cls(**{name: data}, **kwargs))
+
+
+def full(
+    cls, shape: Shape, fill_value: Any, order: Order = "C", **kwargs
+) -> xr.DataArray:
+    """Create a DataArray instance filled with given value.
+
+    Args:
+        cls: DataArray class.
+        shape: Shape of the new DataArray instance.
+        fill_value: Value for the new DataArray instance.
+        order: Whether to store data in row-major (C-style)
+            or column-major (Fortran-style) order in memory.
+        kwargs: Args of the DataArray class except for data.
+
+    Returns:
+        A DataArray instance filled with given value.
+
+    """
+    name = get_data_name(cls)
+    data = np.full(shape, fill_value, order=order)
+    return asdataarray(cls(**{name: data}, **kwargs))
