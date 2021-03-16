@@ -3,17 +3,18 @@ __all__ = ["asdataarray", "dataarrayclass"]
 
 # standard library
 from dataclasses import dataclass
-from typing import Any, Callable, Optional, Sequence, Type, Union
+from typing import Any, Optional, Sequence, Type, Union
 
 
 # third-party packages
 import numpy as np
 import xarray as xr
-from typing_extensions import Literal
+from typing_extensions import Literal, Protocol
 
 
 # submodules
 from .common import (
+    ClassDecorator,
     DataClass,
     get_attrs,
     get_coords,
@@ -29,8 +30,18 @@ Order = Literal["C", "F"]
 Shape = Union[Sequence[int], int]
 
 
+class DataArrayClass(DataClass, Protocol):
+    """Type hint for DataArray class instance."""
+
+    new: classmethod
+    empty: classmethod
+    zeros: classmethod
+    ones: classmethod
+    full: classmethod
+
+
 # runtime functions (public)
-def asdataarray(inst: DataClass) -> xr.DataArray:
+def asdataarray(inst: DataArrayClass) -> xr.DataArray:
     """Create a DataArray instance from a DataArray class instance."""
     dataarray = get_data(inst)
     coords = get_coords(inst, dataarray)
@@ -51,7 +62,7 @@ def dataarrayclass(
     order: bool = False,
     unsafe_hash: bool = False,
     frozen: bool = False,
-) -> Union[Type[DataClass], Callable[[type], Type[DataClass]]]:
+) -> ClassDecorator[DataArrayClass]:
     """Class decorator to create a DataArray class."""
 
     set_options = dataclass(
@@ -63,7 +74,7 @@ def dataarrayclass(
         frozen=frozen,
     )
 
-    def to_dataclass(cls: type) -> Type[DataClass]:
+    def to_dataclass(cls: type) -> Type[DataArrayClass]:
         set_options(cls)
         set_shorthands(cls)
         return cls
@@ -75,7 +86,7 @@ def dataarrayclass(
 
 
 # runtime functions (internal)
-def set_shorthands(cls: Type[DataClass]) -> None:
+def set_shorthands(cls: Type[DataArrayClass]) -> None:
     """Set shorthand methods to a DataArray class."""
 
     @copy_wraps(cls.__init__)  # type: ignore
@@ -88,16 +99,16 @@ def set_shorthands(cls: Type[DataClass]) -> None:
         f"``asdataarray({cls.__name__}(*args, **kwargs))``."
     )
 
-    cls.new = classmethod(new)  # type: ignore
-    cls.empty = classmethod(empty)  # type: ignore
-    cls.zeros = classmethod(zeros)  # type: ignore
-    cls.ones = classmethod(ones)  # type: ignore
-    cls.full = classmethod(full)  # type: ignore
+    cls.new = classmethod(new)
+    cls.empty = classmethod(empty)
+    cls.zeros = classmethod(zeros)
+    cls.ones = classmethod(ones)
+    cls.full = classmethod(full)
 
 
 # helper functions (internal)
 def empty(
-    cls: Type[DataClass],
+    cls: Type[DataArrayClass],
     shape: Shape,
     order: Order = "C",
     **kwargs,
@@ -121,7 +132,7 @@ def empty(
 
 
 def zeros(
-    cls: Type[DataClass],
+    cls: Type[DataArrayClass],
     shape: Shape,
     order: Order = "C",
     **kwargs,
@@ -145,7 +156,7 @@ def zeros(
 
 
 def ones(
-    cls: Type[DataClass],
+    cls: Type[DataArrayClass],
     shape: Shape,
     order: Order = "C",
     **kwargs,
@@ -169,7 +180,7 @@ def ones(
 
 
 def full(
-    cls: Type[DataClass],
+    cls: Type[DataArrayClass],
     shape: Shape,
     fill_value: Any,
     order: Order = "C",
