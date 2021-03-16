@@ -33,7 +33,7 @@ NoneType: Final = type(None)
 
 
 class Xarray(Enum):
-    """Identifiers of type hints for xarray."""
+    """Identifiers for type hints of xarray-dataclasses."""
 
     ATTR = auto()  #: Attribute member of DataArray or Dataset.
     COORD = auto()  #: Coordinate member of DataArray or Dataset.
@@ -69,7 +69,7 @@ DataArrayLike = Union[DataArray[T, D], ndarray[T], Sequence[T], T]
 
 # type hints (public)
 Attr = Annotated[T, Xarray.ATTR]
-"""Type hint for attribute member of DataArray or Dataset.
+"""Type hint for an attribute member of DataArray or Dataset.
 
 Examples:
     ::
@@ -90,7 +90,7 @@ Examples:
 """
 
 Coord = Annotated[DataArrayLike[T, D], Xarray.COORD]
-"""Type hint for coordinate member of DataArray or Dataset.
+"""Type hint for a coordinate member of DataArray or Dataset.
 
 Examples:
     ::
@@ -149,7 +149,7 @@ Examples:
 """
 
 Name = Annotated[T, Xarray.NAME]
-"""Type hint for name of DataArray.
+"""Type hint for a name of DataArray.
 
 Examples:
     ::
@@ -221,7 +221,7 @@ def get_dims(type_: Type[DataArrayLike]) -> Tuple[str, ...]:
 
 
 def get_dtype(type_: Type[DataArrayLike]) -> Optional[np.dtype]:
-    """Extract data type (dtype) from DataArrayLike[T, D]."""
+    """Extract a data type (dtype) from DataArrayLike[T, D]."""
     if get_origin(type_) is Annotated:
         type_ = get_args(type_)[0]
 

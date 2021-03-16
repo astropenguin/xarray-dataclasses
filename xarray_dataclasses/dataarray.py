@@ -31,7 +31,7 @@ Shape = Union[Sequence[int], int]
 
 
 class DataArrayClass(DataClass, Protocol):
-    """Type hint for DataArray class instance."""
+    """Type hint for a DataArray-class instance."""
 
     new: classmethod
     empty: classmethod
@@ -42,7 +42,7 @@ class DataArrayClass(DataClass, Protocol):
 
 # runtime functions (public)
 def asdataarray(inst: DataArrayClass) -> xr.DataArray:
-    """Create a DataArray instance from a DataArray class instance."""
+    """Create a DataArray instance from a DataArray-class instance."""
     dataarray = get_data(inst)
     coords = get_coords(inst, dataarray)
 
@@ -123,7 +123,7 @@ def empty(
         kwargs: Args of the DataArray class except for data.
 
     Returns:
-        A DataArray instance filled without initializing data.
+        DataArray instance filled without initializing data.
 
     """
     name = get_data_name(cls)
@@ -147,7 +147,7 @@ def zeros(
         kwargs: Args of the DataArray class except for data.
 
     Returns:
-        A DataArray instance filled with zeros.
+        DataArray instance filled with zeros.
 
     """
     name = get_data_name(cls)
@@ -171,7 +171,7 @@ def ones(
         kwargs: Args of the DataArray class except for data.
 
     Returns:
-        A DataArray instance filled with ones.
+        DataArray instance filled with ones.
 
     """
     name = get_data_name(cls)
@@ -197,7 +197,7 @@ def full(
         kwargs: Args of the DataArray class except for data.
 
     Returns:
-        A DataArray instance filled with given value.
+        DataArray instance filled with given value.
 
     """
     name = get_data_name(cls)

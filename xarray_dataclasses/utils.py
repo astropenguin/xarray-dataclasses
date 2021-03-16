@@ -13,11 +13,11 @@ def copy_func(func: FunctionType, deep: bool = False) -> FunctionType:
     """Copy a function as a different object.
 
     Args:
-        func: A function object to be copied.
+        func: Function object to be copied.
         deep: If ``True``, mutable attributes of ``func`` are deep-copied.
 
     Returns:
-        A function as a different object from the original one.
+        Function as a different object from the original one.
 
     """
     copied = FunctionType(
