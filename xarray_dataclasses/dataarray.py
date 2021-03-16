@@ -3,7 +3,7 @@ __all__ = ["asdataarray", "dataarrayclass"]
 
 # standard library
 from dataclasses import dataclass
-from typing import Any, Callable, Optional, Sequence, Union
+from typing import Any, Callable, Optional, Sequence, Type, Union
 
 
 # third-party packages
@@ -51,7 +51,7 @@ def dataarrayclass(
     order: bool = False,
     unsafe_hash: bool = False,
     frozen: bool = False,
-) -> Union[DataClass, Callable[[type], DataClass]]:
+) -> Union[Type[DataClass], Callable[[type], Type[DataClass]]]:
     """Class decorator to create a DataArray class."""
 
     set_options = dataclass(
@@ -63,10 +63,10 @@ def dataarrayclass(
         frozen=frozen,
     )
 
-    def to_dataclass(cls: type) -> DataClass:
+    def to_dataclass(cls: type) -> Type[DataClass]:
         set_options(cls)
         set_shorthands(cls)
-        return cls  # type: ignore
+        return cls
 
     if cls is not None:
         return to_dataclass(cls)
@@ -75,7 +75,7 @@ def dataarrayclass(
 
 
 # runtime functions (internal)
-def set_shorthands(cls: type) -> None:
+def set_shorthands(cls: Type[DataClass]) -> None:
     """Set shorthand methods to a DataArray class."""
 
     @copy_wraps(cls.__init__)  # type: ignore
@@ -96,7 +96,12 @@ def set_shorthands(cls: type) -> None:
 
 
 # helper functions (internal)
-def empty(cls, shape: Shape, order: Order = "C", **kwargs) -> xr.DataArray:
+def empty(
+    cls: Type[DataClass],
+    shape: Shape,
+    order: Order = "C",
+    **kwargs,
+) -> xr.DataArray:
     """Create a DataArray instance without initializing data.
 
     Args:
@@ -115,7 +120,12 @@ def empty(cls, shape: Shape, order: Order = "C", **kwargs) -> xr.DataArray:
     return asdataarray(cls(**{name: data}, **kwargs))
 
 
-def zeros(cls, shape: Shape, order: Order = "C", **kwargs) -> xr.DataArray:
+def zeros(
+    cls: Type[DataClass],
+    shape: Shape,
+    order: Order = "C",
+    **kwargs,
+) -> xr.DataArray:
     """Create a DataArray instance filled with zeros.
 
     Args:
@@ -134,7 +144,12 @@ def zeros(cls, shape: Shape, order: Order = "C", **kwargs) -> xr.DataArray:
     return asdataarray(cls(**{name: data}, **kwargs))
 
 
-def ones(cls, shape: Shape, order: Order = "C", **kwargs) -> xr.DataArray:
+def ones(
+    cls: Type[DataClass],
+    shape: Shape,
+    order: Order = "C",
+    **kwargs,
+) -> xr.DataArray:
     """Create a DataArray instance filled with ones.
 
     Args:
@@ -154,7 +169,11 @@ def ones(cls, shape: Shape, order: Order = "C", **kwargs) -> xr.DataArray:
 
 
 def full(
-    cls, shape: Shape, fill_value: Any, order: Order = "C", **kwargs
+    cls: Type[DataClass],
+    shape: Shape,
+    fill_value: Any,
+    order: Order = "C",
+    **kwargs,
 ) -> xr.DataArray:
     """Create a DataArray instance filled with given value.
 

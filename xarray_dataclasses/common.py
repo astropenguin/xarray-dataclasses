@@ -34,7 +34,10 @@ from .typing import (
 
 # type hints (internal)
 class DataClass(Protocol):
-    """Type hint for dataclass and its instance."""
+    """Type hint for dataclass instance."""
+
+    def __init__(self, *args, **kwargs) -> None:
+        ...
 
     __dataclass_fields__: Dict[str, Field]
 
@@ -46,7 +49,8 @@ def get_attrs(inst: DataClass) -> Dict[Hashable, Any]:
 
 
 def get_coords(
-    inst: DataClass, bound_to: Union[xr.DataArray, xr.Dataset]
+    inst: DataClass,
+    bound_to: Union[xr.DataArray, xr.Dataset],
 ) -> Dict[Hashable, xr.DataArray]:
     """Return Coord-typed values for a DataArray or Dataset instance.
 
@@ -90,7 +94,7 @@ def get_name(inst: DataClass) -> Optional[Hashable]:
     return next(iter(names.values()))
 
 
-def get_data_name(cls: DataClass) -> str:
+def get_data_name(cls: Type[DataClass]) -> str:
     """Return name of Data-typed field for a DataArray instance."""
     fields = dict(_gen_fields(cls, is_data))
 
@@ -105,12 +109,13 @@ def get_data_name(cls: DataClass) -> str:
 
 # helper functions (internal)
 def _gen_fields(
-    inst: DataClass, type_filter: Optional[Callable[..., bool]] = None
+    obj: Union[DataClass, Type[DataClass]],
+    type_filter: Optional[Callable[..., bool]] = None,
 ) -> Iterable[Tuple[Field, Any]]:
     """Generate field-value pairs from a dataclass instance.
 
     Args:
-        inst: Dataclass instance.
+        obj: Dataclass or its instance.
         type_filter: If specified, only field-value pairs
             s.t. ``type_filter(field.type) == True`` are yielded.
 
@@ -118,9 +123,9 @@ def _gen_fields(
         Field-value pairs as tuple.
 
     """
-    for name, field in inst.__dataclass_fields__.items():
+    for name, field in obj.__dataclass_fields__.items():
         if type_filter is None or type_filter(field.type):
-            yield field, getattr(inst, name, MISSING)
+            yield field, getattr(obj, name, MISSING)
 
 
 def _to_dataarray(
