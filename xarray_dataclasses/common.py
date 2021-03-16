@@ -89,6 +89,18 @@ def get_data(inst: DataClass) -> xr.DataArray:
     return next(iter(data.values()))
 
 
+def get_data_vars(inst: DataClass) -> Dict[Hashable, xr.DataArray]:
+    """Return Data-typed values for a Dataset instance."""
+    fields = _gen_fields(inst, is_data)
+    data_vars: Dict[Hashable, xr.DataArray]
+    data_vars = {f.name: _to_dataarray(v, f.type) for f, v in fields}
+
+    if len(data_vars) == 0:
+        raise ValueError("Could not find any Data-typed values.")
+
+    return data_vars
+
+
 def get_name(inst: DataClass) -> Optional[Hashable]:
     """Return Name-typed value for a DataArray or Dataset instance."""
     names = {f.name: v for f, v in _gen_fields(inst, is_name)}
