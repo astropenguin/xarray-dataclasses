@@ -1,17 +1,16 @@
-__all__ = ["DataArray"]
+__all__ = ["Attr", "Coord", "Data", "Name"]
 
 
 # standard library
-from dataclasses import Field, _DataclassParams
+from enum import auto, Enum
 from typing import (
     Any,
-    Callable,
-    Dict,
-    Hashable,
-    Mapping,
+    ForwardRef,
     Optional,
     Sequence,
     Tuple,
+    Type,
+    TypeVar,
     Union,
 )
 
@@ -19,138 +18,222 @@ from typing import (
 # third-party packages
 import numpy as np
 import xarray as xr
-from typing_extensions import Literal, Protocol
+from typing_extensions import (
+    Annotated,
+    Final,
+    get_args,
+    get_origin,
+    Literal,
+    Protocol,
+)
 
 
-# type hints (dataclasses)
-class DataClass(Protocol):
-    """Type hint for dataclasses."""
-
-    __dataclass_fields__: Dict[str, Field]
-    __dataclass_params__: _DataclassParams
+# constants (internal)
+NoneType: Final = type(None)
 
 
-DataClassDecorator = Callable[[type], DataClass]
+class Xarray(Enum):
+    """Identifiers for type hints of xarray-dataclasses."""
+
+    ATTR = auto()  #: Attribute member of DataArray or Dataset.
+    COORD = auto()  #: Coordinate member of DataArray or Dataset.
+    DATA = auto()  #: Data of DataArray or variable of Dataset.
+    NAME = auto()  #: Name of DataArray.
+
+    def annotates(self, type_: Any) -> bool:
+        """Check if type is annotated by the identifier."""
+        args = get_args(type_)
+        return len(args) > 1 and self in args[1:]
 
 
-# type hints (numpy)
-Dtype = Optional[Union[np.dtype, type, str]]
-Order = Literal["C", "F"]
-Shape = Union[Sequence[int], int]
+# type variables (internal)
+T = TypeVar("T", covariant=True)  #: Type variable for data types.
+D = TypeVar("D", covariant=True)  #: Type variable for dimensions.
 
 
-# type hints (xarray)
-Attrs = Optional[Mapping]
-Coords = Optional[Union[Sequence[Tuple], Mapping[Hashable, Any]]]
-Dims = Optional[Union[Sequence[Hashable], Hashable]]
-Name = Optional[Hashable]
+# type hints (internal)
+class ndarray(Protocol[T]):
+    """Protocol version of numpy.ndarray."""
+
+    __class__: Type[np.ndarray]  # type: ignore
 
 
-class DataArrayMeta(type):
-    """Metaclass of the type hint for xarray.DataArray."""
+class DataArray(Protocol[T, D]):
+    """Protocol version of xarray.DataArray."""
 
-    def __getitem__(cls, options: Tuple[Dims, Dtype]) -> "DataArrayMeta":
-        try:
-            dims, dtype = options
-        except (ValueError, TypeError):
-            raise ValueError("Both dims and dtype must be specified.")
-
-        if isinstance(dims, str):
-            dims = (dims,)
-
-        if dims is not None:
-            dims = tuple(dims)
-
-        if dtype is not None:
-            dtype = np.dtype(dtype)
-
-        if dims is None and dtype is None:
-            name = cls.__name__
-        else:
-            name = f"{cls.__name__}[{dims!s}, {dtype!s}]"
-
-        namespace = cls.__dict__.copy()
-        namespace.update(dims=dims, dtype=dtype)
-
-        return DataArrayMeta(name, (cls,), namespace)
-
-    def __instancecheck__(cls, inst: Any) -> bool:
-        if not isinstance(inst, xr.DataArray):
-            return False
-
-        if cls.dims is None:
-            is_equal_dims = True  # Do not evaluate.
-        else:
-            is_equal_dims = inst.dims == cls.dims
-
-        if cls.dtype is None:
-            is_equal_dtype = True  # Do not evaluate.
-        else:
-            is_equal_dtype = inst.dtype == cls.dtype
-
-        return is_equal_dims and is_equal_dtype
+    __class__: Type[xr.DataArray]  # type: ignore
 
 
-class DataArray(xr.DataArray, metaclass=DataArrayMeta):
-    """Type hint for xarray.DataArray.
+DataArrayLike = Union[DataArray[T, D], ndarray[T], Sequence[T], T]
 
-    As shown in the examples, it enables to specify fixed dimension(s)
-    (``dims``) and datatype (``dtype``) of ``xarray.DataArray``.
-    Users can use it to create a ``DataArray`` instance with fixed
-    dimension(s) and datatype in the same manner as ``xarray.DataArray``.
 
-    Args:
-        data: Values of a ``DataArray`` instance.
-            They are cast to ``dtype`` if it is specified in a hint.
-        coords: Coordinates of a ``DataArray`` instance.
-        dims: Dimension(s) of a ``DataArray`` instance.
-            It is ignored if ``dims`` is specified in a hint.
-        name: Name of a ``DataArray`` instance.
-        attrs: Attributes of a ``DataArray`` instance.
+# type hints (public)
+Attr = Annotated[T, Xarray.ATTR]
+"""Type hint for an attribute member of DataArray or Dataset.
 
-    Returns:
-        ``DataArray`` instance with fixed ``dims`` and ``dtype``.
+Examples:
+    ::
 
-    Examples:
-        To fix ``dims`` to be ``('x', 'y')``::
+        from typing import Literal
+        from xarray_dataclasses import dataarrayclass, Data, Attr
 
-            DataArray[('x', 'y'), None]
 
-        To fix ``dtype`` to be ``float``::
+        X = Literal["x"]
+        Y = Literal["y"]
 
-            DataArray[None, float]
 
-        To fix both ``dims`` and ``dtype``::
+        @dataarrayclass
+        class Image:
+            data: Data[float, tuple[X, Y]]
+            dpi: Attr[int] = 300
 
-            DataArray[('x', 'y'), float]
+"""
 
-        Not to fix neither ``dims`` nor ``dtype``::
+Coord = Annotated[DataArrayLike[T, D], Xarray.COORD]
+"""Type hint for a coordinate member of DataArray or Dataset.
 
-            DataArray # or DataArray[None, None]
+Examples:
+    ::
 
-        A type can be instantiated::
+        from typing import Literal
+        from xarray_dataclasses import dataarrayclass, Data, Coord
 
-            DataArray["x", float]([0, 1, 2])
 
-            # <xarray.DataArray (x: 3)>
-            # array([0., 1., 2.])
-            # Dimensions without coordinates: x
+        X = Literal["x"]
+        Y = Literal["y"]
 
-    """
 
-    __slots__: Tuple[str, ...] = ()  #: Do not allow to add any values.
-    dims: Dims = None  #: Dimensions to be fixed in DataArray instances.
-    dtype: Dtype = None  #: Datatype to be fixed in DataArray instances.
+        @dataarrayclass
+        class Image:
+            data: Data[float, tuple[X, Y]]
+            weight: Coord[float, tuple[X, Y]] = 1.0
+            x: Coord[int, X] = 0
+            y: Coord[int, Y] = 0
 
-    def __new__(
-        cls,
-        data: Any,
-        coords: Coords = None,
-        dims: Dims = None,
-        name: Name = None,
-        attrs: Attrs = None,
-    ) -> xr.DataArray:
-        """Create a DataArray instance with fixed dims and dtype."""
-        data = np.array(data, cls.dtype)
-        dims = dims if cls.dims is None else cls.dims
-        return xr.DataArray(data, coords, dims, name, attrs)
+"""
+
+Data = Annotated[DataArrayLike[T, D], Xarray.DATA]
+"""Type hint for data of DataArray or variable of Dataset.
+
+Examples:
+    ::
+
+        from typing import Literal
+        from xarray_dataclasses import dataarrayclass, Data
+
+
+        X = Literal["x"]
+        Y = Literal["y"]
+
+
+        @dataarrayclass
+        class Image:
+            data: Data[float, tuple[X, Y]]
+
+    ::
+
+        from typing import Literal
+        from xarray_dataclasses import datasetclass, Data
+
+
+        X = Literal["x"]
+        Y = Literal["y"]
+
+
+        @datasetclass
+        class Images:
+            red: Data[float, tuple[X, Y]]
+            green: Data[float, tuple[X, Y]]
+            blue: Data[float, tuple[X, Y]]
+
+"""
+
+Name = Annotated[T, Xarray.NAME]
+"""Type hint for a name of DataArray.
+
+Examples:
+    ::
+
+        from typing import Literal
+        from xarray_dataclasses import dataarrayclass, Data, Name
+
+
+        X = Literal["x"]
+        Y = Literal["y"]
+
+
+        @dataarrayclass
+        class Image:
+            data: Data[float, tuple[X, Y]]
+            name: Name[str] = "default"
+
+"""
+
+
+# runtime functions (internal)
+def is_attr(type_: Any) -> bool:
+    """Check if type is Attr[T]."""
+    return Xarray.ATTR.annotates(type_)
+
+
+def is_coord(type_: Any) -> bool:
+    """Check if type is Coord[T, D]."""
+    return Xarray.COORD.annotates(type_)
+
+
+def is_data(type_: Any) -> bool:
+    """Check if type is Data[T, D]."""
+    return Xarray.DATA.annotates(type_)
+
+
+def is_name(type_: Any) -> bool:
+    """Check if type is Name[T]."""
+    return Xarray.NAME.annotates(type_)
+
+
+def get_dims(type_: Type[DataArrayLike]) -> Tuple[str, ...]:
+    """Extract dimensions (dims) from DataArrayLike[T, D]."""
+    if get_origin(type_) is Annotated:
+        type_ = get_args(type_)[0]
+
+    dtype_, dims_ = get_args(get_args(type_)[0])
+
+    if get_origin(dims_) is not tuple:
+        dims_ = Tuple[dims_]
+
+    dims = []
+
+    for dim_ in get_args(dims_):
+        if dim_ == () or dim_ is NoneType:
+            continue
+
+        if isinstance(dim_, ForwardRef):
+            dims.append(dim_.__forward_arg__)
+            continue
+
+        if get_origin(dim_) is Literal:
+            dims.append(str(get_args(dim_)[0]))
+            continue
+
+        raise TypeError("Could not extract dimension.")
+
+    return tuple(dims)
+
+
+def get_dtype(type_: Type[DataArrayLike]) -> Optional[np.dtype]:
+    """Extract a data type (dtype) from DataArrayLike[T, D]."""
+    if get_origin(type_) is Annotated:
+        type_ = get_args(type_)[0]
+
+    dtype_, dims_ = get_args(get_args(type_)[0])
+
+    if dtype_ is Any:
+        return None
+
+    if isinstance(dtype_, ForwardRef):
+        return np.dtype(dtype_.__forward_arg__)
+
+    if get_origin(dtype_) is Literal:
+        return np.dtype(get_args(dtype_)[0])
+
+    return np.dtype(dtype_)
