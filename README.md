@@ -13,16 +13,22 @@ xarray-dataclasses is a third-party Python package which helps to create DataArr
 Here is an introduction code of what the package provides:
 
 ```python
-from xarray_dataclasses import DataArray, dataarrayclass
+from typing import Literal
+from xarray_dataclasses import Coord, Data, dataarrayclass
+
+
+X = Literal['x']
+Y = Literal['y']
 
 
 @dataarrayclass
 class Image:
     """DataArray class to represent images."""
 
-    data: DataArray[('x', 'y'), float]
-    x: DataArray['x', int] = 0
-    y: DataArray['y', int] = 0
+    data: Data[float, tuple[X, Y])
+    x: Coord[int, X] = 0
+    y: Coord[int, Y] = 0
+
 ```
 
 The key features are:
