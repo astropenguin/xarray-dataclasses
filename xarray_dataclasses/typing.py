@@ -6,7 +6,6 @@ from enum import auto, Enum
 from typing import (
     Any,
     ForwardRef,
-    Hashable,
     Optional,
     Sequence,
     Tuple,
