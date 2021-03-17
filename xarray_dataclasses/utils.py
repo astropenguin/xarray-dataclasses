@@ -5,7 +5,11 @@ __all__ = ["copy_func", "copy_wraps"]
 from copy import copy, deepcopy
 from functools import wraps, WRAPPER_ASSIGNMENTS, WRAPPER_UPDATES
 from types import FunctionType
-from typing import Callable, Sequence
+from typing import Callable, Sequence, TypeVar
+
+
+# type variables (internal)
+T = TypeVar("T")
 
 
 # utility functions (internal)
@@ -29,13 +33,7 @@ def copy_func(func: FunctionType, deep: bool = False) -> FunctionType:
     )
 
     # mutable attributes are copied by the given method
-    copier: Callable
-
-    if deep:
-        copier = deepcopy
-    else:
-        copier = copy
-
+    copier = deepcopy if deep else copy
     copied.__annotations__ = copier(func.__annotations__)
     copied.__dict__ = copier(func.__dict__)
     copied.__kwdefaults__ = copier(func.__kwdefaults__)
@@ -53,6 +51,6 @@ def copy_wraps(
     wrapped: FunctionType,
     assigned: Sequence[str] = WRAPPER_ASSIGNMENTS,
     updated: Sequence[str] = WRAPPER_UPDATES,
-) -> Callable:
+) -> Callable[[T], T]:
     """Same as functools.wraps but uses a copied function."""
     return wraps(copy_func(wrapped), assigned, updated)

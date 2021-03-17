@@ -1,5 +1,5 @@
 # standard library
-from dataclasses import Field, MISSING
+from dataclasses import MISSING
 from typing import (
     Any,
     Callable,
@@ -35,19 +35,28 @@ from .typing import (
 
 # type variables (internal)
 T = TypeVar("T")
+D = TypeVar("D")
 
 
 # type hints (internal)
-ClassDecorator = Union[Type[T], Callable[[type], Type[T]]]
+class Field(Protocol[T]):
+    """Protocol version of dataclasses.Field."""
+
+    name: str
+    type: Type[T]
 
 
 class DataClass(Protocol):
     """Type hint for dataclass instance."""
 
-    __dataclass_fields__: Dict[str, Field]
+    __dataclass_fields__: Dict[str, Field[Any]]
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         ...
+
+
+ClassDecorator = Union[Type[T], Callable[[type], Type[T]]]
+FieldValue = Tuple[Field[DataArrayLike[T, D]], Any]
 
 
 # runtime function (internal)
@@ -131,7 +140,7 @@ def get_name(inst: DataClass) -> Optional[Hashable]:
 def _gen_fields(
     obj: Union[DataClass, Type[DataClass]],
     type_filter: Optional[Callable[..., bool]] = None,
-) -> Iterable[Tuple[Field, Any]]:
+) -> Iterable[FieldValue[T, D]]:
     """Generate field-value pairs from a dataclass instance.
 
     Args:
@@ -149,8 +158,8 @@ def _gen_fields(
 
 
 def _to_dataarray(
-    data: DataArrayLike,
-    type_: Type[DataArrayLike],
+    data: DataArrayLike[T, D],
+    type_: Type[DataArrayLike[T, D]],
     sizes: Optional[Mapping[Hashable, int]] = None,
 ) -> xr.DataArray:
     """Create a DataArray instance from DataArrayLike object.

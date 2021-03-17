@@ -5,8 +5,10 @@ __all__ = ["Attr", "Coord", "Data", "Name"]
 from enum import auto, Enum
 from typing import (
     Any,
+    Callable,
+    cast,
     ForwardRef,
-    Optional,
+    List,
     Sequence,
     Tuple,
     Type,
@@ -17,7 +19,6 @@ from typing import (
 
 # third-party packages
 import numpy as np
-import xarray as xr
 from typing_extensions import (
     Annotated,
     Final,
@@ -29,9 +30,6 @@ from typing_extensions import (
 
 
 # constants (internal)
-NoneType: Final = type(None)
-
-
 class Xarray(Enum):
     """Identifiers for type hints of xarray-dataclasses."""
 
@@ -47,24 +45,26 @@ class Xarray(Enum):
 
 
 # type variables (internal)
-T = TypeVar("T", covariant=True)  #: Type variable for data types.
-D = TypeVar("D", covariant=True)  #: Type variable for dimensions.
+T = TypeVar("T")
+D = TypeVar("D")
 
 
 # type hints (internal)
 class ndarray(Protocol[T]):
     """Protocol version of numpy.ndarray."""
 
-    __class__: Type[np.ndarray]  # type: ignore
+    __array__: Callable[..., np.ndarray]
 
 
 class DataArray(Protocol[T, D]):
     """Protocol version of xarray.DataArray."""
 
-    __class__: Type[xr.DataArray]  # type: ignore
+    __array__: Callable[..., np.ndarray]
 
 
 DataArrayLike = Union[DataArray[T, D], ndarray[T], Sequence[T], T]
+DTypeLike = Union[np.dtype, type, str, None]
+NoneType: Final[type] = type(None)
 
 
 # type hints (public)
@@ -191,19 +191,21 @@ def is_name(type_: Any) -> bool:
     return Xarray.NAME.annotates(type_)
 
 
-def get_dims(type_: Type[DataArrayLike]) -> Tuple[str, ...]:
+def get_dims(type_: Type[DataArrayLike[T, D]]) -> Tuple[str, ...]:
     """Extract dimensions (dims) from DataArrayLike[T, D]."""
     if get_origin(type_) is Annotated:
         type_ = get_args(type_)[0]
 
-    dtype_, dims_ = get_args(get_args(type_)[0])
+    dims_ = get_args(get_args(type_)[0])[1]
 
-    if get_origin(dims_) is not tuple:
-        dims_ = Tuple[dims_]
+    if get_origin(dims_) is tuple:
+        dims_ = get_args(dims_)
+    else:
+        dims_ = (dims_,)
 
-    dims = []
+    dims: List[str] = []
 
-    for dim_ in get_args(dims_):
+    for dim_ in dims_:
         if dim_ == () or dim_ is NoneType:
             continue
 
@@ -220,20 +222,20 @@ def get_dims(type_: Type[DataArrayLike]) -> Tuple[str, ...]:
     return tuple(dims)
 
 
-def get_dtype(type_: Type[DataArrayLike]) -> Optional[np.dtype]:
+def get_dtype(type_: Type[DataArrayLike[T, D]]) -> DTypeLike:
     """Extract a data type (dtype) from DataArrayLike[T, D]."""
     if get_origin(type_) is Annotated:
         type_ = get_args(type_)[0]
 
-    dtype_, dims_ = get_args(get_args(type_)[0])
+    dtype_ = get_args(get_args(type_)[0])[0]
 
     if dtype_ is Any:
         return None
 
     if isinstance(dtype_, ForwardRef):
-        return np.dtype(dtype_.__forward_arg__)
+        return dtype_.__forward_arg__
 
     if get_origin(dtype_) is Literal:
-        return np.dtype(get_args(dtype_)[0])
+        return get_args(dtype_)[0]
 
-    return np.dtype(dtype_)
+    return cast(type, dtype_)
