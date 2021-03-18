@@ -1,5 +1,5 @@
 # standard library
-from dataclasses import MISSING
+from dataclasses import Field, MISSING
 from typing import (
     Any,
     Callable,
@@ -39,24 +39,15 @@ D = TypeVar("D")
 
 
 # type hints (internal)
-class Field(Protocol[T]):
-    """Protocol version of dataclasses.Field."""
-
-    name: str
-    type: Type[T]
+FieldDict = Dict[str, Field]
+FieldValue = Tuple[Field, Any]
 
 
 class DataClass(Protocol):
     """Type hint for dataclass instance."""
 
-    __dataclass_fields__: Dict[str, Field[Any]]
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        ...
-
-
-ClassDecorator = Union[Type[T], Callable[[type], Type[T]]]
-FieldValue = Tuple[Field[DataArrayLike[T, D]], Any]
+    __init__: Callable[..., None]
+    __dataclass_fields__: FieldDict
 
 
 # runtime function (internal)
@@ -140,7 +131,7 @@ def get_name(inst: DataClass) -> Optional[Hashable]:
 def _gen_fields(
     obj: Union[DataClass, Type[DataClass]],
     type_filter: Optional[Callable[..., bool]] = None,
-) -> Iterable[FieldValue[T, D]]:
+) -> Iterable[FieldValue]:
     """Generate field-value pairs from a dataclass instance.
 
     Args:
