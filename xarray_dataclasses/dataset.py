@@ -15,12 +15,8 @@ import xarray as xr
 
 
 # submodules
-from .common import (
-    DataClass,
-    get_attrs,
-    get_coords,
-    get_data_vars,
-)
+from .common import get_attrs, get_coords, get_data_vars
+from .typing import DataClass
 from .utils import copy_wraps, extend_class
 
 

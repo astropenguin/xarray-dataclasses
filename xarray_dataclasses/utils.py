@@ -8,7 +8,7 @@ from types import FunctionType
 from typing import Callable, Sequence, TypeVar
 
 
-# type variables (internal)
+# type hints (internal)
 T = TypeVar("T")
 
 

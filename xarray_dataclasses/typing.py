@@ -2,11 +2,13 @@ __all__ = ["Attr", "Coord", "Data", "Name"]
 
 
 # standard library
+from dataclasses import Field
 from enum import auto, Enum
 from typing import (
     Any,
     Callable,
     cast,
+    Dict,
     ForwardRef,
     List,
     Sequence,
@@ -44,12 +46,15 @@ class Xarray(Enum):
         return len(args) > 1 and self in args[1:]
 
 
-# type variables (internal)
+# type hints (internal)
 T = TypeVar("T")
 D = TypeVar("D")
 
+DTypeLike = Union[np.dtype, type, str, None]
+FieldDict = Dict[str, Field]
+NoneType: Final[type] = type(None)
 
-# type hints (internal)
+
 class ndarray(Protocol[T]):
     """Protocol version of numpy.ndarray."""
 
@@ -62,9 +67,14 @@ class DataArray(Protocol[T, D]):
     __array__: Callable[..., np.ndarray]
 
 
+class DataClass(Protocol):
+    """Type hint for dataclass instance."""
+
+    __init__: Callable[..., None]
+    __dataclass_fields__: FieldDict
+
+
 DataArrayLike = Union[DataArray[T, D], ndarray[T], Sequence[T], T]
-DTypeLike = Union[np.dtype, type, str, None]
-NoneType: Final[type] = type(None)
 
 
 # type hints (public)

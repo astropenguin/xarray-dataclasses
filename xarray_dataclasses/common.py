@@ -18,12 +18,12 @@ from typing import (
 # third-party packages
 import numpy as np
 import xarray as xr
-from typing_extensions import Protocol
 
 
 # submodules
 from .typing import (
     DataArrayLike,
+    DataClass,
     get_dims,
     get_dtype,
     is_attr,
@@ -33,21 +33,11 @@ from .typing import (
 )
 
 
-# type variables (internal)
+# type hints (internal)
 T = TypeVar("T")
 D = TypeVar("D")
 
-
-# type hints (internal)
-FieldDict = Dict[str, Field]
 FieldValue = Tuple[Field, Any]
-
-
-class DataClass(Protocol):
-    """Type hint for dataclass instance."""
-
-    __init__: Callable[..., None]
-    __dataclass_fields__: FieldDict
 
 
 # runtime function (internal)

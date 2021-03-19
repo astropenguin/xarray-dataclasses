@@ -17,14 +17,8 @@ from typing_extensions import Literal
 
 
 # submodules
-from .common import (
-    DataClass,
-    get_attrs,
-    get_coords,
-    get_data,
-    get_data_name,
-    get_name,
-)
+from .common import get_attrs, get_coords, get_data, get_data_name, get_name
+from .typing import DataClass
 from .utils import copy_wraps, extend_class
 
 
