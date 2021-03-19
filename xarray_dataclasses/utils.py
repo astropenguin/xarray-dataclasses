@@ -1,4 +1,4 @@
-__all__ = ["copy_func", "copy_wraps"]
+__all__ = ["copy_func", "copy_wraps", "extend_class"]
 
 
 # standard library
@@ -54,3 +54,8 @@ def copy_wraps(
 ) -> Callable[[T], T]:
     """Same as functools.wraps but uses a copied function."""
     return wraps(copy_func(wrapped), assigned, updated)
+
+
+def extend_class(cls: type, *mixins: type) -> type:
+    """Extend a class with mix-in classes."""
+    return type(cls.__name__, mixins, cls.__dict__.copy())  # type: ignore
