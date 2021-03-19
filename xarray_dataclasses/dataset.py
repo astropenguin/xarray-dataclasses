@@ -82,17 +82,10 @@ class DatasetMixin:
         """Update new() based on the dataclass definition."""
         super().__init_subclass__(**kwargs)
 
-        dataclass(
-            init=True,
-            repr=False,
-            eq=False,
-            order=False,
-            unsafe_hash=False,
-            frozen=False,
-        )(cls)
+        # temporary class to get __init__ created by dataclass
+        Temp = type("Temp", (), cls.__dict__.copy())
+        init = cast(FunctionType, dataclass(Temp).__init__)
+        init.__annotations__["return"] = xr.Dataset
 
-        init = cast(FunctionType, cls.__init__)
         new = copy_wraps(init)(cls.new.__func__)  # type: ignore
-        new.__annotations__["return"] = xr.Dataset
-        new.__doc__ = "Create a Dataset instance."
         cls.new = classmethod(new)  # type: ignore
