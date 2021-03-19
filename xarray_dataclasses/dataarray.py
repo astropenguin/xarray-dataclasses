@@ -190,8 +190,10 @@ class DataArrayMixin:
         data = np.full(shape, fill_value, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
 
-    def __init_subclass__(cls) -> None:
+    def __init_subclass__(cls, **kwargs: Any) -> None:
         """Update new() based on the dataclass definition."""
+        super().__init_subclass__(**kwargs)
+
         dataclass(
             init=True,
             repr=False,

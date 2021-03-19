@@ -82,8 +82,10 @@ class DatasetMixin:
         cls = cast(Type[DataClass], cls)
         return asdataset(cls(*args, **kwargs))
 
-    def __init_subclass__(cls) -> None:
+    def __init_subclass__(cls, **kwargs: Any) -> None:
         """Update new() based on the dataclass definition."""
+        super().__init_subclass__(**kwargs)
+
         dataclass(
             init=True,
             repr=False,
