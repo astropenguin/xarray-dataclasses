@@ -56,6 +56,11 @@ def copy_wraps(
     return wraps(copy_func(wrapped), assigned, updated)
 
 
-def extend_class(cls: type, *mixins: type) -> type:
-    """Extend a class with mix-in classes."""
-    return type(cls.__name__, mixins, cls.__dict__.copy())  # type: ignore
+def extend_class(cls: type, mixin: type) -> type:
+    """Extend a class with a mix-in class."""
+    if cls.__bases__ == (object,):
+        bases = (mixin,)
+    else:
+        bases = (*cls.__bases__, mixin)
+
+    return type(cls.__name__, bases, cls.__dict__.copy())
