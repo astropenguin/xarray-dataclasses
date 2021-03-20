@@ -27,9 +27,9 @@ Y = Literal[DIMS[1]]
 # dataclasses
 @dataclass
 class Image(DataArrayMixin):
-    data: Data[float, Tuple[X, Y]]
-    x: Coord[int, X] = 0
-    y: Coord[int, Y] = 0
+    data: Data[Tuple[X, Y], float]
+    x: Coord[X, int] = 0
+    y: Coord[Y, int] = 0
     dpi: Attr[int] = 100
     name: Name[str] = "image"
 

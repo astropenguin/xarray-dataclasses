@@ -27,16 +27,16 @@ Y = Literal[DIMS[1]]
 # dataclasses
 @dataclass
 class Image(DataArrayMixin):
-    data: Data[float, Tuple[X, Y]]
+    data: Data[Tuple[X, Y], float]
 
 
 @dataclass
 class RGBImage(DatasetMixin):
-    red: Data[float, Tuple[X, Y]]
-    green: Data[float, Tuple[X, Y]]
-    blue: Data[float, Tuple[X, Y]]
-    x: Coord[int, X] = 0
-    y: Coord[int, Y] = 0
+    red: Data[Tuple[X, Y], float]
+    green: Data[Tuple[X, Y], float]
+    blue: Data[Tuple[X, Y], float]
+    x: Coord[X, int] = 0
+    y: Coord[Y, int] = 0
     dpi: Attr[int] = 100
 
 
