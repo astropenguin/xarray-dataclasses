@@ -40,11 +40,6 @@ ones = Image.ones((2, 2), x=[0, 1], y=[0, 1])
 - 100% compatible with [the Python's native dataclass].
 - 100% compatible with static type check by [Pyright].
 
-### Requirements
-
-- **Python:** 3.7, 3.8, or 3.9 (tested by the author)
-- **Dependencies:** see [pyproject.toml](pyproject.toml)
-
 ### Installation
 
 ```shell
