@@ -20,9 +20,9 @@ from xarray_dataclasses import Coord, Data, dataarrayclass
 class Image:
     """DataArray that represents an image."""
 
-    data: Data[tuple["x", "y"], float]
-    x: Coord["x", int] = 0
-    y: Coord["y", int] = 0
+    data: Data[tuple['x', 'y'], float]
+    x: Coord['x', int] = 0
+    y: Coord['y', int] = 0
 
 
 # create a DataArray instance
