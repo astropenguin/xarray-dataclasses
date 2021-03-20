@@ -1,4 +1,5 @@
 # flake8: noqa
+# type: ignore
 __author__ = "Akio Taniguchi"
 __version__ = "0.2.0"
 
@@ -15,7 +16,3 @@ from . import utils
 from .dataarray import *
 from .dataset import *
 from .typing import *
-
-
-# for sphinx docs
-__all__ = dir()
