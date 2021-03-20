@@ -7,6 +7,7 @@
 
 xarray extension for DataArray and Dataset classes
 
+
 ## TL;DR
 
 xarray-dataclasses is a Python package for creating DataArray and Dataset classes in the same manner as [the Python's native dataclass].
@@ -45,6 +46,7 @@ ones = Image.ones((2, 2), x=[0, 1], y=[0, 1])
 ```shell
 $ pip install xarray-dataclasses
 ```
+
 
 ## Introduction
 
@@ -263,6 +265,6 @@ Attributes:
 
 
 <!-- References -->
-[the Python's native dataclass]: https://docs.python.org/3/library/dataclasses.html
 [Pyright]: https://github.com/microsoft/pyright
+[the Python's native dataclass]: https://docs.python.org/3/library/dataclasses.html
 [xarray]: https://xarray.pydata.org/en/stable/index.html
