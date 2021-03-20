@@ -115,3 +115,4 @@ Finally, the class decorator, `@dataarrayclass`, converts a class to [the Python
 <!-- References -->
 [the Python's native dataclass]: https://docs.python.org/3/library/dataclasses.html
 [Pyright]: https://github.com/microsoft/pyright
+[xarray]: https://xarray.pydata.org/en/stable/index.html
