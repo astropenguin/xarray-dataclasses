@@ -122,10 +122,10 @@ The extension of the specs is then easy by class inheritance.
 xarray-dataclasses uses [the Python's native dataclass] (please learn how to use it before proceeding).
 Data (or data variables), coordinates, attribute members, and name of a DataArray or Dataset instance are defined as dataclass fields with the following dedicated type hints.
 
-#### `Data[<dims>, <dtype>]`
+### Data
 
-`Data` specifies the field whose value will become the data of a DataArray instance or a member of the data variables of a Dataset instance.
-It accepts two type variables, `<dims>` and `<dtype>`.
+`Data[<dims>, <dtype>]` specifies the field whose value will become the data of a DataArray instance or a member of the data variables of a Dataset instance.
+It accepts two type variables, `<dims>` and `<dtype>`, for fixing dimensions and data type, respectively.
 For example:
 
 | Type hint | Inferred dims | Inferred dtype |
@@ -137,15 +137,15 @@ For example:
 
 Note: for Python 3.7 and 3.8, use `typing.Tuple[...]` instead of `tuple[...]`.
 
-#### `Coord[<dims>, <dtype>]`
+### Coord
 
-`Coord` specifies the field whose value will become a coordinate of a DataArray or Dataset instance.
-Similar to `Data`, it accepts two type variables, `<dims>` and `<dtype>`.
+`Coord[<dims>, <dtypes>]` specifies the field whose value will become a coordinate of a DataArray or Dataset instance.
+Similar to `Data`, it accepts two type variables, `<dims>` and `<dtype>`, for fixing dimensions and data type, respectively.
 
-#### `Attr[<type>]`
+### Attr
 
-`Attr` specifies the field whose value will become a member of the attributes (attrs) of a DataArray or Dataset instance.
-It accepts a type variable, `<type>`.
+`Attr[<type>]` specifies the field whose value will become a member of the attributes (attrs) of a DataArray or Dataset instance.
+It accepts a type variable, `<type>`, for specifying the type of the value.
 For example:
 
 ```python
@@ -154,10 +154,10 @@ class Specs:
     units: Attr[str] = 'm/s'  # equivalent to str
 ```
 
-### `Name[<type>]`
+### Name
 
-`Name` specifies the field whose value will become the name of a DataArray.
-It accepts a type variable, `<type>`.
+`Name[<type>]` specifies the field whose value will become the name of a DataArray.
+It accepts a type variable, `<type>`, for specifying the type of the value.
 For example:
 
 ```python
