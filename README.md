@@ -25,9 +25,9 @@ Y = Literal['y']
 class Image:
     """DataArray class to represent images."""
 
-    data: Data[float, tuple[X, Y])
-    x: Coord[int, X] = 0
-    y: Coord[int, Y] = 0
+    data: Data[tuple[X, Y], float)
+    x: Coord[X, int] = 0
+    y: Coord[Y, int] = 0
 
 ```
 

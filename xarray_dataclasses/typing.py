@@ -94,7 +94,7 @@ Examples:
 
         @dataarrayclass
         class Image:
-            data: Data[float, tuple[X, Y]]
+            data: Data[tuple[X, Y], float]
             dpi: Attr[int] = 300
 
 """
@@ -115,10 +115,10 @@ Examples:
 
         @dataarrayclass
         class Image:
-            data: Data[float, tuple[X, Y]]
-            weight: Coord[float, tuple[X, Y]] = 1.0
-            x: Coord[int, X] = 0
-            y: Coord[int, Y] = 0
+            data: Data[tuple[X, Y], float]
+            weight: Coord[tuple[X, Y], float] = 1.0
+            x: Coord[X, int] = 0
+            y: Coord[Y, int] = 0
 
 """
 
@@ -138,7 +138,7 @@ Examples:
 
         @dataarrayclass
         class Image:
-            data: Data[float, tuple[X, Y]]
+            data: Data[tuple[X, Y], float]
 
     ::
 
@@ -152,9 +152,9 @@ Examples:
 
         @datasetclass
         class Images:
-            red: Data[float, tuple[X, Y]]
-            green: Data[float, tuple[X, Y]]
-            blue: Data[float, tuple[X, Y]]
+            red: Data[tuple[X, Y], float]
+            green: Data[tuple[X, Y], float]
+            blue: Data[tuple[X, Y], float]
 
 """
 
@@ -174,7 +174,7 @@ Examples:
 
         @dataarrayclass
         class Image:
-            data: Data[float, tuple[X, Y]]
+            data: Data[tuple[X, Y], float]
             name: Name[str] = "default"
 
 """
