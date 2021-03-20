@@ -1,0 +1,7 @@
+{
+    "strict": [
+        "docs",
+        "tests",
+        "xarray_dataclasses",
+    ]
+}
