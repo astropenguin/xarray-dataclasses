@@ -18,12 +18,12 @@ from typing import (
 # third-party packages
 import numpy as np
 import xarray as xr
-from typing_extensions import Protocol
 
 
 # submodules
 from .typing import (
     DataArrayLike,
+    DataClass,
     get_dims,
     get_dtype,
     is_attr,
@@ -33,21 +33,11 @@ from .typing import (
 )
 
 
-# type variables (internal)
-T = TypeVar("T")
-
-
 # type hints (internal)
-ClassDecorator = Union[Type[T], Callable[[type], Type[T]]]
+T = TypeVar("T")
+D = TypeVar("D")
 
-
-class DataClass(Protocol):
-    """Type hint for dataclass instance."""
-
-    __dataclass_fields__: Dict[str, Field]
-
-    def __init__(self, *args, **kwargs) -> None:
-        ...
+FieldValue = Tuple[Field, Any]
 
 
 # runtime function (internal)
@@ -89,19 +79,6 @@ def get_data(inst: DataClass) -> xr.DataArray:
     return next(iter(data.values()))
 
 
-def get_name(inst: DataClass) -> Optional[Hashable]:
-    """Return Name-typed value for a DataArray or Dataset instance."""
-    names = {f.name: v for f, v in _gen_fields(inst, is_name)}
-
-    if len(names) > 1:
-        raise ValueError("Unique Name-typed value is allowed.")
-
-    if len(names) == 0:
-        return None
-
-    return next(iter(names.values()))
-
-
 def get_data_name(cls: Type[DataClass]) -> str:
     """Return name of Data-typed field for a DataArray instance."""
     fields = dict(_gen_fields(cls, is_data))
@@ -115,11 +92,36 @@ def get_data_name(cls: Type[DataClass]) -> str:
     return next(iter(fields)).name
 
 
+def get_data_vars(inst: DataClass) -> Dict[Hashable, xr.DataArray]:
+    """Return Data-typed values for a Dataset instance."""
+    fields = _gen_fields(inst, is_data)
+    data_vars: Dict[Hashable, xr.DataArray]
+    data_vars = {f.name: _to_dataarray(v, f.type) for f, v in fields}
+
+    if len(data_vars) == 0:
+        raise ValueError("Could not find any Data-typed values.")
+
+    return data_vars
+
+
+def get_name(inst: DataClass) -> Optional[Hashable]:
+    """Return Name-typed value for a DataArray instance."""
+    names = {f.name: v for f, v in _gen_fields(inst, is_name)}
+
+    if len(names) > 1:
+        raise ValueError("Unique Name-typed value is allowed.")
+
+    if len(names) == 0:
+        return None
+
+    return next(iter(names.values()))
+
+
 # helper functions (internal)
 def _gen_fields(
     obj: Union[DataClass, Type[DataClass]],
     type_filter: Optional[Callable[..., bool]] = None,
-) -> Iterable[Tuple[Field, Any]]:
+) -> Iterable[FieldValue]:
     """Generate field-value pairs from a dataclass instance.
 
     Args:
@@ -137,8 +139,8 @@ def _gen_fields(
 
 
 def _to_dataarray(
-    data: DataArrayLike,
-    type_: Type[DataArrayLike],
+    data: DataArrayLike[T, D],
+    type_: Type[DataArrayLike[T, D]],
     sizes: Optional[Mapping[Hashable, int]] = None,
 ) -> xr.DataArray:
     """Create a DataArray instance from DataArrayLike object.

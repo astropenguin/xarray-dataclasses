@@ -11,8 +11,8 @@ from typing_extensions import Literal
 
 # submodules
 from xarray_dataclasses.dataarray import DataArrayMixin
-from xarray_dataclasses.typing import Attr, Coord, Data, Name
-
+from xarray_dataclasses.dataset import DatasetMixin
+from xarray_dataclasses.typing import Attr, Coord, Data
 
 # constants
 DIMS = "x", "y"
@@ -28,33 +28,41 @@ Y = Literal[DIMS[1]]
 @dataclass
 class Image(DataArrayMixin):
     data: Data[float, Tuple[X, Y]]
+
+
+@dataclass
+class RGBImage(DatasetMixin):
+    red: Data[float, Tuple[X, Y]]
+    green: Data[float, Tuple[X, Y]]
+    blue: Data[float, Tuple[X, Y]]
     x: Coord[int, X] = 0
     y: Coord[int, Y] = 0
     dpi: Attr[int] = 100
-    name: Name[str] = "image"
 
 
 # test datasets
-created = Image.ones(SHAPE)
-expected = xr.DataArray(
-    np.ones(SHAPE, float),
-    dims=DIMS,
+created = RGBImage.new(
+    Image.ones(SHAPE),
+    Image.ones(SHAPE),
+    Image.ones(SHAPE),
+)
+expected = xr.Dataset(
+    data_vars={
+        "red": xr.DataArray(np.ones(SHAPE), dims=DIMS),
+        "green": xr.DataArray(np.ones(SHAPE), dims=DIMS),
+        "blue": xr.DataArray(np.ones(SHAPE), dims=DIMS),
+    },
     coords={
         "x": ("x", np.zeros(SHAPE[0])),
         "y": ("y", np.zeros(SHAPE[1])),
     },
     attrs={"dpi": 100},
-    name="image",
 )
 
 
 # test functions
-def test_data() -> None:
+def test_data_vars() -> None:
     assert (created == expected).all()  # type: ignore
-
-
-def test_dtype() -> None:
-    assert created.dtype == expected.dtype  # type: ignore
 
 
 def test_dims() -> None:
@@ -63,7 +71,3 @@ def test_dims() -> None:
 
 def test_attrs() -> None:
     assert created.attrs == expected.attrs
-
-
-def test_name() -> None:
-    assert created.name == expected.name

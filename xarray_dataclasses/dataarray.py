@@ -1,28 +1,30 @@
+from __future__ import annotations
+
+
 __all__ = ["asdataarray", "dataarrayclass"]
 
 
 # standard library
 from dataclasses import dataclass
-from typing import Any, Optional, Sequence, Type, Union
+from functools import wraps
+from types import FunctionType
+from typing import Any, Callable, cast, Optional, Sequence, Type, Union
 
 
 # third-party packages
 import numpy as np
 import xarray as xr
-from typing_extensions import Literal, Protocol
+from typing_extensions import Literal
 
 
 # submodules
-from .common import (
-    ClassDecorator,
-    DataClass,
-    get_attrs,
-    get_coords,
-    get_data,
-    get_name,
-    get_data_name,
-)
-from .utils import copy_wraps
+from .common import get_attrs, get_coords, get_data, get_data_name, get_name
+from .typing import DataClass
+from .utils import copy_class, extend_class
+
+
+# constants
+TEMP_CLASS_PREFIX: str = "__Copied"
 
 
 # type hints (internal)
@@ -30,19 +32,9 @@ Order = Literal["C", "F"]
 Shape = Union[Sequence[int], int]
 
 
-class DataArrayClass(DataClass, Protocol):
-    """Type hint for a DataArray-class instance."""
-
-    new: classmethod
-    empty: classmethod
-    zeros: classmethod
-    ones: classmethod
-    full: classmethod
-
-
 # runtime functions (public)
-def asdataarray(inst: DataArrayClass) -> xr.DataArray:
-    """Create a DataArray instance from a DataArray-class instance."""
+def asdataarray(inst: DataClass) -> xr.DataArray:
+    """Convert a DataArray-class instance to DataArray one."""
     dataarray = get_data(inst)
     coords = get_coords(inst, dataarray)
 
@@ -62,144 +54,163 @@ def dataarrayclass(
     order: bool = False,
     unsafe_hash: bool = False,
     frozen: bool = False,
-) -> ClassDecorator[DataArrayClass]:
+    shorthands: bool = True,
+) -> Union[Type[DataClass], Callable[[type], Type[DataClass]]]:
     """Class decorator to create a DataArray class."""
 
-    set_options = dataclass(
-        init=init,
-        repr=repr,
-        eq=eq,
-        order=order,
-        unsafe_hash=unsafe_hash,
-        frozen=frozen,
-    )
+    def to_dataclass(cls: type) -> Type[DataClass]:
+        if shorthands:
+            cls = extend_class(cls, DataArrayMixin)
 
-    def to_dataclass(cls: type) -> Type[DataArrayClass]:
-        set_options(cls)
-        set_shorthands(cls)
-        return cls
+        return dataclass(
+            init=init,
+            repr=repr,
+            eq=eq,
+            order=order,
+            unsafe_hash=unsafe_hash,
+            frozen=frozen,
+        )(cls)
 
-    if cls is not None:
-        return to_dataclass(cls)
-    else:
+    if cls is None:
         return to_dataclass
+    else:
+        return to_dataclass(cls)
 
 
-# runtime functions (internal)
-def set_shorthands(cls: Type[DataArrayClass]) -> None:
-    """Set shorthand methods to a DataArray class."""
+# mix-in class (internal)
+class DataArrayMixin:
+    """Mix-in class that provides shorthand methods."""
 
-    @copy_wraps(cls.__init__)  # type: ignore
-    def new(cls, *args, **kwargs):
-        return asdataarray(cls(*args, **kwargs))
+    @classmethod
+    def new(
+        cls,
+        *args: Any,
+        **kwargs: Any,
+    ) -> xr.DataArray:
+        """Create a DataArray instance."""
+        raise NotImplementedError
 
-    new.__annotations__["return"] = xr.DataArray
-    new.__doc__ = (
-        "Create a DataArray instance. This is a shorthand for "
-        f"``asdataarray({cls.__name__}(*args, **kwargs))``."
-    )
+    @classmethod
+    def empty(
+        cls,
+        shape: Shape,
+        order: Order = "C",
+        **kwargs: Any,
+    ) -> xr.DataArray:
+        """Create a DataArray instance without initializing data.
 
-    cls.new = classmethod(new)
-    cls.empty = classmethod(empty)
-    cls.zeros = classmethod(zeros)
-    cls.ones = classmethod(ones)
-    cls.full = classmethod(full)
+        Args:
+            shape: Shape of the new DataArray instance.
+            order: Whether to store data in row-major (C-style)
+                or column-major (Fortran-style) order in memory.
+            kwargs: Args of the DataArray class except for data.
 
+        Returns:
+            DataArray instance filled without initializing data.
 
-# helper functions (internal)
-def empty(
-    cls: Type[DataArrayClass],
-    shape: Shape,
-    order: Order = "C",
-    **kwargs,
-) -> xr.DataArray:
-    """Create a DataArray instance without initializing data.
+        """
+        cls = cast(Type[DataClass], cls)
+        name = get_data_name(cls)
+        data = np.empty(shape, order=order)
+        return asdataarray(cls(**{name: data}, **kwargs))
 
-    Args:
-        cls: DataArray class.
-        shape: Shape of the new DataArray instance.
-        order: Whether to store data in row-major (C-style)
-            or column-major (Fortran-style) order in memory.
-        kwargs: Args of the DataArray class except for data.
+    @classmethod
+    def zeros(
+        cls,
+        shape: Shape,
+        order: Order = "C",
+        **kwargs: Any,
+    ) -> xr.DataArray:
+        """Create a DataArray instance filled with zeros.
 
-    Returns:
-        DataArray instance filled without initializing data.
+        Args:
+            shape: Shape of the new DataArray instance.
+            order: Whether to store data in row-major (C-style)
+                or column-major (Fortran-style) order in memory.
+            kwargs: Args of the DataArray class except for data.
 
-    """
-    name = get_data_name(cls)
-    data = np.empty(shape, order=order)
-    return asdataarray(cls(**{name: data}, **kwargs))
+        Returns:
+            DataArray instance filled with zeros.
 
+        """
+        cls = cast(Type[DataClass], cls)
+        name = get_data_name(cls)
+        data = np.zeros(shape, order=order)
+        return asdataarray(cls(**{name: data}, **kwargs))
 
-def zeros(
-    cls: Type[DataArrayClass],
-    shape: Shape,
-    order: Order = "C",
-    **kwargs,
-) -> xr.DataArray:
-    """Create a DataArray instance filled with zeros.
+    @classmethod
+    def ones(
+        cls,
+        shape: Shape,
+        order: Order = "C",
+        **kwargs: Any,
+    ) -> xr.DataArray:
+        """Create a DataArray instance filled with ones.
 
-    Args:
-        cls: DataArray class.
-        shape: Shape of the new DataArray instance.
-        order: Whether to store data in row-major (C-style)
-            or column-major (Fortran-style) order in memory.
-        kwargs: Args of the DataArray class except for data.
+        Args:
+            shape: Shape of the new DataArray instance.
+            order: Whether to store data in row-major (C-style)
+                or column-major (Fortran-style) order in memory.
+            kwargs: Args of the DataArray class except for data.
 
-    Returns:
-        DataArray instance filled with zeros.
+        Returns:
+            DataArray instance filled with ones.
 
-    """
-    name = get_data_name(cls)
-    data = np.zeros(shape, order=order)
-    return asdataarray(cls(**{name: data}, **kwargs))
+        """
+        cls = cast(Type[DataClass], cls)
+        name = get_data_name(cls)
+        data = np.ones(shape, order=order)
+        return asdataarray(cls(**{name: data}, **kwargs))
 
+    @classmethod
+    def full(
+        cls,
+        shape: Shape,
+        fill_value: Any,
+        order: Order = "C",
+        **kwargs: Any,
+    ) -> xr.DataArray:
+        """Create a DataArray instance filled with given value.
 
-def ones(
-    cls: Type[DataArrayClass],
-    shape: Shape,
-    order: Order = "C",
-    **kwargs,
-) -> xr.DataArray:
-    """Create a DataArray instance filled with ones.
+        Args:
+            shape: Shape of the new DataArray instance.
+            fill_value: Value for the new DataArray instance.
+            order: Whether to store data in row-major (C-style)
+                or column-major (Fortran-style) order in memory.
+            kwargs: Args of the DataArray class except for data.
 
-    Args:
-        cls: DataArray class.
-        shape: Shape of the new DataArray instance.
-        order: Whether to store data in row-major (C-style)
-            or column-major (Fortran-style) order in memory.
-        kwargs: Args of the DataArray class except for data.
+        Returns:
+            DataArray instance filled with given value.
 
-    Returns:
-        DataArray instance filled with ones.
+        """
+        cls = cast(Type[DataClass], cls)
+        name = get_data_name(cls)
+        data = np.full(shape, fill_value, order=order)
+        return asdataarray(cls(**{name: data}, **kwargs))
 
-    """
-    name = get_data_name(cls)
-    data = np.ones(shape, order=order)
-    return asdataarray(cls(**{name: data}, **kwargs))
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        """Update new() based on the dataclass definition."""
+        super().__init_subclass__(**kwargs)
 
+        # temporary class only for getting dataclass __init__
+        try:
+            Temp = dataclass(copy_class(cls, TEMP_CLASS_PREFIX))
+        except ValueError:
+            return
 
-def full(
-    cls: Type[DataArrayClass],
-    shape: Shape,
-    fill_value: Any,
-    order: Order = "C",
-    **kwargs,
-) -> xr.DataArray:
-    """Create a DataArray instance filled with given value.
+        init: FunctionType = Temp.__init__  # type: ignore
+        init.__annotations__["return"] = xr.DataArray
 
-    Args:
-        cls: DataArray class.
-        shape: Shape of the new DataArray instance.
-        fill_value: Value for the new DataArray instance.
-        order: Whether to store data in row-major (C-style)
-            or column-major (Fortran-style) order in memory.
-        kwargs: Args of the DataArray class except for data.
+        # create a concrete new method and bind
+        @classmethod
+        @wraps(init)
+        def new(
+            cls,  # type: ignore
+            *args: Any,
+            **kwargs: Any,
+        ) -> xr.DataArray:
+            """Create a DataArray instance."""
+            cls = cast(Type[DataClass], cls)
+            return asdataarray(cls(*args, **kwargs))
 
-    Returns:
-        DataArray instance filled with given value.
-
-    """
-    name = get_data_name(cls)
-    data = np.full(shape, fill_value, order=order)
-    return asdataarray(cls(**{name: data}, **kwargs))
+        cls.new = new  # type: ignore
