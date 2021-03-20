@@ -41,9 +41,9 @@ testdata_dtype = [
 # test functions
 @mark.parametrize("dims, expected", testdata_dims)
 def test_dims(dims: Any, expected: Any) -> None:
-    assert get_dims(DataArrayLike[Any, dims]) == expected
+    assert get_dims(DataArrayLike[dims, Any]) == expected
 
 
 @mark.parametrize("dtype, expected", testdata_dtype)
 def test_dtype(dtype: Any, expected: Any) -> None:
-    assert get_dtype(DataArrayLike[dtype, Any]) == expected
+    assert get_dtype(DataArrayLike[Any, dtype]) == expected
