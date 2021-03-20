@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt install pandoc
-          npm install pyright
+          npm install -g pyright
           pip install poetry
           poetry install
       - name: Lint by Flake8
