@@ -2,6 +2,6 @@
     "strict": [
         "docs",
         "tests",
-        "xarray_dataclasses",
+        "xarray_dataclasses"
     ]
 }
