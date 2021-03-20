@@ -6,6 +6,7 @@ __all__ = ["asdataarray", "dataarrayclass"]
 
 # standard library
 from dataclasses import dataclass
+from functools import wraps
 from types import FunctionType
 from typing import Any, Callable, cast, Optional, Sequence, Type, Union
 
@@ -19,7 +20,11 @@ from typing_extensions import Literal
 # submodules
 from .common import get_attrs, get_coords, get_data, get_data_name, get_name
 from .typing import DataClass
-from .utils import copy_wraps, extend_class
+from .utils import copy_class, extend_class
+
+
+# constants
+TEMP_CLASS_PREFIX: str = "__Copied"
 
 
 # type hints (internal)
@@ -83,8 +88,7 @@ class DataArrayMixin:
         **kwargs: Any,
     ) -> xr.DataArray:
         """Create a DataArray instance."""
-        cls = cast(Type[DataClass], cls)
-        return asdataarray(cls(*args, **kwargs))
+        raise NotImplementedError
 
     @classmethod
     def empty(
@@ -188,10 +192,25 @@ class DataArrayMixin:
         """Update new() based on the dataclass definition."""
         super().__init_subclass__(**kwargs)
 
-        # temporary class to get __init__ created by dataclass
-        Temp = type("Temp", (), cls.__dict__.copy())
-        init = cast(FunctionType, dataclass(Temp).__init__)
+        # temporary class only for getting dataclass __init__
+        try:
+            Temp = dataclass(copy_class(cls, TEMP_CLASS_PREFIX))
+        except ValueError:
+            return
+
+        init: FunctionType = Temp.__init__  # type: ignore
         init.__annotations__["return"] = xr.DataArray
 
-        new = copy_wraps(init)(cls.new.__func__)  # type: ignore
-        cls.new = classmethod(new)  # type: ignore
+        # create a concrete new method and bind
+        @classmethod
+        @wraps(init)
+        def new(
+            cls,  # type: ignore
+            *args: Any,
+            **kwargs: Any,
+        ) -> xr.DataArray:
+            """Create a DataArray instance."""
+            cls = cast(Type[DataClass], cls)
+            return asdataarray(cls(*args, **kwargs))
+
+        cls.new = new  # type: ignore

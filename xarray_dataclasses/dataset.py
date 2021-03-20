@@ -6,6 +6,7 @@ __all__ = ["asdataset", "datasetclass"]
 
 # standard library
 from dataclasses import dataclass
+from functools import wraps
 from types import FunctionType
 from typing import Any, Callable, cast, Optional, Type, Union
 
@@ -17,7 +18,11 @@ import xarray as xr
 # submodules
 from .common import get_attrs, get_coords, get_data_vars
 from .typing import DataClass
-from .utils import copy_wraps, extend_class
+from .utils import copy_class, extend_class
+
+
+# constants
+TEMP_CLASS_PREFIX: str = "__Copied"
 
 
 # runtime functions (public)
@@ -75,17 +80,31 @@ class DatasetMixin:
         **kwargs: Any,
     ) -> xr.Dataset:
         """Create a Dataset instance."""
-        cls = cast(Type[DataClass], cls)
-        return asdataset(cls(*args, **kwargs))
+        raise NotImplementedError
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         """Update new() based on the dataclass definition."""
         super().__init_subclass__(**kwargs)
 
-        # temporary class to get __init__ created by dataclass
-        Temp = type("Temp", (), cls.__dict__.copy())
-        init = cast(FunctionType, dataclass(Temp).__init__)
+        # temporary class only for getting dataclass __init__
+        try:
+            Temp = dataclass(copy_class(cls, TEMP_CLASS_PREFIX))
+        except ValueError:
+            return
+
+        init: FunctionType = Temp.__init__  # type: ignore
         init.__annotations__["return"] = xr.Dataset
 
-        new = copy_wraps(init)(cls.new.__func__)  # type: ignore
-        cls.new = classmethod(new)  # type: ignore
+        # create a concrete new method and bind
+        @classmethod
+        @wraps(init)
+        def new(
+            cls,  # type: ignore
+            *args: Any,
+            **kwargs: Any,
+        ) -> xr.Dataset:
+            """Create a Dataset instance."""
+            cls = cast(Type[DataClass], cls)
+            return asdataset(cls(*args, **kwargs))
+
+        cls.new = new  # type: ignore

@@ -1,4 +1,4 @@
-__all__ = ["copy_func", "copy_wraps", "extend_class"]
+__all__ = ["copy_class", "copy_func", "copy_wraps", "extend_class"]
 
 
 # standard library
@@ -13,6 +13,22 @@ T = TypeVar("T")
 
 
 # utility functions (internal)
+def copy_class(cls: type, prefix: str = "Copied") -> type:
+    """Copy a class as a new one whose name starts with prefix."""
+
+    if cls.__name__.startswith(prefix):
+        raise ValueError("Could not copy a copied class.")
+
+    name = prefix + cls.__name__
+
+    if cls.__bases__ == (object,):
+        bases = ()
+    else:
+        bases = cls.__bases__
+
+    return type(name, bases, cls.__dict__.copy())
+
+
 def copy_func(func: FunctionType, deep: bool = False) -> FunctionType:
     """Copy a function as a different object.
 
