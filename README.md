@@ -117,8 +117,8 @@ The extension of the specs is then easy by class inheritance.
 
 ## Basic usage
 
-xarray-dataclasses uses [the Python's native dataclass] (please learn how to use dataclass before proceeding).
-Data (or data variables), coordinates, attribute members, and name (only for DataArray) of a DataArray or Dataset instance are defined as dataclass fields with the following dedicated type hints.
+xarray-dataclasses uses [the Python's native dataclass] (please learn how to use it before proceeding).
+Data (or data variables), coordinates, attribute members, and name of a DataArray or Dataset instance are defined as dataclass fields with the following dedicated type hints.
 
 #### `Data[<dims>, <dtype>]`
 
@@ -149,7 +149,7 @@ For example:
 ```python
 @dataarrayclass
 class Specs:
-    units: Attr[str] = "m/s"  # equivalent to str
+    units: Attr[str] = 'm/s'  # equivalent to str
 ```
 
 ### `Name[<type>]`
@@ -161,7 +161,104 @@ For example:
 ```python
 @dataarrayclass
 class Specs:
-    name: Name[str] = "default"  # equivalent to str
+    name: Name[str] = 'default'  # equivalent to str
+```
+
+### DataArray class
+
+DataArray class is a dataclass that defines DataArray creation.
+For example:
+
+```python
+from xarray_dataclasses import Attr, Coord, Data, Name, dataarrayclass
+
+
+@dataarrayclass
+class Image:
+    """DataArray that represents an image."""
+
+    data: Data[tuple['x', 'y'], float]
+    x: Coord['x', int] = 0
+    y: Coord['y', int] = 0
+    dpi: Attr[int] = 300
+    name: Name[str] = 'default'
+```
+
+where exactly one `Data`-typed field is allowed.
+`ValueError` is raised if more than two `Data`-type fields exist.
+A spec-compliant DataArray instance is created by a shorthand method, `new()`:
+
+```python
+Image.new([[0, 1], [2, 3]], x=[0, 1], y=[0, 1])
+
+<xarray.DataArray 'default' (x: 2, y: 2)>
+array([[0., 1.],
+       [2., 3.]])
+Coordinates:
+  * x        (x) int64 0 1
+  * y        (y) int64 0 1
+Attributes:
+    dpi:      300
+```
+
+DataArray class has NumPy-like `empty()`, `zeros()`, `ones()`, `full()` methods:
+
+```python
+Image.ones((3, 3), dpi=200, name='flat')
+
+<xarray.DataArray 'flat' (x: 3, y: 3)>
+array([[1., 1., 1.],
+       [1., 1., 1.],
+       [1., 1., 1.]])
+Coordinates:
+  * x        (x) int64 0 0 0
+  * y        (y) int64 0 0 0
+Attributes:
+    dpi:      200
+```
+
+### Dataset class
+
+Dataset class is a dataclass that defines Dataset creation.
+For example:
+
+```python
+from xarray_dataclasses import Attr, Coord, Data, datasetclass
+
+
+@datasetclass
+class RGBImage:
+    """Dataset that represents a three-color image."""
+
+    red: Data[tuple['x', 'y'], float]
+    green: Data[tuple['x', 'y'], float]
+    blue: Data[tuple['x', 'y'], float]
+    x: Coord['x', int] = 0
+    y: Coord['y', int] = 0
+    dpi: Attr[int] = 300
+```
+
+where multiple `Data`-typed fields are allowed.
+A spec-compliant Dataset instance is created by a shorthand method, `new()`:
+
+```python
+RGBImage.new(
+    [[0, 0], [0, 0]],  # red
+    [[1, 1], [1, 1]],  # green
+    [[2, 2], [2, 2]],  # blue
+)
+
+<xarray.Dataset>
+Dimensions:  (x: 2, y: 2)
+Coordinates:
+  * x        (x) int64 0 0
+  * y        (y) int64 0 0
+Data variables:
+    red      (x, y) float64 0.0 0.0 0.0 0.0
+    green    (x, y) float64 1.0 1.0 1.0 1.0
+    blue     (x, y) float64 2.0 2.0 2.0 2.0
+Attributes:
+    dpi:      300
 ```
 
 
