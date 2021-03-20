@@ -63,8 +63,8 @@ import numpy as np
 import xarray as xr
 
 
-def create_dataarray(data, x=None, y=None):
-    """Create a DataArray instance."""
+def spec_dataarray(data, x=None, y=None):
+    """Create a spec-comliant DataArray instance."""
     data = np.array(data)
 
     if x is None:
@@ -87,7 +87,7 @@ def create_dataarray(data, x=None, y=None):
     )
 
 
-dataarray = create_dataarray([[0, 1], [2, 3]])
+dataarray = spec_dataarray([[0, 1], [2, 3]])
 ```
 
 The issues are (1) it is hard to figure out the specs from the code and (2) it is hard to reuse the code, for example, to add a new coordinate to the original specs.
@@ -108,9 +108,13 @@ class Specs:
 dataarray = Specs.new([[0, 1], [2, 3]])
 ```
 
+The specs are now much easier to read:
 The type hints, `Data[<dims>, <dtype>]` and `Coord[<dims>, <dtype>]`, have complete information of DataArray creation.
 The default values are given as class variables.
-Finally, the class decorator, `@dataarrayclass`, converts a class to [the Python's native dataclass] and add class methods such as `new()` to it.
+
+The class decorator, `@dataarrayclass`, converts a class to [the Python's native dataclass] and add class methods such as `new()` to it.
+The extension of the specs is then easy by class inheritance.
+
 
 <!-- References -->
 [the Python's native dataclass]: https://docs.python.org/3/library/dataclasses.html
