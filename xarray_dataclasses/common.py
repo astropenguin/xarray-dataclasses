@@ -34,8 +34,8 @@ from .typing import (
 
 
 # type hints (internal)
-T = TypeVar("T")
 D = TypeVar("D")
+T = TypeVar("T")
 
 FieldValue = Tuple[Field, Any]
 
@@ -139,15 +139,15 @@ def _gen_fields(
 
 
 def _to_dataarray(
-    data: DataArrayLike[T, D],
-    type_: Type[DataArrayLike[T, D]],
+    data: DataArrayLike[D, T],
+    type_: Type[DataArrayLike[D, T]],
     sizes: Optional[Mapping[Hashable, int]] = None,
 ) -> xr.DataArray:
     """Create a DataArray instance from DataArrayLike object.
 
     Args:
         data: DataArrayLike object.
-        type_: Type of ``data``. Must be DataArrayLike[T, D].
+        type_: Type of ``data``. Must be DataArrayLike[D, T].
         sizes: If specified, it is used for broadcasting ``data``.
 
     Returns:
