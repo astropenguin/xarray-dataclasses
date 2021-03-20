@@ -5,7 +5,7 @@
 [![Test](https://img.shields.io/github/workflow/status/astropenguin/xarray-dataclasses/Test?logo=github&label=Test&style=flat-square)](https://github.com/astropenguin/xarray-dataclasses/actions)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?label=License&style=flat-square)](LICENSE)
 
-xarray extension for dataarray classes
+xarray extension for DataArray and Dataset classes
 
 ## TL;DR
 
