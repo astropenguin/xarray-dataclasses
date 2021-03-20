@@ -115,6 +115,55 @@ The default values are given as class variables.
 The class decorator, `@dataarrayclass`, converts a class to [the Python's native dataclass] and add class methods such as `new()` to it.
 The extension of the specs is then easy by class inheritance.
 
+## Basic usage
+
+xarray-dataclasses uses [the Python's native dataclass] (please learn how to use dataclass before proceeding).
+Data (or data variables), coordinates, attribute members, and name (only for DataArray) of a DataArray or Dataset instance are defined as dataclass fields with the following dedicated type hints.
+
+#### `Data[<dims>, <dtype>]`
+
+`Data` specifies the field whose value will become the data of a DataArray instance or a member of the data variables of a Dataset instance.
+It accepts two type variables, `<dims>` and `<dtype>`.
+For example:
+
+| Type hint | Inferred dims | Inferred dtype |
+| --- | --- | --- |
+| `Data['x', typing.Any]` | `('x',)` | `None` |
+| `Data['x', int]` | `('x',)` | `numpy.dtype('int64')` |
+| `Data['x', float]` | `('x',)` | `numpy.dtype('float64')` |
+| `Data[tuple['x', 'y'], float]` | `('x', 'y')` | `numpy.dtype('float64')` |
+
+Note: for Python 3.7 and 3.8, use `typing.Tuple[...]` instead of `tuple[...]`.
+
+#### `Coord[<dims>, <dtype>]`
+
+`Coord` specifies the field whose value will become a coordinate of a DataArray or Dataset instance.
+Similar to `Data`, it accepts two type variables, `<dims>` and `<dtype>`.
+
+#### `Attr[<type>]`
+
+`Attr` specifies the field whose value will become a member of the attributes (attrs) of a DataArray or Dataset instance.
+It accepts a type variable, `<type>`.
+For example:
+
+```python
+@dataarrayclass
+class Specs:
+    units: Attr[str] = "m/s"  # equivalent to str
+```
+
+### `Name[<type>]`
+
+`Name` specifies the field whose value will become the name of a DataArray.
+It accepts a type variable, `<type>`.
+For example:
+
+```python
+@dataarrayclass
+class Specs:
+    name: Name[str] = "default"  # equivalent to str
+```
+
 
 <!-- References -->
 [the Python's native dataclass]: https://docs.python.org/3/library/dataclasses.html
