@@ -47,8 +47,8 @@ class Xarray(Enum):
 
 
 # type hints (internal)
-T = TypeVar("T")
-D = TypeVar("D")
+T = TypeVar("T", covariant=True)
+D = TypeVar("D", covariant=True)
 
 DTypeLike = Union[np.dtype, type, str, None]
 FieldDict = Dict[str, Field]
