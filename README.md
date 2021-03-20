@@ -9,7 +9,7 @@ xarray extension for DataArray and Dataset classes
 
 ## TL;DR
 
-xarray-dataclasses is a third-party Python package which helps to create DataArray classes in the same manner as [the Python's native dataclass].
+xarray-dataclasses is a Python package for creating DataArray and Dataset classes in the same manner as [the Python's native dataclass].
 Here is an introduction code of what the package provides:
 
 ```python
@@ -17,13 +17,13 @@ from typing import Literal
 from xarray_dataclasses import Coord, Data, dataarrayclass
 
 
-X = Literal['x']
-Y = Literal['y']
+X = Literal['x']  # type hint for dimension 'x'
+Y = Literal['y']  # type hint for dimension 'y'
 
 
 @dataarrayclass
 class Image:
-    """DataArray class to represent images."""
+    """DataArray that represents an image."""
 
     data: Data[tuple[X, Y], float)
     x: Coord[X, int] = 0
@@ -41,8 +41,9 @@ image = Image.new([[0, 1], [2, 3]], x=[0, 1], y=[0, 1])
 ones = Image.ones((2, 2), x=[0, 1], y=[0, 1])
 ```
 
-- Custom DataArray instances with fixed dimensions, datatype, and coordinates can easily be created.
+- DataArray or Dataset instances with fixed dimensions, data type, and coordinates can easily be created.
 - NumPy-like special functions like ``ones()`` are provided as class methods.
+- 100% compatible with [the Python's native dataclass].
 
 ## Requirements
 
