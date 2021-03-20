@@ -29,26 +29,26 @@ class Image:
     x: Coord[X, int] = 0
     y: Coord[Y, int] = 0
 
-```
 
-The key features are:
-
-```python
 # create a DataArray instance
 image = Image.new([[0, 1], [2, 3]], x=[0, 1], y=[0, 1])
+
 
 # create a DataArray instance filled with ones
 ones = Image.ones((2, 2), x=[0, 1], y=[0, 1])
 ```
 
+## Features
+
 - DataArray or Dataset instances with fixed dimensions, data type, and coordinates can easily be created.
-- NumPy-like special functions like ``ones()`` are provided as class methods.
+- NumPy-like special functions such as ``ones()`` are provided as class methods.
 - 100% compatible with [the Python's native dataclass].
+- 100% compatible with static type check by [Pyright].
 
 ## Requirements
 
 - **Python:** 3.7, 3.8, or 3.9 (tested by the author)
-- **Dependencies:** See [pyproject.toml](pyproject.toml)
+- **Dependencies:** see [pyproject.toml](pyproject.toml)
 
 ## Installation
 
@@ -58,3 +58,4 @@ $ pip install xarray-dataclasses
 
 <!-- References -->
 [the Python's native dataclass]: https://docs.python.org/3/library/dataclasses.html
+[Pyright]: https://github.com/microsoft/pyright
