@@ -26,9 +26,11 @@ TEMP_CLASS_PREFIX: str = "__Copied"
 
 
 # runtime functions (public)
-def asdataset(inst: DataClass) -> xr.Dataset:
+def asdataset(
+    inst: DataClass, as_class: Type[xr.Dataset] = xr.Dataset
+) -> xr.Dataset:
     """Convert a Dataset-class instance to Dataset one."""
-    dataset = xr.Dataset(get_data_vars(inst))
+    dataset = as_class(get_data_vars(inst))
     coords = get_coords(inst, dataset)
 
     dataset.coords.update(coords)
@@ -47,12 +49,30 @@ def datasetclass(
     unsafe_hash: bool = False,
     frozen: bool = False,
     shorthands: bool = True,
+    extend_xarray: Union[bool, Type[object]] = False,
 ) -> Union[Type[DataClass], Callable[[type], Type[DataClass]]]:
     """Class decorator to create a Dataset class."""
 
     def to_dataclass(cls: type) -> Type[DataClass]:
-        if shorthands:
-            cls = extend_class(cls, DatasetMixin)
+        if not shorthands and extend_xarray:
+            raise TypeError(
+                "No shorthands not compatible with extend_xarray"
+            )
+        mixin = None
+        if extend_xarray:
+            mixin = XArrayBaseDatasetMixin
+        elif shorthands:
+            mixin = DatasetMixin
+        if mixin is not None:
+            name = cls.__name__
+            cls = extend_class(cls, mixin)
+            if isinstance(extend_xarray, type):
+                bases = (xr.Dataset, cast(object, extend_xarray))
+            else:
+                bases = (xr.Dataset, cls)
+            cls.xarray_subclass = type(  # type: ignore
+                name + "Dataset", bases, dict(__slots__=tuple())
+            )
 
         return dataclass(
             init=init,
@@ -72,6 +92,12 @@ def datasetclass(
 # mix-in class (internal)
 class DatasetMixin:
     """Mix-in class that provides shorthand methods."""
+
+    #: whether new() returns a subclass of xarray inheriting from cls
+    extend_xarray = False
+
+    #: subclass of xarray
+    xarray_subclass: Optional[Type[xr.Dataset]] = None
 
     @classmethod
     def new(
@@ -99,12 +125,24 @@ class DatasetMixin:
         @classmethod
         @wraps(init)
         def new(
-            cls,  # type: ignore
+            cls: Type[Any],
             *args: Any,
             **kwargs: Any,
         ) -> xr.Dataset:
             """Create a Dataset instance."""
+            if cls.extend_xarray:
+                as_class = cls.xarray_subclass
+            else:
+                as_class = xr.Dataset
             cls = cast(Type[DataClass], cls)
-            return asdataset(cls(*args, **kwargs))
+            return asdataset(cls(*args, **kwargs), as_class=as_class)
 
         cls.new = new  # type: ignore
+
+
+class XArrayBaseDatasetMixin(DatasetMixin):
+    """
+    Mixin marks class "new" returns instance derived from dataclass.
+    """
+
+    extend_xarray = True
