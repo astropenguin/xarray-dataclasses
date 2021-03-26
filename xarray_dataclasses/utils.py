@@ -5,7 +5,17 @@ __all__ = ["copy_class", "copy_func", "copy_wraps", "extend_class"]
 from copy import copy, deepcopy
 from functools import wraps, WRAPPER_ASSIGNMENTS, WRAPPER_UPDATES
 from types import FunctionType
-from typing import Callable, Sequence, TypeVar
+from typing import (
+    Callable,
+    Dict,
+    Sequence,
+    Tuple,
+    Type,
+    TypeVar,
+    Any,
+    TypeVar,
+    cast,
+)
 
 
 # type hints (internal)
@@ -80,3 +90,25 @@ def extend_class(cls: type, mixin: type) -> type:
         bases = (*cls.__bases__, mixin)
 
     return type(cls.__name__, bases, cls.__dict__.copy())
+
+
+OT = TypeVar("OT")
+
+
+def make_marked_subclass(
+    cls: Type[OT],
+    mark_class: Type[Any],
+    attrs: Dict[str, Any] = {},
+) -> Type[OT]:
+    """
+    Create class deriving from `cls`, extra base `mark_class`.
+
+    The intention is that `cls` provides functionality; `mark_class`
+    is a mixin that just provides name, and the ability to test
+    distinct type of `cls` via `instanceof` or `issubclass`.
+    """
+    bases = (cls, mark_class)
+    return cast(
+        Type[OT],
+        type(mark_class.__name__, bases, attrs),  # type: ignore
+    )

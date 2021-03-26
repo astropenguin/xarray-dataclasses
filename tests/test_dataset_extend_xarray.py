@@ -23,7 +23,7 @@ class ImageDataset:
     __slots__ = tuple()
 
 
-@datasetclass(extend_xarray=ImageDataset)
+@datasetclass(xarray_base=ImageDataset)
 class Image:
     data: Data[Tuple[X, Y], float]
 
@@ -32,7 +32,7 @@ class ImageMaskedDataset:
     __slots__ = tuple()
 
 
-@datasetclass(extend_xarray=ImageMaskedDataset)
+@datasetclass(xarray_base=ImageMaskedDataset)
 class ImageMasked:
     data: Data[Tuple[X, Y], float]
     mask: Data[Tuple[X, Y], bool]
