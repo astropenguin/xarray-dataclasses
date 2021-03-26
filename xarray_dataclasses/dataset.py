@@ -8,7 +8,17 @@ __all__ = ["asdataset", "datasetclass"]
 from dataclasses import dataclass
 from functools import wraps
 from types import FunctionType
-from typing import Any, Callable, cast, Optional, Type, Union
+from typing import (
+    Any,
+    Callable,
+    Literal,
+    TypeVar,
+    cast,
+    Optional,
+    Type,
+    Union,
+    overload,
+)
 
 
 # third-party packages
@@ -18,7 +28,7 @@ import xarray as xr
 # submodules
 from .common import get_attrs, get_coords, get_data_vars
 from .typing import DataClass
-from .utils import copy_class, extend_class
+from .utils import copy_class, extend_class, make_marked_subclass
 
 
 # constants
@@ -26,9 +36,11 @@ TEMP_CLASS_PREFIX: str = "__Copied"
 
 
 # runtime functions (public)
-def asdataset(inst: DataClass) -> xr.Dataset:
+def asdataset(
+    inst: DataClass, as_class: Type[xr.Dataset] = xr.Dataset
+) -> xr.Dataset:
     """Convert a Dataset-class instance to Dataset one."""
-    dataset = xr.Dataset(get_data_vars(inst))
+    dataset = as_class(get_data_vars(inst))
     coords = get_coords(inst, dataset)
 
     dataset.coords.update(coords)
@@ -37,8 +49,58 @@ def asdataset(inst: DataClass) -> xr.Dataset:
     return dataset
 
 
+T = TypeVar("T")
+
+
+@overload
+def datasetclass(cls: Type[object]) -> Type[DataClass]:
+    ...
+
+
+@overload
 def datasetclass(
-    cls: Optional[type] = None,
+    *,
+    shorthands: Literal[False],
+    init: bool = True,
+    repr: bool = True,
+    eq: bool = True,
+    order: bool = False,
+    unsafe_hash: bool = False,
+    frozen: bool = False,
+) -> Callable[[Type[object]], Type[DataClass]]:
+    ...
+
+
+@overload
+def datasetclass(
+    *,
+    init: bool = True,
+    repr: bool = True,
+    eq: bool = True,
+    order: bool = False,
+    unsafe_hash: bool = False,
+    frozen: bool = False,
+) -> Callable[[Type[object]], Type[DatasetMixin]]:
+    ...
+
+
+@overload
+def datasetclass(
+    *,
+    xarray_base: Type[object],
+    init: bool = True,
+    repr: bool = True,
+    eq: bool = True,
+    order: bool = False,
+    unsafe_hash: bool = False,
+    frozen: bool = False,
+    shorthands: bool = True,
+) -> Callable[[Type[object]], Type[DatasetMixin]]:
+    ...
+
+
+def datasetclass(
+    cls: Optional[Type[object]] = None,
     *,
     init: bool = True,
     repr: bool = True,
@@ -47,11 +109,21 @@ def datasetclass(
     unsafe_hash: bool = False,
     frozen: bool = False,
     shorthands: bool = True,
+    xarray_base: Optional[Type[object]] = None,
 ) -> Union[Type[DataClass], Callable[[type], Type[DataClass]]]:
     """Class decorator to create a Dataset class."""
 
     def to_dataclass(cls: type) -> Type[DataClass]:
-        if shorthands:
+        if not shorthands and xarray_base is not None:
+            raise TypeError(
+                "No shorthands not compatible with xarray_base"
+            )
+        if xarray_base is not None:
+            cls = extend_class(cls, DatasetMixin)
+            cast(DatasetMixin, cls).xarray_base = make_marked_subclass(
+                xr.Dataset, xarray_base, dict(__slots__=tuple())
+            )
+        elif shorthands:
             cls = extend_class(cls, DatasetMixin)
 
         return dataclass(
@@ -69,9 +141,14 @@ def datasetclass(
         return to_dataclass(cls)
 
 
-# mix-in class (internal)
-class DatasetMixin:
-    """Mix-in class that provides shorthand methods."""
+class DatasetMixin(DataClass):
+    """DataClass that provides shorthand methods to create datasets."""
+
+    #: whether new() returns a subclass of xarray inheriting from cls
+    extend_xarray = False
+
+    #: subclass of Dataset to return
+    xarray_base = xr.Dataset
 
     @classmethod
     def new(
@@ -99,12 +176,14 @@ class DatasetMixin:
         @classmethod
         @wraps(init)
         def new(
-            cls,  # type: ignore
+            cls: Type[DatasetMixin],
             *args: Any,
             **kwargs: Any,
         ) -> xr.Dataset:
             """Create a Dataset instance."""
-            cls = cast(Type[DataClass], cls)
-            return asdataset(cls(*args, **kwargs))
+            cls = cast(Type[DatasetMixin], cls)
+            return asdataset(
+                cls(*args, **kwargs), as_class=cls.xarray_base
+            )
 
         cls.new = new  # type: ignore
