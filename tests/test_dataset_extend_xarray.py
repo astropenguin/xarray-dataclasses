@@ -28,7 +28,7 @@ class Image:
     data: Data[Tuple[X, Y], float]
 
 
-class ImageMaskedDataset:
+class ImageMaskedDataset(xr.Dataset):
     __slots__ = tuple()
 
 
@@ -50,13 +50,13 @@ def check_image_masked(x: xr.Dataset) -> str:
 
 
 @check_image_masked.register
-def _(x: ImageDataset):
+def check_image_masked_i(x: ImageDataset) -> str:
     return "unmasked"
 
 
 @check_image_masked.register
-def _(x: ImageMaskedDataset):
-    return "masked"
+def check_image_masked_im(x: ImageMaskedDataset) -> str:
+    return f"masked; len = {len(x.data)}"
 
 
 def test_dataset_singledispatch():
@@ -65,5 +65,6 @@ def test_dataset_singledispatch():
         check_image_masked(generic)
     assert check_image_masked(Image.new([[1]]) == "unmasked")
     assert (
-        check_image_masked(ImageMasked.new([[1]], [[True]])) == "masked"
+        check_image_masked(ImageMasked.new([[1]], [[True]]))
+        == "masked; len = 1"
     )

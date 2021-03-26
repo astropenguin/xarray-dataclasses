@@ -8,7 +8,17 @@ __all__ = ["asdataset", "datasetclass"]
 from dataclasses import dataclass
 from functools import wraps
 from types import FunctionType
-from typing import Any, Callable, cast, Optional, Type, Union
+from typing import (
+    Any,
+    Callable,
+    Literal,
+    TypeVar,
+    cast,
+    Optional,
+    Type,
+    Union,
+    overload,
+)
 
 
 # third-party packages
@@ -39,8 +49,58 @@ def asdataset(
     return dataset
 
 
+T = TypeVar("T")
+
+
+@overload
+def datasetclass(cls: Type[object]) -> Type[DataClass]:
+    ...
+
+
+@overload
 def datasetclass(
-    cls: Optional[type] = None,
+    *,
+    shorthands: Literal[False],
+    init: bool = True,
+    repr: bool = True,
+    eq: bool = True,
+    order: bool = False,
+    unsafe_hash: bool = False,
+    frozen: bool = False,
+) -> Callable[[Type[object]], Type[DataClass]]:
+    ...
+
+
+@overload
+def datasetclass(
+    *,
+    init: bool = True,
+    repr: bool = True,
+    eq: bool = True,
+    order: bool = False,
+    unsafe_hash: bool = False,
+    frozen: bool = False,
+) -> Callable[[Type[object]], Type[DatasetMixin]]:
+    ...
+
+
+@overload
+def datasetclass(
+    *,
+    xarray_base: Type[object],
+    init: bool = True,
+    repr: bool = True,
+    eq: bool = True,
+    order: bool = False,
+    unsafe_hash: bool = False,
+    frozen: bool = False,
+    shorthands: bool = True,
+) -> Callable[[Type[object]], Type[DatasetMixin]]:
+    ...
+
+
+def datasetclass(
+    cls: Optional[Type[object]] = None,
     *,
     init: bool = True,
     repr: bool = True,
@@ -58,19 +118,13 @@ def datasetclass(
             raise TypeError(
                 "No shorthands not compatible with xarray_base"
             )
-        mixin = None
         if xarray_base is not None:
-            mixin = XArrayBaseDatasetMixin
-        elif shorthands:
-            mixin = DatasetMixin
-        if mixin is not None:
-            cls = extend_class(cls, mixin)
-        if xarray_base is not None:
-            cast(
-                XArrayBaseDatasetMixin, cls
-            ).xarray_base = make_marked_subclass(
+            cls = extend_class(cls, DatasetMixin)
+            cast(DatasetMixin, cls).xarray_base = make_marked_subclass(
                 xr.Dataset, xarray_base, dict(__slots__=tuple())
             )
+        elif shorthands:
+            cls = extend_class(cls, DatasetMixin)
 
         return dataclass(
             init=init,
@@ -87,14 +141,13 @@ def datasetclass(
         return to_dataclass(cls)
 
 
-# mix-in class (internal)
-class DatasetMixin:
-    """Mix-in class that provides shorthand methods."""
+class DatasetMixin(DataClass):
+    """DataClass that provides shorthand methods to create datasets."""
 
     #: whether new() returns a subclass of xarray inheriting from cls
     extend_xarray = False
 
-    #: subclass of Dataset
+    #: subclass of Dataset to return
     xarray_base = xr.Dataset
 
     @classmethod
@@ -123,22 +176,14 @@ class DatasetMixin:
         @classmethod
         @wraps(init)
         def new(
-            cls: "DatasetMixin",
+            cls: Type[DatasetMixin],
             *args: Any,
             **kwargs: Any,
         ) -> xr.Dataset:
             """Create a Dataset instance."""
-            cls = cast(Type[DataClass], cls)
+            cls = cast(Type[DatasetMixin], cls)
             return asdataset(
                 cls(*args, **kwargs), as_class=cls.xarray_base
             )
 
         cls.new = new  # type: ignore
-
-
-class XArrayBaseDatasetMixin(DatasetMixin):
-    """
-    Mixin marks class "new" returns instance derived from dataclass.
-    """
-
-    extend_xarray = True

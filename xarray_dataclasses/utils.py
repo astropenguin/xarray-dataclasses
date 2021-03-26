@@ -106,7 +106,12 @@ def make_marked_subclass(
     The intention is that `cls` provides functionality; `mark_class`
     is a mixin that just provides name, and the ability to test
     distinct type of `cls` via `instanceof` or `issubclass`.
+
+    Alternately, if `cls` is a subclass of `mark_class`, we
+    simply pass back `mark_class`
     """
+    if issubclass(mark_class, cls):
+        return mark_class
     bases = (cls, mark_class)
     return cast(
         Type[OT],
