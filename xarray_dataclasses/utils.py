@@ -1,15 +1,22 @@
-__all__ = ["copy_class", "copy_func", "copy_wraps", "extend_class"]
+__all__ = [
+    "copy_class",
+    "copy_func",
+    "copy_wraps",
+    "extend_class",
+    "make_generic",
+]
 
 
 # standard library
 from copy import copy, deepcopy
 from functools import wraps, WRAPPER_ASSIGNMENTS, WRAPPER_UPDATES
 from types import FunctionType
-from typing import Callable, Sequence, TypeVar
+from typing import Callable, Sequence, Type, TypeVar
 
 
 # type hints (internal)
 T = TypeVar("T")
+GenericAlias = type(Sequence[int])
 
 
 # utility functions (internal)
@@ -80,3 +87,13 @@ def extend_class(cls: type, mixin: type) -> type:
         bases = (*cls.__bases__, mixin)
 
     return type(cls.__name__, bases, cls.__dict__.copy())
+
+
+def make_generic(cls: Type[T]) -> Type[T]:
+    """Make a class generic (only for type check)."""
+    try:
+        cls.__class_getitem__  # type: ignore
+    except AttributeError:
+        cls.__class_getitem__ = classmethod(GenericAlias)  # type: ignore
+
+    return cls
