@@ -3,6 +3,6 @@
     "pyright": "^1.1.126"
   },
   "scripts": {
-    "pyright": "pyright"
+    "pyright": "poetry run pyright"
   }
 }
