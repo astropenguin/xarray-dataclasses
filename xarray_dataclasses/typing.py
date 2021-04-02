@@ -31,6 +31,14 @@ from typing_extensions import (
 )
 
 
+# submodules
+from .utils import make_generic
+
+
+# for Python 3.7 and 3.9
+make_generic(Field)
+
+
 # constants (internal)
 class Xarray(Enum):
     """Identifiers for type hints of xarray-dataclasses."""
@@ -51,7 +59,6 @@ D = TypeVar("D", covariant=True)
 T = TypeVar("T", covariant=True)
 
 DTypeLike = Union[np.dtype, type, str, None]
-FieldDict = Dict[str, Field]
 NoneType: Final[type] = type(None)
 
 
@@ -71,7 +78,7 @@ class DataClass(Protocol):
     """Type hint for dataclass instance."""
 
     __init__: Callable[..., None]
-    __dataclass_fields__: FieldDict
+    __dataclass_fields__: Dict[str, Field[Any]]
 
 
 DataArrayLike = Union[DataArray[D, T], ndarray[T], Sequence[T], T]

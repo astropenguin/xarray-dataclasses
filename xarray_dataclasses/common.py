@@ -31,13 +31,17 @@ from .typing import (
     is_data,
     is_name,
 )
+from .utils import make_generic
+
+
+# for Python 3.7 and 3.8
+make_generic(Field)
 
 
 # type hints (internal)
 D = TypeVar("D")
 T = TypeVar("T")
-
-FieldValue = Tuple[Field, Any]
+FieldValue = Tuple[Field[T], T]
 
 
 # runtime function (internal)
@@ -121,7 +125,7 @@ def get_name(inst: DataClass) -> Optional[Hashable]:
 def _gen_fields(
     obj: Union[DataClass, Type[DataClass]],
     type_filter: Optional[Callable[..., bool]] = None,
-) -> Iterable[FieldValue]:
+) -> Iterable[FieldValue[T]]:
     """Generate field-value pairs from a dataclass instance.
 
     Args:
