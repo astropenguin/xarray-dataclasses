@@ -35,7 +35,7 @@ from typing_extensions import (
 from .utils import make_generic
 
 
-# for Python 3.7 and 3.9
+# for Python 3.7 and 3.8
 make_generic(Field)
 
 
