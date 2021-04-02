@@ -108,7 +108,7 @@ class DataArrayMixin:
         """
         cls = cast(Type[DataClass], cls)
         name = get_data_name(cls)
-        data = np.empty(shape, order=order)
+        data = np.empty(shape, order=order)  # type: ignore
         return asdataarray(cls(**{name: data}, **kwargs))
 
     @classmethod
@@ -132,7 +132,7 @@ class DataArrayMixin:
         """
         cls = cast(Type[DataClass], cls)
         name = get_data_name(cls)
-        data = np.zeros(shape, order=order)
+        data = np.zeros(shape, order=order)  # type: ignore
         return asdataarray(cls(**{name: data}, **kwargs))
 
     @classmethod
@@ -156,7 +156,7 @@ class DataArrayMixin:
         """
         cls = cast(Type[DataClass], cls)
         name = get_data_name(cls)
-        data = np.ones(shape, order=order)
+        data = np.ones(shape, order=order)  # type: ignore
         return asdataarray(cls(**{name: data}, **kwargs))
 
     @classmethod
@@ -182,7 +182,7 @@ class DataArrayMixin:
         """
         cls = cast(Type[DataClass], cls)
         name = get_data_name(cls)
-        data = np.full(shape, fill_value, order=order)
+        data = np.full(shape, fill_value, order=order)  # type: ignore
         return asdataarray(cls(**{name: data}, **kwargs))
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
