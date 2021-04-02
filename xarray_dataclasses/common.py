@@ -41,7 +41,6 @@ make_generic(Field)
 # type hints (internal)
 D = TypeVar("D")
 T = TypeVar("T")
-FieldValue = Tuple[Field[T], T]
 
 
 # runtime function (internal)
@@ -125,7 +124,7 @@ def get_name(inst: DataClass) -> Optional[Hashable]:
 def _gen_fields(
     obj: Union[DataClass, Type[DataClass]],
     type_filter: Optional[Callable[..., bool]] = None,
-) -> Iterable[FieldValue[T]]:
+) -> Iterable[Tuple[Field[T], T]]:
     """Generate field-value pairs from a dataclass instance.
 
     Args:
