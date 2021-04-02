@@ -16,7 +16,7 @@ jobs:
       matrix:
         python-version: [3.7, 3.8, 3.9]
     env:
-      TEST_DIRS: docs tests xarray_dataclasses
+      TESTED_DIRS: docs tests xarray_dataclasses
     steps:
       - uses: actions/checkout@v2
       - name: Setup Python ${{ matrix.python-version }}
@@ -34,12 +34,12 @@ jobs:
           poetry install
           npm install
       - name: Test code format (Black)
-        run: poetry run black --check ${TEST_DIRS}
+        run: poetry run black --check ${TESTED_DIRS}
       - name: Test code style (Flake8)
-        run: poetry run flake8 ${TEST_DIRS}
+        run: poetry run flake8 ${TESTED_DIRS}
       - name: Test code typing (Pyright)
-        run: npm run pyright ${TEST_DIRS}
+        run: npm run pyright ${TESTED_DIRS}
       - name: Test package (pytest)
-        run : poetry run pytest -v
+        run : poetry run pytest -v tests
       - name: Test docs building (Sphinx)
         run: poetry run scripts/docs
