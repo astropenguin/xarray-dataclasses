@@ -15,29 +15,31 @@ jobs:
     strategy:
       matrix:
         python-version: [3.7, 3.8, 3.9]
+    env:
+      TESTED_DIRS: docs tests xarray_dataclasses
     steps:
       - uses: actions/checkout@v2
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
       - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 15
       - name: Install dependencies
         run: |
           sudo apt install pandoc
-          npm install -g pyright
           pip install poetry
           poetry install
-      - name: Lint by Flake8
-        run: poetry run flake8 docs tests xarray_dataclasses
-      - name: Format by Black
-        run: poetry run black --check docs tests xarray_dataclasses
-      - name: Type check by Pyright
-        run: poetry run pyright docs tests xarray_dataclasses
-      - name: Test by pytest
+          npm install
+      - name: Test code format (Black)
+        run: poetry run black --check ${TESTED_DIRS}
+      - name: Test code style (Flake8)
+        run: poetry run flake8 ${TESTED_DIRS}
+      - name: Test code typing (Pyright)
+        run: npm run pyright ${TESTED_DIRS}
+      - name: Test package (pytest)
         run : poetry run pytest -v tests
-      - name: Build docs
+      - name: Test docs building (Sphinx)
         run: poetry run scripts/docs

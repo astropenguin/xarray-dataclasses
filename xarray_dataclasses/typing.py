@@ -31,6 +31,14 @@ from typing_extensions import (
 )
 
 
+# submodules
+from .utils import make_generic
+
+
+# for Python 3.7 and 3.9
+make_generic(Field)
+
+
 # constants (internal)
 class Xarray(Enum):
     """Identifiers for type hints of xarray-dataclasses."""
@@ -49,9 +57,6 @@ class Xarray(Enum):
 # type hints (internal)
 D = TypeVar("D", covariant=True)
 T = TypeVar("T", covariant=True)
-
-DTypeLike = Union[np.dtype, type, str, None]
-FieldDict = Dict[str, Field]
 NoneType: Final[type] = type(None)
 
 
@@ -71,10 +76,11 @@ class DataClass(Protocol):
     """Type hint for dataclass instance."""
 
     __init__: Callable[..., None]
-    __dataclass_fields__: FieldDict
+    __dataclass_fields__: Dict[str, Field[Any]]
 
 
 DataArrayLike = Union[DataArray[D, T], ndarray[T], Sequence[T], T]
+"""Type hint for DataArray-like object."""
 
 
 # type hints (public)
@@ -232,7 +238,7 @@ def get_dims(type_: Type[DataArrayLike[D, T]]) -> Tuple[str, ...]:
     return tuple(dims)
 
 
-def get_dtype(type_: Type[DataArrayLike[D, T]]) -> DTypeLike:
+def get_dtype(type_: Type[DataArrayLike[D, T]]) -> Union[type, str, None]:
     """Extract a data type (dtype) from DataArrayLike[D, T]."""
     if get_origin(type_) is Annotated:
         type_ = get_args(type_)[0]

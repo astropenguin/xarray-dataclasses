@@ -1,7 +1,4 @@
 {
-    "strict": [
-        "docs",
-        "tests",
-        "xarray_dataclasses"
-    ]
+    "typeCheckingMode": "strict",
+    "reportUnknownMemberType": "none"
 }
