@@ -12,7 +12,7 @@ documentation = "https://astropenguin.github.io/xarray-dataclasses/"
 python = "^3.7"
 numpy = "^1.19"
 typing-extensions = "^3.7"
-xarray = "^0.15"
+xarray = ">= 0.15, < 1.0"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b"
