@@ -256,7 +256,9 @@ def _find_dataset_class_for(cls: Union[WithClass[DS], Any]) -> Type[DS]:
     if not hasattr(cls, "__orig_bases__"):
         return cast(Type[DS], xr.Dataset)
     for g_base in cast(Any, cls).__orig_bases__:
-        if not issubclass(g_base.__origin__, WithClass):
+        if not hasattr(g_base, "__origin__") or not issubclass(
+            g_base.__origin__, WithClass
+        ):
             continue
         for g_arg in g_base.__args__:
             if isinstance(g_arg, type) and issubclass(

@@ -6,7 +6,7 @@ from copy import copy, deepcopy
 from functools import wraps, WRAPPER_ASSIGNMENTS, WRAPPER_UPDATES
 from types import FunctionType
 import types
-from typing import Callable, Sequence, Tuple, Type, TypeVar, cast
+from typing import Callable, List, Sequence, Tuple, Type, TypeVar, cast
 
 
 # type hints (internal)
@@ -78,8 +78,18 @@ def extend_class(cls: type, mixin: type) -> type:
     if issubclass(cls, mixin):
         return cls
     if cls.__bases__ == (object,):
-        bases = (mixin,)
+        bases: Tuple[type, ...] = (mixin,)
     else:
-        bases = (*cls.__bases__, mixin)
+        # ensure consistent MRO
+        collect: List[type] = []
+        for i, b in enumerate(cls.__bases__):
+            if issubclass(mixin, b):
+                collect.append(mixin)
+                collect.extend(cls.__bases__[i:])
+                break
+            collect.append(b)
+        else:
+            collect.append(mixin)
+        bases = tuple(collect)
 
     return type(cls.__name__, bases, cls.__dict__.copy())

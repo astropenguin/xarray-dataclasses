@@ -45,6 +45,39 @@ class ImageW(WithNewX[ImageDataset]):
     data: Data[Tuple[X, Y], float]
 
 
+class MaskedImageDataset(ImageDataset):
+    __slots__ = ()
+    mask: xr.DataArray
+
+
+class ColoredImageDataset(ImageDataset):
+    __slots__ = ()
+    tint: xr.DataArray
+
+
+class MaskedColoredImageDataset(
+    MaskedImageDataset, ColoredImageDataset
+):
+    __slots__ = ()
+
+
+@datasetclass
+class MaskedImageW(ImageW, WithNewX[MaskedImageDataset]):
+    mask: Data[Tuple[X, Y], bool]
+
+
+@datasetclass
+class ColoredImageW(ImageW, WithNewX[ColoredImageDataset]):
+    tint: Data[Tuple[X, Y], float]
+
+
+@datasetclass
+class MaskedColoredImageW(
+    MaskedImageW, ColoredImageW, WithNewX[MaskedColoredImageDataset]
+):
+    pass
+
+
 def test_dataset_extend_base():
     image = ImageU.new([[1, 2], [3, 4]])
     assert ImageU.new.__annotations__["return"] == xr.Dataset
@@ -72,5 +105,29 @@ def test_dataset_extend_with_new():
     foo(image)
 
 
+def test_dataset_extend_derived():
+    masked = MaskedImageW.new([[1]], [[True]])
+    assert (
+        MaskedImageW.new.__annotations__["return"] == MaskedImageDataset
+    )
+    assert isinstance(masked, MaskedImageDataset)
+    foo_masked(masked)
+
+
+def test_dataset_extend_diamond():
+    mc = MaskedColoredImageW.new(
+        data=[[1]], mask=[[True]], tint=[[0.8]]
+    )
+    assert (
+        MaskedColoredImageW.new.__annotations__["return"]
+        == MaskedColoredImageDataset
+    )
+    assert isinstance(mc, MaskedColoredImageDataset)
+
+
 def foo(imageDataset: ImageDataset):
+    pass
+
+
+def foo_masked(maskedDataset: MaskedImageDataset):
     pass
