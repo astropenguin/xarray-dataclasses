@@ -5,7 +5,8 @@ __all__ = ["copy_class", "copy_func", "copy_wraps", "extend_class"]
 from copy import copy, deepcopy
 from functools import wraps, WRAPPER_ASSIGNMENTS, WRAPPER_UPDATES
 from types import FunctionType
-from typing import Callable, Sequence, TypeVar
+import types
+from typing import Callable, Sequence, Tuple, Type, TypeVar, cast
 
 
 # type hints (internal)
@@ -22,7 +23,7 @@ def copy_class(cls: type, prefix: str = "Copied") -> type:
     name = prefix + cls.__name__
 
     if cls.__bases__ == (object,):
-        bases = ()
+        bases: Tuple[type, ...] = ()
     else:
         bases = cls.__bases__
 

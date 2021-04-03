@@ -7,6 +7,7 @@ from enum import auto, Enum
 from typing import (
     Any,
     Callable,
+    Generic,
     cast,
     Dict,
     ForwardRef,
@@ -69,12 +70,19 @@ class DataArray(Protocol[D, T]):
     __array__: Callable[..., np.ndarray]
 
 
-class DataClass(Protocol[DS]):
+class DataClass(Protocol):
     """Type hint for dataclass instance."""
 
     __init__: Callable[..., None]
     __dataclass_fields__: FieldDict
+
+
+class WithClass(Generic[DS]):
     __dataset_class__: Type[DS]
+
+
+class DataClassX(DataClass, WithClass[DS]):
+    ...
 
 
 DataArrayLike = Union[DataArray[D, T], ndarray[T], Sequence[T], T]
