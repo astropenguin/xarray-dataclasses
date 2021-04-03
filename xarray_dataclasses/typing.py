@@ -21,6 +21,7 @@ from typing import (
 
 # third-party packages
 import numpy as np
+import xarray as xr
 from typing_extensions import (
     Annotated,
     Final,
@@ -49,6 +50,7 @@ class Xarray(Enum):
 # type hints (internal)
 D = TypeVar("D", covariant=True)
 T = TypeVar("T", covariant=True)
+DS = TypeVar("DS", bound=xr.Dataset)
 
 DTypeLike = Union[np.dtype, type, str, None]
 FieldDict = Dict[str, Field]
@@ -67,11 +69,12 @@ class DataArray(Protocol[D, T]):
     __array__: Callable[..., np.ndarray]
 
 
-class DataClass(Protocol):
+class DataClass(Protocol[DS]):
     """Type hint for dataclass instance."""
 
     __init__: Callable[..., None]
     __dataclass_fields__: FieldDict
+    __dataset_class__: Type[DS]
 
 
 DataArrayLike = Union[DataArray[D, T], ndarray[T], Sequence[T], T]

@@ -8,7 +8,7 @@ __all__ = ["asdataset", "datasetclass"]
 from dataclasses import dataclass
 from functools import wraps
 from types import FunctionType
-from typing import Any, Callable, cast, Optional, Type, Union
+from typing import Any, Callable, Generic, cast, Optional, Type, Union
 
 
 # third-party packages
@@ -17,7 +17,7 @@ import xarray as xr
 
 # submodules
 from .common import get_attrs, get_coords, get_data_vars
-from .typing import DataClass
+from .typing import DS, DataClass
 from .utils import copy_class, extend_class
 
 
@@ -26,7 +26,7 @@ TEMP_CLASS_PREFIX: str = "__Copied"
 
 
 # runtime functions (public)
-def asdataset(inst: DataClass) -> xr.Dataset:
+def asdataset(inst: DataClass[DS]) -> DS:
     """Convert a Dataset-class instance to Dataset one."""
     dataset = xr.Dataset(get_data_vars(inst))
     coords = get_coords(inst, dataset)
@@ -50,9 +50,9 @@ def datasetclass(
 ) -> Union[Type[DataClass], Callable[[type], Type[DataClass]]]:
     """Class decorator to create a Dataset class."""
 
-    def to_dataclass(cls: type) -> Type[DataClass]:
-        if shorthands:
-            cls = extend_class(cls, DatasetMixin)
+    def to_dataclass(cls: type) -> Type[DataClass[DS]]:
+        if shorthands and not issubclass(cls, WithNew):
+            cls = extend_class(cls, WithNew)
 
         return dataclass(
             init=init,
@@ -69,8 +69,7 @@ def datasetclass(
         return to_dataclass(cls)
 
 
-# mix-in class (internal)
-class DatasetMixin:
+class WithNew(Generic[DS], DataClass[DS]):
     """Mix-in class that provides shorthand methods."""
 
     @classmethod
@@ -78,7 +77,7 @@ class DatasetMixin:
         cls,
         *args: Any,
         **kwargs: Any,
-    ) -> xr.Dataset:
+    ) -> DS:
         """Create a Dataset instance."""
         raise NotImplementedError
 
@@ -93,7 +92,7 @@ class DatasetMixin:
             return
 
         init: FunctionType = Temp.__init__  # type: ignore
-        init.__annotations__["return"] = xr.Dataset
+        init.__annotations__["return"] = cls.__dataset_class__
 
         # create a concrete new method and bind
         @classmethod
@@ -102,7 +101,7 @@ class DatasetMixin:
             cls,  # type: ignore
             *args: Any,
             **kwargs: Any,
-        ) -> xr.Dataset:
+        ) -> DS:
             """Create a Dataset instance."""
             cls = cast(Type[DataClass], cls)
             return asdataset(cls(*args, **kwargs))

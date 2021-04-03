@@ -11,7 +11,7 @@ from typing_extensions import Literal
 
 # submodules
 from xarray_dataclasses.dataarray import DataArrayMixin
-from xarray_dataclasses.dataset import DatasetMixin
+from xarray_dataclasses.dataset import WithNew
 from xarray_dataclasses.typing import Attr, Coord, Data
 
 # constants
@@ -31,7 +31,7 @@ class Image(DataArrayMixin):
 
 
 @dataclass
-class RGBImage(DatasetMixin):
+class RGBImage(WithNew):
     red: Data[Tuple[X, Y], float]
     green: Data[Tuple[X, Y], float]
     blue: Data[Tuple[X, Y], float]

@@ -74,6 +74,8 @@ def copy_wraps(
 
 def extend_class(cls: type, mixin: type) -> type:
     """Extend a class with a mix-in class."""
+    if issubclass(cls, mixin):
+        return cls
     if cls.__bases__ == (object,):
         bases = (mixin,)
     else:
