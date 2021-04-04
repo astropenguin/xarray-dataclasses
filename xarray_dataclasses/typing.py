@@ -51,6 +51,8 @@ class Xarray(Enum):
 # type hints (internal)
 D = TypeVar("D", covariant=True)
 T = TypeVar("T", covariant=True)
+
+# create dataset type (internal)
 DS = TypeVar("DS", bound=xr.Dataset)
 
 DTypeLike = Union[np.dtype, type, str, None]
