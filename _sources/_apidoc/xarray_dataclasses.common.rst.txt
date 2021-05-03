@@ -1,0 +1,7 @@
+xarray\_dataclasses.common module
+=================================
+
+.. automodule:: xarray_dataclasses.common
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,382 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>xarray_dataclasses.dataarray &#8212; Python  documentation</title>
+    
+  <link rel="stylesheet" href="../../_static/css/index.f658d18f9b420779cfdf24aa0a7e2d77.css">
+
+    
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+  <link rel="stylesheet"
+    href="../../_static/vendor/open-sans_all/1.44.1/index.css">
+  <link rel="stylesheet"
+    href="../../_static/vendor/lato_latin-ext/1.44.1/index.css">
+
+    
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/basic.css" type="text/css" />
+    
+  <link rel="preload" as="script" href="../../_static/js/index.d3f166471bb80abb5163.js">
+
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en" />
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main">
+<div class="container-xl">
+
+    <a class="navbar-brand" href="../../index.html">
+    
+      <img src="../../_static/logo.svg" class="logo" alt="logo" />
+    
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
+      <ul id="navbar-main-elements" class="navbar-nav mr-auto">
+        
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../index.html">Home</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../_apidoc/xarray_dataclasses.html">Package guide</a>
+        </li>
+        
+        
+      </ul>
+
+
+      
+
+      <ul class="navbar-nav">
+        
+          <li class="nav-item">
+            <a class="nav-link" href="https://github.com/astropenguin/xarray-dataclasses/" target="_blank" rel="noopener">
+              <span><i class="fab fa-github-square"></i></span>
+            </a>
+          </li>
+        
+        
+          <li class="nav-item">
+            <a class="nav-link" href="https://twitter.com/astropengu_in/" target="_blank" rel="noopener">
+              <span><i class="fab fa-twitter-square"></i></span>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+          <div class="col-12 col-md-3 bd-sidebar"><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form>
+<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+
+    <div class="bd-toc-item active">
+    
+  
+    <ul class="nav bd-sidenav">
+        
+        
+        
+        
+        
+      </ul>
+  
+  </nav>
+          </div>
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+              
+
+<nav id="bd-toc-nav">
+    <ul class="nav section-nav flex-column">
+    
+    </ul>
+</nav>
+
+
+              
+          </div>
+          
+
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <h1>Source code for xarray_dataclasses.dataarray</h1><div class="highlight"><pre>
+<span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;asdataarray&quot;</span><span class="p">,</span> <span class="s2">&quot;dataarrayclass&quot;</span><span class="p">]</span>
+
+
+<span class="c1"># standard library</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">FunctionType</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
+
+
+<span class="c1"># third-party packages</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
+
+
+<span class="c1"># submodules</span>
+<span class="kn">from</span> <span class="nn">.common</span> <span class="kn">import</span> <span class="n">get_attrs</span><span class="p">,</span> <span class="n">get_coords</span><span class="p">,</span> <span class="n">get_data</span><span class="p">,</span> <span class="n">get_data_name</span><span class="p">,</span> <span class="n">get_name</span>
+<span class="kn">from</span> <span class="nn">.typing</span> <span class="kn">import</span> <span class="n">DataClass</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">copy_class</span><span class="p">,</span> <span class="n">extend_class</span>
+
+
+<span class="c1"># constants</span>
+<span class="n">TEMP_CLASS_PREFIX</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;__Copied&quot;</span>
+
+
+<span class="c1"># type hints (internal)</span>
+<span class="n">Order</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;F&quot;</span><span class="p">]</span>
+<span class="n">Shape</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">int</span><span class="p">]</span>
+
+
+<span class="c1"># runtime functions (public)</span>
+<div class="viewcode-block" id="asdataarray"><a class="viewcode-back" href="../../_apidoc/xarray_dataclasses.dataarray.html#xarray_dataclasses.dataarray.asdataarray">[docs]</a><span class="k">def</span> <span class="nf">asdataarray</span><span class="p">(</span><span class="n">inst</span><span class="p">:</span> <span class="n">DataClass</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Convert a DataArray-class instance to DataArray one.&quot;&quot;&quot;</span>
+    <span class="n">dataarray</span> <span class="o">=</span> <span class="n">get_data</span><span class="p">(</span><span class="n">inst</span><span class="p">)</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">get_coords</span><span class="p">(</span><span class="n">inst</span><span class="p">,</span> <span class="n">dataarray</span><span class="p">)</span>
+
+    <span class="n">dataarray</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+    <span class="n">dataarray</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">get_attrs</span><span class="p">(</span><span class="n">inst</span><span class="p">)</span>
+    <span class="n">dataarray</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">get_name</span><span class="p">(</span><span class="n">inst</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dataarray</span></div>
+
+
+<div class="viewcode-block" id="dataarrayclass"><a class="viewcode-back" href="../../_apidoc/xarray_dataclasses.dataarray.html#xarray_dataclasses.dataarray.dataarrayclass">[docs]</a><span class="k">def</span> <span class="nf">dataarrayclass</span><span class="p">(</span>
+    <span class="bp">cls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">init</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="nb">repr</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">eq</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">order</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">unsafe_hash</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">frozen</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">shorthands</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">DataClass</span><span class="p">],</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">type</span><span class="p">],</span> <span class="n">Type</span><span class="p">[</span><span class="n">DataClass</span><span class="p">]]]:</span>
+    <span class="sd">&quot;&quot;&quot;Class decorator to create a DataArray class.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">to_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="nb">type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">DataClass</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">shorthands</span><span class="p">:</span>
+            <span class="bp">cls</span> <span class="o">=</span> <span class="n">extend_class</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">DataArrayMixin</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">dataclass</span><span class="p">(</span>
+            <span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">,</span>
+            <span class="nb">repr</span><span class="o">=</span><span class="nb">repr</span><span class="p">,</span>
+            <span class="n">eq</span><span class="o">=</span><span class="n">eq</span><span class="p">,</span>
+            <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span>
+            <span class="n">unsafe_hash</span><span class="o">=</span><span class="n">unsafe_hash</span><span class="p">,</span>
+            <span class="n">frozen</span><span class="o">=</span><span class="n">frozen</span><span class="p">,</span>
+        <span class="p">)(</span><span class="bp">cls</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">to_dataclass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">to_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span></div>
+
+
+<span class="c1"># mix-in class (internal)</span>
+<span class="k">class</span> <span class="nc">DataArrayMixin</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Mix-in class that provides shorthand methods.&quot;&quot;&quot;</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">new</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Create a DataArray instance.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">empty</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">shape</span><span class="p">:</span> <span class="n">Shape</span><span class="p">,</span>
+        <span class="n">order</span><span class="p">:</span> <span class="n">Order</span> <span class="o">=</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Create a DataArray instance without initializing data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            shape: Shape of the new DataArray instance.</span>
+<span class="sd">            order: Whether to store data in row-major (C-style)</span>
+<span class="sd">                or column-major (Fortran-style) order in memory.</span>
+<span class="sd">            kwargs: Args of the DataArray class except for data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataArray instance filled without initializing data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Type</span><span class="p">[</span><span class="n">DataClass</span><span class="p">],</span> <span class="bp">cls</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">get_data_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">asdataarray</span><span class="p">(</span><span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">data</span><span class="p">},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">zeros</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">shape</span><span class="p">:</span> <span class="n">Shape</span><span class="p">,</span>
+        <span class="n">order</span><span class="p">:</span> <span class="n">Order</span> <span class="o">=</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Create a DataArray instance filled with zeros.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            shape: Shape of the new DataArray instance.</span>
+<span class="sd">            order: Whether to store data in row-major (C-style)</span>
+<span class="sd">                or column-major (Fortran-style) order in memory.</span>
+<span class="sd">            kwargs: Args of the DataArray class except for data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataArray instance filled with zeros.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Type</span><span class="p">[</span><span class="n">DataClass</span><span class="p">],</span> <span class="bp">cls</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">get_data_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">asdataarray</span><span class="p">(</span><span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">data</span><span class="p">},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">ones</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">shape</span><span class="p">:</span> <span class="n">Shape</span><span class="p">,</span>
+        <span class="n">order</span><span class="p">:</span> <span class="n">Order</span> <span class="o">=</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Create a DataArray instance filled with ones.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            shape: Shape of the new DataArray instance.</span>
+<span class="sd">            order: Whether to store data in row-major (C-style)</span>
+<span class="sd">                or column-major (Fortran-style) order in memory.</span>
+<span class="sd">            kwargs: Args of the DataArray class except for data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataArray instance filled with ones.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Type</span><span class="p">[</span><span class="n">DataClass</span><span class="p">],</span> <span class="bp">cls</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">get_data_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">asdataarray</span><span class="p">(</span><span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">data</span><span class="p">},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">full</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">shape</span><span class="p">:</span> <span class="n">Shape</span><span class="p">,</span>
+        <span class="n">fill_value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">order</span><span class="p">:</span> <span class="n">Order</span> <span class="o">=</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Create a DataArray instance filled with given value.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            shape: Shape of the new DataArray instance.</span>
+<span class="sd">            fill_value: Value for the new DataArray instance.</span>
+<span class="sd">            order: Whether to store data in row-major (C-style)</span>
+<span class="sd">                or column-major (Fortran-style) order in memory.</span>
+<span class="sd">            kwargs: Args of the DataArray class except for data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataArray instance filled with given value.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Type</span><span class="p">[</span><span class="n">DataClass</span><span class="p">],</span> <span class="bp">cls</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">get_data_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">fill_value</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">asdataarray</span><span class="p">(</span><span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">data</span><span class="p">},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Update new() based on the dataclass definition.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># temporary class only for getting dataclass __init__</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">Temp</span> <span class="o">=</span> <span class="n">dataclass</span><span class="p">(</span><span class="n">copy_class</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">TEMP_CLASS_PREFIX</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">init</span><span class="p">:</span> <span class="n">FunctionType</span> <span class="o">=</span> <span class="n">Temp</span><span class="o">.</span><span class="fm">__init__</span>  <span class="c1"># type: ignore</span>
+        <span class="n">init</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">[</span><span class="s2">&quot;return&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span>
+
+        <span class="c1"># create a concrete new method and bind</span>
+        <span class="nd">@classmethod</span>
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">init</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">new</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+            <span class="sd">&quot;&quot;&quot;Create a DataArray instance.&quot;&quot;&quot;</span>
+            <span class="bp">cls</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Type</span><span class="p">[</span><span class="n">DataClass</span><span class="p">],</span> <span class="bp">cls</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">asdataarray</span><span class="p">(</span><span class="bp">cls</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+
+        <span class="bp">cls</span><span class="o">.</span><span class="n">new</span> <span class="o">=</span> <span class="n">new</span>  <span class="c1"># type: ignore</span>
+</pre></div>
+
+              </div>
+              
+              
+              <div class='prev-next-bottom'>
+                
+
+              </div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+
+    
+  <script src="../../_static/js/index.d3f166471bb80abb5163.js"></script>
+
+
+    <footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    <p>
+          &copy; Copyright 2020, Akio Taniguchi.<br/>
+        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.2.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

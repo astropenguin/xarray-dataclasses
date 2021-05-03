@@ -1,0 +1,474 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>xarray-dataclasses &#8212; Python  documentation</title>
+    
+  <link rel="stylesheet" href="_static/css/index.f658d18f9b420779cfdf24aa0a7e2d77.css">
+
+    
+  <link rel="stylesheet"
+    href="_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+  <link rel="stylesheet"
+    href="_static/vendor/open-sans_all/1.44.1/index.css">
+  <link rel="stylesheet"
+    href="_static/vendor/lato_latin-ext/1.44.1/index.css">
+
+    
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    
+  <link rel="preload" as="script" href="_static/js/index.d3f166471bb80abb5163.js">
+
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="xarray_dataclasses package" href="_apidoc/xarray_dataclasses.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en" />
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main">
+<div class="container-xl">
+
+    <a class="navbar-brand" href="#">
+    
+      <img src="_static/logo.svg" class="logo" alt="logo" />
+    
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
+      <ul id="navbar-main-elements" class="navbar-nav mr-auto">
+        
+        
+        <li class="nav-item active">
+            <a class="nav-link" href="">Home</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="_apidoc/xarray_dataclasses.html">Package guide</a>
+        </li>
+        
+        
+      </ul>
+
+
+      
+
+      <ul class="navbar-nav">
+        
+          <li class="nav-item">
+            <a class="nav-link" href="https://github.com/astropenguin/xarray-dataclasses/" target="_blank" rel="noopener">
+              <span><i class="fab fa-github-square"></i></span>
+            </a>
+          </li>
+        
+        
+          <li class="nav-item">
+            <a class="nav-link" href="https://twitter.com/astropengu_in/" target="_blank" rel="noopener">
+              <span><i class="fab fa-twitter-square"></i></span>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+          <div class="col-12 col-md-3 bd-sidebar"><form class="bd-search d-flex align-items-center" action="search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form>
+<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+
+    <div class="bd-toc-item active">
+    
+  
+    <ul class="nav bd-sidenav">
+        
+        
+          
+        
+        
+        
+        
+      </ul>
+  
+  </nav>
+          </div>
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+              
+<div class="tocsection onthispage pt-5 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="nav section-nav flex-column">
+    
+        <li class="nav-item toc-entry toc-h2">
+            <a href="#tl-dr" class="nav-link">TL;DR</a><ul class="nav section-nav flex-column">
+                
+        <li class="nav-item toc-entry toc-h3">
+            <a href="#features" class="nav-link">Features</a>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h3">
+            <a href="#installation" class="nav-link">Installation</a>
+        </li>
+    
+            </ul>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h2">
+            <a href="#introduction" class="nav-link">Introduction</a>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h2">
+            <a href="#basic-usage" class="nav-link">Basic usage</a><ul class="nav section-nav flex-column">
+                
+        <li class="nav-item toc-entry toc-h3">
+            <a href="#data" class="nav-link">Data</a>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h3">
+            <a href="#coord" class="nav-link">Coord</a>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h3">
+            <a href="#attr" class="nav-link">Attr</a>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h3">
+            <a href="#name" class="nav-link">Name</a>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h3">
+            <a href="#dataarray-class" class="nav-link">DataArray class</a>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h3">
+            <a href="#dataset-class" class="nav-link">Dataset class</a>
+        </li>
+    
+            </ul>
+        </li>
+    
+    </ul>
+</nav>
+
+
+              
+          </div>
+          
+
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <div class="section" id="xarray-dataclasses">
+<h1>xarray-dataclasses<a class="headerlink" href="#xarray-dataclasses" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="https://pypi.org/project/xarray-dataclasses/"><img alt="PyPI" src="https://img.shields.io/pypi/v/xarray-dataclasses.svg?label=PyPI&amp;style=flat-square" /></a> <a class="reference external" href="https://pypi.org/project/xarray-dataclasses/"><img alt="Python" src="https://img.shields.io/pypi/pyversions/xarray-dataclasses.svg?label=Python&amp;color=yellow&amp;style=flat-square" /></a> <a class="reference external" href="https://github.com/astropenguin/xarray-dataclasses/actions"><img alt="Test" src="https://img.shields.io/github/workflow/status/astropenguin/xarray-dataclasses/Test?logo=github&amp;label=Test&amp;style=flat-square" /></a> <a class="reference external" href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-blue.svg?label=License&amp;style=flat-square" /></a></p>
+<p>xarray extension for DataArray and Dataset classes</p>
+<div class="section" id="tl-dr">
+<h2>TL;DR<a class="headerlink" href="#tl-dr" title="Permalink to this headline">¶</a></h2>
+<p>xarray-dataclasses is a Python package for creating DataArray and Dataset classes in the same manner as <a class="reference external" href="https://docs.python.org/3/library/dataclasses.html">the Python’s native dataclass</a>. Here is an example code of what the package provides:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">xarray_dataclasses</span> <span class="kn">import</span> <span class="n">Coord</span><span class="p">,</span> <span class="n">Data</span><span class="p">,</span> <span class="n">dataarrayclass</span>
+
+
+<span class="nd">@dataarrayclass</span>
+<span class="k">class</span> <span class="nc">Image</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;DataArray that represents an image.&quot;&quot;&quot;</span>
+
+    <span class="n">data</span><span class="p">:</span> <span class="n">Data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">Coord</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">Coord</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+
+<span class="c1"># create a DataArray instance</span>
+<span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]],</span> <span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+
+<span class="c1"># create a DataArray instance filled with ones</span>
+<span class="n">ones</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="section" id="features">
+<h3>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>DataArray or Dataset instances with fixed dimensions, data type, and coordinates can easily be created.</p></li>
+<li><p>NumPy-like special functions such as <code class="docutils literal notranslate"><span class="pre">ones()</span></code> are provided as class methods.</p></li>
+<li><p>100% compatible with <a class="reference external" href="https://docs.python.org/3/library/dataclasses.html">the Python’s native dataclass</a>.</p></li>
+<li><p>100% compatible with static type check by <a class="reference external" href="https://github.com/microsoft/pyright">Pyright</a>.</p></li>
+</ul>
+</div>
+<div class="section" id="installation">
+<h3>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pip install xarray-dataclasses
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="https://xarray.pydata.org/en/stable/index.html">xarray</a> is useful for handling labeled multi-dimensional data, but it is a bit troublesome to create a DataArray or Dataset instance with fixed dimensions, data type, or coordinates. For example, let us think about the following specifications of DataArray instances:</p>
+<ul class="simple">
+<li><p>Dimensions of data must be <code class="docutils literal notranslate"><span class="pre">('x',</span> <span class="pre">'y')</span></code>.</p></li>
+<li><p>Data type of data must be <code class="docutils literal notranslate"><span class="pre">float</span></code>.</p></li>
+<li><p>Data type of dimensions must be <code class="docutils literal notranslate"><span class="pre">int</span></code>.</p></li>
+<li><p>Default value of dimensions must be <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p></li>
+</ul>
+<p>Then a function to create a spec-compliant DataArray instance is something like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+
+
+<span class="k">def</span> <span class="nf">spec_dataarray</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a spec-comliant DataArray instance.&quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span>
+        <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">),</span>
+        <span class="n">coords</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)),</span>
+            <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)),</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+
+<span class="n">dataarray</span> <span class="o">=</span> <span class="n">spec_dataarray</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]])</span>
+</pre></div>
+</div>
+<p>The issues are (1) it is hard to figure out the specs from the code and (2) it is hard to reuse the code, for example, to add a new coordinate to the original specs.</p>
+<p><a class="reference external" href="#xarray-dataclasses">xarray-dataclasses</a> resolves them by defining the specs as a dataclass with dedicated type hints:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">xarray_dataclasses</span> <span class="kn">import</span> <span class="n">Coord</span><span class="p">,</span> <span class="n">Data</span><span class="p">,</span> <span class="n">dataarrayclass</span>
+
+
+<span class="nd">@dataarrayclass</span>
+<span class="k">class</span> <span class="nc">Specs</span><span class="p">:</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">Data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">Coord</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">Coord</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+
+<span class="n">dataarray</span> <span class="o">=</span> <span class="n">Specs</span><span class="o">.</span><span class="n">new</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]])</span>
+</pre></div>
+</div>
+<p>The specs are now much easier to read: The type hints, <code class="docutils literal notranslate"><span class="pre">Data[&lt;dims&gt;,</span> <span class="pre">&lt;dtype&gt;]</span></code> and <code class="docutils literal notranslate"><span class="pre">Coord[&lt;dims&gt;,</span> <span class="pre">&lt;dtype&gt;]</span></code>, have complete information of DataArray creation. The default values are given as class variables.</p>
+<p>The class decorator, <code class="docutils literal notranslate"><span class="pre">&#64;dataarrayclass</span></code>, converts a class to <a class="reference external" href="https://docs.python.org/3/library/dataclasses.html">the Python’s native dataclass</a> and add class methods such as <code class="docutils literal notranslate"><span class="pre">new()</span></code> to it. The extension of the specs is then easy by class inheritance.</p>
+</div>
+<div class="section" id="basic-usage">
+<h2>Basic usage<a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h2>
+<p>xarray-dataclasses uses <a class="reference external" href="https://docs.python.org/3/library/dataclasses.html">the Python’s native dataclass</a> (please learn how to use it before proceeding). Data (or data variables), coordinates, attribute members, and name of a DataArray or Dataset instance are defined as dataclass fields with the following dedicated type hints.</p>
+<div class="section" id="data">
+<h3>Data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">Data[&lt;dims&gt;,</span> <span class="pre">&lt;dtype&gt;]</span></code> specifies the field whose value will become the data of a DataArray instance or a member of the data variables of a Dataset instance. It accepts two type variables, <code class="docutils literal notranslate"><span class="pre">&lt;dims&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;dtype&gt;</span></code>, for fixing dimensions and data type, respectively. For example:</p>
+<table class="table">
+<colgroup>
+<col style="width: 44%" />
+<col style="width: 19%" />
+<col style="width: 36%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Type hint</p></th>
+<th class="head"><p>Inferred dims</p></th>
+<th class="head"><p>Inferred dtype</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Data['x',</span> <span class="pre">typing.Any]</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">('x',)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Data['x',</span> <span class="pre">int]</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">('x',)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">numpy.dtype('int64')</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Data['x',</span> <span class="pre">float]</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">('x',)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">numpy.dtype('float64')</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Data[tuple['x',</span> <span class="pre">'y'],</span> <span class="pre">float]</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">('x',</span> <span class="pre">'y')</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">numpy.dtype('float64')</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>Note: for Python 3.7 and 3.8, use <code class="docutils literal notranslate"><span class="pre">typing.Tuple[...]</span></code> instead of <code class="docutils literal notranslate"><span class="pre">tuple[...]</span></code>.</p>
+</div>
+<div class="section" id="coord">
+<h3>Coord<a class="headerlink" href="#coord" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">Coord[&lt;dims&gt;,</span> <span class="pre">&lt;dtypes&gt;]</span></code> specifies the field whose value will become a coordinate of a DataArray or Dataset instance. Similar to <code class="docutils literal notranslate"><span class="pre">Data</span></code>, it accepts two type variables, <code class="docutils literal notranslate"><span class="pre">&lt;dims&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;dtype&gt;</span></code>, for fixing dimensions and data type, respectively.</p>
+</div>
+<div class="section" id="attr">
+<h3>Attr<a class="headerlink" href="#attr" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">Attr[&lt;type&gt;]</span></code> specifies the field whose value will become a member of the attributes (attrs) of a DataArray or Dataset instance. It accepts a type variable, <code class="docutils literal notranslate"><span class="pre">&lt;type&gt;</span></code>, for specifying the type of the value. For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataarrayclass</span>
+<span class="k">class</span> <span class="nc">Specs</span><span class="p">:</span>
+    <span class="n">units</span><span class="p">:</span> <span class="n">Attr</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;m/s&#39;</span>  <span class="c1"># equivalent to str</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="name">
+<h3>Name<a class="headerlink" href="#name" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">Name[&lt;type&gt;]</span></code> specifies the field whose value will become the name of a DataArray. It accepts a type variable, <code class="docutils literal notranslate"><span class="pre">&lt;type&gt;</span></code>, for specifying the type of the value. For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataarrayclass</span>
+<span class="k">class</span> <span class="nc">Specs</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">Name</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;default&#39;</span>  <span class="c1"># equivalent to str</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="dataarray-class">
+<h3>DataArray class<a class="headerlink" href="#dataarray-class" title="Permalink to this headline">¶</a></h3>
+<p>DataArray class is a dataclass that defines DataArray creation. For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">xarray_dataclasses</span> <span class="kn">import</span> <span class="n">Attr</span><span class="p">,</span> <span class="n">Coord</span><span class="p">,</span> <span class="n">Data</span><span class="p">,</span> <span class="n">Name</span><span class="p">,</span> <span class="n">dataarrayclass</span>
+
+
+<span class="nd">@dataarrayclass</span>
+<span class="k">class</span> <span class="nc">Image</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;DataArray that represents an image.&quot;&quot;&quot;</span>
+
+    <span class="n">data</span><span class="p">:</span> <span class="n">Data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">Coord</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">Coord</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">dpi</span><span class="p">:</span> <span class="n">Attr</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">300</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">Name</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;default&#39;</span>
+</pre></div>
+</div>
+<p>where exactly one <code class="docutils literal notranslate"><span class="pre">Data</span></code>-typed field is allowed. <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> is raised if more than two <code class="docutils literal notranslate"><span class="pre">Data</span></code>-type fields exist. A spec-compliant DataArray instance is created by a shorthand method, <code class="docutils literal notranslate"><span class="pre">new()</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]],</span> <span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="o">&lt;</span><span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span> <span class="s1">&#39;default&#39;</span> <span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="mi">2</span><span class="p">)</span><span class="o">&gt;</span>
+<span class="n">array</span><span class="p">([[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span>
+       <span class="p">[</span><span class="mf">2.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">]])</span>
+<span class="n">Coordinates</span><span class="p">:</span>
+  <span class="o">*</span> <span class="n">x</span>        <span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="n">int64</span> <span class="mi">0</span> <span class="mi">1</span>
+  <span class="o">*</span> <span class="n">y</span>        <span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="n">int64</span> <span class="mi">0</span> <span class="mi">1</span>
+<span class="n">Attributes</span><span class="p">:</span>
+    <span class="n">dpi</span><span class="p">:</span>      <span class="mi">300</span>
+</pre></div>
+</div>
+<p>DataArray class has NumPy-like <code class="docutils literal notranslate"><span class="pre">empty()</span></code>, <code class="docutils literal notranslate"><span class="pre">zeros()</span></code>, <code class="docutils literal notranslate"><span class="pre">ones()</span></code>, <code class="docutils literal notranslate"><span class="pre">full()</span></code> methods:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Image</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;flat&#39;</span><span class="p">)</span>
+
+<span class="o">&lt;</span><span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span> <span class="s1">&#39;flat&#39;</span> <span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="mi">3</span><span class="p">)</span><span class="o">&gt;</span>
+<span class="n">array</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span>
+       <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span>
+       <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]])</span>
+<span class="n">Coordinates</span><span class="p">:</span>
+  <span class="o">*</span> <span class="n">x</span>        <span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="n">int64</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span>
+  <span class="o">*</span> <span class="n">y</span>        <span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="n">int64</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span>
+<span class="n">Attributes</span><span class="p">:</span>
+    <span class="n">dpi</span><span class="p">:</span>      <span class="mi">200</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="dataset-class">
+<h3>Dataset class<a class="headerlink" href="#dataset-class" title="Permalink to this headline">¶</a></h3>
+<p>Dataset class is a dataclass that defines Dataset creation. For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">xarray_dataclasses</span> <span class="kn">import</span> <span class="n">Attr</span><span class="p">,</span> <span class="n">Coord</span><span class="p">,</span> <span class="n">Data</span><span class="p">,</span> <span class="n">datasetclass</span>
+
+
+<span class="nd">@datasetclass</span>
+<span class="k">class</span> <span class="nc">RGBImage</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Dataset that represents a three-color image.&quot;&quot;&quot;</span>
+
+    <span class="n">red</span><span class="p">:</span> <span class="n">Data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span>
+    <span class="n">green</span><span class="p">:</span> <span class="n">Data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span>
+    <span class="n">blue</span><span class="p">:</span> <span class="n">Data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">Coord</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">Coord</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">dpi</span><span class="p">:</span> <span class="n">Attr</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">300</span>
+</pre></div>
+</div>
+<p>where multiple <code class="docutils literal notranslate"><span class="pre">Data</span></code>-typed fields are allowed. A spec-compliant Dataset instance is created by a shorthand method, <code class="docutils literal notranslate"><span class="pre">new()</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">RGBImage</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+    <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span>  <span class="c1"># red</span>
+    <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span>  <span class="c1"># green</span>
+    <span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]],</span>  <span class="c1"># blue</span>
+<span class="p">)</span>
+
+<span class="o">&lt;</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="o">&gt;</span>
+<span class="n">Dimensions</span><span class="p">:</span>  <span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">Coordinates</span><span class="p">:</span>
+  <span class="o">*</span> <span class="n">x</span>        <span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="n">int64</span> <span class="mi">0</span> <span class="mi">0</span>
+  <span class="o">*</span> <span class="n">y</span>        <span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="n">int64</span> <span class="mi">0</span> <span class="mi">0</span>
+<span class="n">Data</span> <span class="n">variables</span><span class="p">:</span>
+    <span class="n">red</span>      <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="n">float64</span> <span class="mf">0.0</span> <span class="mf">0.0</span> <span class="mf">0.0</span> <span class="mf">0.0</span>
+    <span class="n">green</span>    <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="n">float64</span> <span class="mf">1.0</span> <span class="mf">1.0</span> <span class="mf">1.0</span> <span class="mf">1.0</span>
+    <span class="n">blue</span>     <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="n">float64</span> <span class="mf">2.0</span> <span class="mf">2.0</span> <span class="mf">2.0</span> <span class="mf">2.0</span>
+<span class="n">Attributes</span><span class="p">:</span>
+    <span class="n">dpi</span><span class="p">:</span>      <span class="mi">300</span>
+</pre></div>
+</div>
+<!-- References --><div class="toctree-wrapper compound">
+</div>
+</div>
+</div>
+</div>
+
+
+              </div>
+              
+              
+              <div class='prev-next-bottom'>
+                
+    <a class='right-next' id="next-link" href="_apidoc/xarray_dataclasses.html" title="next page">xarray_dataclasses package</a>
+
+              </div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+
+    
+  <script src="_static/js/index.d3f166471bb80abb5163.js"></script>
+
+
+    <footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    <p>
+          &copy; Copyright 2020, Akio Taniguchi.<br/>
+        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.2.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+xarray\_dataclasses package
+===========================
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   xarray_dataclasses.common
+   xarray_dataclasses.dataarray
+   xarray_dataclasses.dataset
+   xarray_dataclasses.typing
+   xarray_dataclasses.utils
+
+Module contents
+---------------
+
+.. automodule:: xarray_dataclasses
+   :members:
+   :undoc-members:
+   :show-inheritance:
