@@ -5,11 +5,12 @@ __all__ = ["asdataset", "datasetclass"]
 from dataclasses import dataclass
 from functools import wraps
 from types import FunctionType
-from typing import Any, Callable, cast, Optional, Type, Union
+from typing import Any, Callable, Optional, Type, TypeVar, Union
 
 
 # third-party packages
 import xarray as xr
+from typing_extensions import Protocol
 
 
 # submodules
@@ -22,8 +23,20 @@ from .utils import copy_class, extend_class
 TEMP_CLASS_PREFIX: str = "__Copied"
 
 
+# type hints (internal)
+DS = TypeVar("DS", covariant=True, bound=xr.Dataset)
+
+
+class HasFactory(Protocol[DS]):
+    __dataset_factory__: Callable[..., DS]
+
+
+class DatasetClass(DataClass, HasFactory[DS], Protocol):
+    pass
+
+
 # runtime functions (public)
-def asdataset(inst: DataClass) -> xr.Dataset:
+def asdataset(inst: DatasetClass[DS]) -> DS:
     """Convert a Dataset-class instance to Dataset one."""
     dataset = xr.Dataset(get_data_vars(inst))
     coords = get_coords(inst, dataset)
@@ -31,7 +44,7 @@ def asdataset(inst: DataClass) -> xr.Dataset:
     dataset.coords.update(coords)
     dataset.attrs = get_attrs(inst)
 
-    return dataset
+    return inst.__dataset_factory__(dataset)
 
 
 def datasetclass(
@@ -70,12 +83,14 @@ def datasetclass(
 class DatasetMixin:
     """Mix-in class that provides shorthand methods."""
 
+    __dataset_factory__ = xr.Dataset
+
     @classmethod
     def new(
-        cls,
+        cls: Type[DatasetClass[DS]],
         *args: Any,
         **kwargs: Any,
-    ) -> xr.Dataset:
+    ) -> DS:
         """Create a Dataset instance."""
         raise NotImplementedError
 
@@ -90,18 +105,17 @@ class DatasetMixin:
             return
 
         init: FunctionType = Temp.__init__  # type: ignore
-        init.__annotations__["return"] = xr.Dataset
+        init.__annotations__["return"] = DS
 
         # create a concrete new method and bind
         @classmethod
         @wraps(init)
         def new(
-            cls,  # type: ignore
+            cls: Type[DatasetClass[DS]],
             *args: Any,
             **kwargs: Any,
-        ) -> xr.Dataset:
+        ) -> DS:
             """Create a Dataset instance."""
-            cls = cast(Type[DataClass], cls)
             return asdataset(cls(*args, **kwargs))
 
         cls.new = new  # type: ignore
