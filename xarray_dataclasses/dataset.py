@@ -5,7 +5,7 @@ __all__ = ["asdataset", "datasetclass"]
 from dataclasses import dataclass
 from functools import wraps
 from types import FunctionType
-from typing import Any, Callable, Optional, Type, TypeVar, Union
+from typing import Any, Callable, Optional, overload, Type, TypeVar, Union
 
 
 # third-party packages
@@ -27,16 +27,28 @@ TEMP_CLASS_PREFIX: str = "__Copied"
 DS = TypeVar("DS", covariant=True, bound=xr.Dataset)
 
 
-class HasFactory(Protocol[DS]):
+class DataClassWithFactory(DataClass, Protocol[DS]):
     __dataset_factory__: Callable[..., DS]
 
 
-class DatasetClass(DataClass, HasFactory[DS], Protocol):
-    pass
-
-
 # runtime functions (public)
-def asdataset(inst: DatasetClass[DS]) -> DS:
+@overload
+def asdataset(
+    inst: DataClassWithFactory[DS],
+    dataset_factory: Type[Any] = xr.Dataset,
+) -> DS:
+    ...
+
+
+@overload
+def asdataset(
+    inst: DataClass,
+    dataset_factory: Type[DS] = xr.Dataset,
+) -> DS:
+    ...
+
+
+def asdataset(inst: Any, dataset_factory: Any = xr.Dataset) -> Any:
     """Convert a Dataset-class instance to Dataset one."""
     dataset = xr.Dataset(get_data_vars(inst))
     coords = get_coords(inst, dataset)
@@ -44,7 +56,10 @@ def asdataset(inst: DatasetClass[DS]) -> DS:
     dataset.coords.update(coords)
     dataset.attrs = get_attrs(inst)
 
-    return inst.__dataset_factory__(dataset)
+    try:
+        return inst.__dataset_factory__(dataset)
+    except AttributeError:
+        return dataset_factory(dataset)
 
 
 def datasetclass(
@@ -87,7 +102,7 @@ class DatasetMixin:
 
     @classmethod
     def new(
-        cls: Type[DatasetClass[DS]],
+        cls: Type[DataClassWithFactory[DS]],
         *args: Any,
         **kwargs: Any,
     ) -> DS:
@@ -111,11 +126,10 @@ class DatasetMixin:
         @classmethod
         @wraps(init)
         def new(
-            cls: Type[DatasetClass[DS]],
+            cls: Type[DataClassWithFactory[DS]],
             *args: Any,
             **kwargs: Any,
         ) -> DS:
-            """Create a Dataset instance."""
             return asdataset(cls(*args, **kwargs))
 
         cls.new = new  # type: ignore
