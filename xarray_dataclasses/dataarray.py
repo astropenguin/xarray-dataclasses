@@ -5,7 +5,7 @@ __all__ = ["asdataarray", "dataarrayclass"]
 from dataclasses import dataclass
 from functools import wraps
 from types import FunctionType
-from typing import Any, Callable, cast, Optional, Sequence, Type, Union
+from typing import Any, Callable, Optional, overload, Sequence, Type, TypeVar, Union
 
 
 # third-party packages
@@ -30,16 +30,28 @@ Shape = Union[Sequence[int], int]
 DA = TypeVar("DA", covariant=True, bound=xr.DataArray)
 
 
-class HasFactory(Protocol[DA]):
+class DataClassWithFactory(DataClass, Protocol[DA]):
     __dataarray_factory__: Callable[..., DA]
 
 
-class DataArrayClass(DataClass, HasFactory[DA], Protocol):
-    pass
-
-
 # runtime functions (public)
-def asdataarray(inst: DataArrayClass[DA]) -> DA:
+@overload
+def asdataarray(
+    inst: DataClassWithFactory[DA],
+    dataarray_factory: Type[Any] = xr.DataArray,
+) -> DA:
+    ...
+
+
+@overload
+def asdataarray(
+    inst: DataClass,
+    dataarray_factory: Type[DA] = xr.DataArray,
+) -> DA:
+    ...
+
+
+def asdataarray(inst: Any, dataarray_factory: Any = xr.DataArray) -> Any:
     """Convert a DataArray-class instance to DataArray one."""
     dataarray = get_data(inst)
     coords = get_coords(inst, dataarray)
@@ -48,7 +60,10 @@ def asdataarray(inst: DataArrayClass[DA]) -> DA:
     dataarray.attrs = get_attrs(inst)
     dataarray.name = get_name(inst)
 
-    return inst.__dataarray_factory__(dataarray)
+    try:
+        return inst.__dataarray_factory__(dataarray)
+    except AttributeError:
+        return dataarray_factory(dataarray)
 
 
 def dataarrayclass(
@@ -91,7 +106,7 @@ class DataArrayMixin:
 
     @classmethod
     def new(
-        cls: Type[DataArrayClass[DA]],
+        cls: Type[DataClassWithFactory[DA]],
         *args: Any,
         **kwargs: Any,
     ) -> DA:
@@ -100,7 +115,7 @@ class DataArrayMixin:
 
     @classmethod
     def empty(
-        cls: Type[DataArrayClass[DA]],
+        cls: Type[DataClassWithFactory[DA]],
         shape: Shape,
         order: Order = "C",
         **kwargs: Any,
@@ -123,7 +138,7 @@ class DataArrayMixin:
 
     @classmethod
     def zeros(
-        cls: Type[DataArrayClass[DA]],
+        cls: Type[DataClassWithFactory[DA]],
         shape: Shape,
         order: Order = "C",
         **kwargs: Any,
@@ -146,7 +161,7 @@ class DataArrayMixin:
 
     @classmethod
     def ones(
-        cls: Type[DataArrayClass[DA]],
+        cls: Type[DataClassWithFactory[DA]],
         shape: Shape,
         order: Order = "C",
         **kwargs: Any,
@@ -169,7 +184,7 @@ class DataArrayMixin:
 
     @classmethod
     def full(
-        cls: Type[DataArrayClass[DA]],
+        cls: Type[DataClassWithFactory[DA]],
         shape: Shape,
         fill_value: Any,
         order: Order = "C",
@@ -209,11 +224,10 @@ class DataArrayMixin:
         @classmethod
         @wraps(init)
         def new(
-            cls: Type[DataArrayClass[DA]],
+            cls: Type[DataClassWithFactory[DA]],
             *args: Any,
             **kwargs: Any,
         ) -> DA:
-            """Create a DataArray instance."""
             return asdataarray(cls(*args, **kwargs))
 
         cls.new = new  # type: ignore
