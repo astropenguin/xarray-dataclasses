@@ -4,7 +4,6 @@ __all__ = ["asdataarray", "dataarrayclass"]
 # standard library
 from dataclasses import dataclass
 from functools import wraps
-from types import FunctionType
 from typing import Any, Callable, Optional, overload, Sequence, Type, TypeVar, Union
 
 
@@ -217,7 +216,7 @@ class DataArrayMixin:
         except ValueError:
             return
 
-        init: FunctionType = Temp.__init__  # type: ignore
+        init = Temp.__init__
         init.__annotations__["return"] = DA
 
         # create a concrete new method and bind

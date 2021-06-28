@@ -4,7 +4,6 @@ __all__ = ["asdataset", "datasetclass"]
 # standard library
 from dataclasses import dataclass
 from functools import wraps
-from types import FunctionType
 from typing import Any, Callable, Optional, overload, Type, TypeVar, Union
 
 
@@ -119,7 +118,7 @@ class DatasetMixin:
         except ValueError:
             return
 
-        init: FunctionType = Temp.__init__  # type: ignore
+        init = Temp.__init__
         init.__annotations__["return"] = DS
 
         # create a concrete new method and bind
