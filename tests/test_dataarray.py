@@ -25,8 +25,14 @@ Y = Literal[DIMS[1]]
 
 
 # dataclasses
+class Custom(xr.DataArray):
+    __slots__ = ()
+
+
 @dataclass
 class Image(DataArrayMixin):
+    __dataarray_factory__ = Custom
+
     data: Data[Tuple[X, Y], float]
     x: Coord[X, int] = 0
     y: Coord[Y, int] = 0
@@ -36,7 +42,7 @@ class Image(DataArrayMixin):
 
 # test datasets
 created = Image.ones(SHAPE)
-expected = xr.DataArray(
+expected = Custom(
     np.ones(SHAPE, float),
     dims=DIMS,
     coords={
@@ -49,6 +55,10 @@ expected = xr.DataArray(
 
 
 # test functions
+def test_type() -> None:
+    assert type(created) is type(expected)
+
+
 def test_data() -> None:
     assert (created == expected).all()  # type: ignore
 
