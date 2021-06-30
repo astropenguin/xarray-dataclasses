@@ -187,26 +187,6 @@ Examples:
 
 
 # runtime functions (internal)
-def is_attr(type_: Any) -> bool:
-    """Check if type is Attr[T]."""
-    return Xarray.ATTR.annotates(type_)
-
-
-def is_coord(type_: Any) -> bool:
-    """Check if type is Coord[D, T]."""
-    return Xarray.COORD.annotates(type_)
-
-
-def is_data(type_: Any) -> bool:
-    """Check if type is Data[D, T]."""
-    return Xarray.DATA.annotates(type_)
-
-
-def is_name(type_: Any) -> bool:
-    """Check if type is Name[T]."""
-    return Xarray.NAME.annotates(type_)
-
-
 def get_dims(type_: Type[DataArrayLike[D, T]]) -> Tuple[str, ...]:
     """Extract dimensions (dims) from DataArrayLike[D, T]."""
     if get_origin(type_) is Annotated:
