@@ -138,7 +138,7 @@ def _gen_fields(
     """
     for name, field in obj.__dataclass_fields__.items():
         if type_filter is None or type_filter(field.type):
-            yield field, getattr(obj, name, MISSING)
+            yield field, getattr(obj, name, MISSING)  # type: ignore
 
 
 def _to_dataarray(

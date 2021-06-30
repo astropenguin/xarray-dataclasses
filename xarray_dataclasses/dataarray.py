@@ -4,14 +4,13 @@ __all__ = ["asdataarray", "dataarrayclass"]
 # standard library
 from dataclasses import dataclass
 from functools import wraps
-from types import FunctionType
-from typing import Any, Callable, cast, Optional, Sequence, Type, Union
+from typing import Any, Callable, Optional, overload, Sequence, Type, TypeVar, Union
 
 
 # third-party packages
 import numpy as np
 import xarray as xr
-from typing_extensions import Literal
+from typing_extensions import Literal, Protocol
 
 
 # submodules
@@ -27,12 +26,38 @@ TEMP_CLASS_PREFIX: str = "__Copied"
 # type hints (internal)
 Order = Literal["C", "F"]
 Shape = Union[Sequence[int], int]
+DA = TypeVar("DA", covariant=True, bound=xr.DataArray)
+
+
+class DataClassWithFactory(DataClass, Protocol[DA]):
+    __dataarray_factory__: Callable[..., DA]
 
 
 # runtime functions (public)
-def asdataarray(inst: DataClass) -> xr.DataArray:
+@overload
+def asdataarray(
+    inst: DataClassWithFactory[DA],
+    dataarray_factory: Type[Any] = xr.DataArray,
+) -> DA:
+    ...
+
+
+@overload
+def asdataarray(
+    inst: DataClass,
+    dataarray_factory: Type[DA] = xr.DataArray,
+) -> DA:
+    ...
+
+
+def asdataarray(inst: Any, dataarray_factory: Any = xr.DataArray) -> Any:
     """Convert a DataArray-class instance to DataArray one."""
-    dataarray = get_data(inst)
+    try:
+        dataarray_factory = inst.__dataarray_factory__
+    except AttributeError:
+        pass
+
+    dataarray = dataarray_factory(get_data(inst))
     coords = get_coords(inst, dataarray)
 
     dataarray.coords.update(coords)
@@ -78,22 +103,24 @@ def dataarrayclass(
 class DataArrayMixin:
     """Mix-in class that provides shorthand methods."""
 
+    __dataarray_factory__ = xr.DataArray
+
     @classmethod
     def new(
-        cls,
+        cls: Type[DataClassWithFactory[DA]],
         *args: Any,
         **kwargs: Any,
-    ) -> xr.DataArray:
+    ) -> DA:
         """Create a DataArray instance."""
         raise NotImplementedError
 
     @classmethod
     def empty(
-        cls,
+        cls: Type[DataClassWithFactory[DA]],
         shape: Shape,
         order: Order = "C",
         **kwargs: Any,
-    ) -> xr.DataArray:
+    ) -> DA:
         """Create a DataArray instance without initializing data.
 
         Args:
@@ -106,18 +133,17 @@ class DataArrayMixin:
             DataArray instance filled without initializing data.
 
         """
-        cls = cast(Type[DataClass], cls)
         name = get_data_name(cls)
         data = np.empty(shape, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
 
     @classmethod
     def zeros(
-        cls,
+        cls: Type[DataClassWithFactory[DA]],
         shape: Shape,
         order: Order = "C",
         **kwargs: Any,
-    ) -> xr.DataArray:
+    ) -> DA:
         """Create a DataArray instance filled with zeros.
 
         Args:
@@ -130,18 +156,17 @@ class DataArrayMixin:
             DataArray instance filled with zeros.
 
         """
-        cls = cast(Type[DataClass], cls)
         name = get_data_name(cls)
         data = np.zeros(shape, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
 
     @classmethod
     def ones(
-        cls,
+        cls: Type[DataClassWithFactory[DA]],
         shape: Shape,
         order: Order = "C",
         **kwargs: Any,
-    ) -> xr.DataArray:
+    ) -> DA:
         """Create a DataArray instance filled with ones.
 
         Args:
@@ -154,19 +179,18 @@ class DataArrayMixin:
             DataArray instance filled with ones.
 
         """
-        cls = cast(Type[DataClass], cls)
         name = get_data_name(cls)
         data = np.ones(shape, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
 
     @classmethod
     def full(
-        cls,
+        cls: Type[DataClassWithFactory[DA]],
         shape: Shape,
         fill_value: Any,
         order: Order = "C",
         **kwargs: Any,
-    ) -> xr.DataArray:
+    ) -> DA:
         """Create a DataArray instance filled with given value.
 
         Args:
@@ -180,7 +204,6 @@ class DataArrayMixin:
             DataArray instance filled with given value.
 
         """
-        cls = cast(Type[DataClass], cls)
         name = get_data_name(cls)
         data = np.full(shape, fill_value, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
@@ -195,19 +218,17 @@ class DataArrayMixin:
         except ValueError:
             return
 
-        init: FunctionType = Temp.__init__  # type: ignore
-        init.__annotations__["return"] = xr.DataArray
+        init = Temp.__init__
+        init.__annotations__["return"] = DA
 
         # create a concrete new method and bind
         @classmethod
         @wraps(init)
         def new(
-            cls,  # type: ignore
+            cls: Type[DataClassWithFactory[DA]],
             *args: Any,
             **kwargs: Any,
-        ) -> xr.DataArray:
-            """Create a DataArray instance."""
-            cls = cast(Type[DataClass], cls)
+        ) -> DA:
             return asdataarray(cls(*args, **kwargs))
 
         cls.new = new  # type: ignore

@@ -25,6 +25,10 @@ Y = Literal[DIMS[1]]
 
 
 # dataclasses
+class Custom(xr.Dataset):
+    __slots__ = ()
+
+
 @dataclass
 class Image(DataArrayMixin):
     data: Data[Tuple[X, Y], float]
@@ -32,6 +36,8 @@ class Image(DataArrayMixin):
 
 @dataclass
 class RGBImage(DatasetMixin):
+    __dataset_factory__ = Custom
+
     red: Data[Tuple[X, Y], float]
     green: Data[Tuple[X, Y], float]
     blue: Data[Tuple[X, Y], float]
@@ -46,7 +52,7 @@ created = RGBImage.new(
     Image.ones(SHAPE),
     Image.ones(SHAPE),
 )
-expected = xr.Dataset(
+expected = Custom(
     data_vars={
         "red": xr.DataArray(np.ones(SHAPE), dims=DIMS),
         "green": xr.DataArray(np.ones(SHAPE), dims=DIMS),
@@ -61,6 +67,10 @@ expected = xr.Dataset(
 
 
 # test functions
+def test_type() -> None:
+    assert type(created) is type(expected)
+
+
 def test_data_vars() -> None:
     assert (created == expected).all()  # type: ignore
 
