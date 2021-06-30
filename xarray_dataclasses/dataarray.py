@@ -52,17 +52,19 @@ def asdataarray(
 
 def asdataarray(inst: Any, dataarray_factory: Any = xr.DataArray) -> Any:
     """Convert a DataArray-class instance to DataArray one."""
-    dataarray = get_data(inst)
+    try:
+        dataarray_factory = inst.__dataarray_factory__
+    except AttributeError:
+        pass
+
+    dataarray = dataarray_factory(get_data(inst))
     coords = get_coords(inst, dataarray)
 
     dataarray.coords.update(coords)
     dataarray.attrs = get_attrs(inst)
     dataarray.name = get_name(inst)
 
-    try:
-        return inst.__dataarray_factory__(dataarray)
-    except AttributeError:
-        return dataarray_factory(dataarray)
+    return dataarray
 
 
 def dataarrayclass(

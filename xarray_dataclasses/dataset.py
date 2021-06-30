@@ -49,16 +49,18 @@ def asdataset(
 
 def asdataset(inst: Any, dataset_factory: Any = xr.Dataset) -> Any:
     """Convert a Dataset-class instance to Dataset one."""
-    dataset = xr.Dataset(get_data_vars(inst))
+    try:
+        dataset_factory = inst.__dataset_factory__
+    except AttributeError:
+        pass
+
+    dataset = dataset_factory(get_data_vars(inst))
     coords = get_coords(inst, dataset)
 
     dataset.coords.update(coords)
     dataset.attrs = get_attrs(inst)
 
-    try:
-        return inst.__dataset_factory__(dataset)
-    except AttributeError:
-        return dataset_factory(dataset)
+    return dataset
 
 
 def datasetclass(
