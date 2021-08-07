@@ -1,7 +1,7 @@
 # standard library
 from dataclasses import dataclass, Field
 from itertools import chain
-from typing import Any, ForwardRef, Optional, Tuple, Type, TypeVar, Union
+from typing import Any, ForwardRef, List, Optional, Tuple, Type, TypeVar, Union
 
 
 # third-party packages
@@ -11,7 +11,7 @@ from typing_extensions import Annotated, get_args, get_origin, Literal
 
 
 # submodules
-from .typing import ArrayLike, FieldType
+from .typing import ArrayLike, DataClass, FieldType
 from .utils import make_generic
 
 
@@ -20,6 +20,7 @@ make_generic(Field)
 
 
 # type hints
+DataClassLike = Union[Type[DataClass], DataClass]
 Dims = Tuple[str, ...]
 Dtype = Optional[str]
 NoneType = type(None)
@@ -77,6 +78,51 @@ class ParsedField:
 
         type = f"{field.type.__module__}.{field.type.__qualname__}"
         return cls(field.name, type, value)
+
+
+@dataclass(frozen=True)
+class ParsedDataClass:
+    """Dataclass for parsed dataclass or dataclass instance."""
+
+    attr: List[ParsedField]
+    """Parsed Attr-typed field(s) information."""
+    coord: List[ParsedField]
+    """Parsed Coord-typed field(s) information."""
+    data: List[ParsedField]
+    """Parsed Data-typed field(s) information."""
+    name: List[ParsedField]
+    """Parsed Name-typed field(s) information."""
+
+    def __post_init__(self):
+        """Validate the number of fields in ``data`` and ``name``."""
+        if len(self.data) == 0:
+            raise RuntimeError("Could not find any Data-typed fields.")
+
+        if len(self.name) > 1:
+            raise RuntimeError("Found more than one Name-typed fields.")
+
+    @classmethod
+    def from_dataclass(cls, dataclass: DataClassLike) -> "ParsedDataClass":
+        """Create an instance from a dataclass or dataclass instance."""
+        attr: List[ParsedField] = []
+        coord: List[ParsedField] = []
+        data: List[ParsedField] = []
+        name: List[ParsedField] = []
+
+        for field in dataclass.__dataclass_fields__.values():
+            value = getattr(dataclass, field.name, field.default)
+            parsed_field = ParsedField.from_field(field, value)
+
+            if FieldType.ATTR.annotates(field):
+                attr.append(parsed_field)
+            elif FieldType.COORD.annotates(field):
+                coord.append(parsed_field)
+            elif FieldType.DATA.annotates(field):
+                data.append(parsed_field)
+            elif FieldType.NAME.annotates(field):
+                name.append(parsed_field)
+
+        return cls(attr, coord, data, name)
 
 
 # helper features
