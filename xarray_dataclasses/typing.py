@@ -55,18 +55,19 @@ class FieldType(Enum):
 
 
 # type hints (internal)
-D = TypeVar("D", covariant=True)
-T = TypeVar("T", covariant=True)
+T = TypeVar("T")
+TDims = TypeVar("TDims", covariant=True)
+TDtype = TypeVar("TDtype", covariant=True)
 NoneType: Final[type] = type(None)
 
 
-class ndarray(Protocol[T]):
+class ndarray(Protocol[TDtype]):
     """Protocol version of numpy.ndarray."""
 
     __array__: Callable[..., np.ndarray]
 
 
-class DataArray(Protocol[D, T]):
+class DataArray(Protocol[TDims, TDtype]):
     """Protocol version of xarray.DataArray."""
 
     __array__: Callable[..., np.ndarray]
@@ -79,7 +80,12 @@ class DataClass(Protocol):
     __dataclass_fields__: Dict[str, Field[Any]]
 
 
-DataArrayLike = Union[DataArray[D, T], ndarray[T], Sequence[T], T]
+DataArrayLike = Union[
+    DataArray[TDims, TDtype],
+    ndarray[TDtype],
+    Sequence[TDtype],
+    TDtype,
+]
 """Type hint for DataArray-like object."""
 
 
@@ -105,7 +111,7 @@ Examples:
 
 """
 
-Coord = Annotated[DataArrayLike[D, T], FieldType.COORD]
+Coord = Annotated[DataArrayLike[TDims, TDtype], FieldType.COORD]
 """Type hint for a coordinate member of DataArray or Dataset.
 
 Examples:
@@ -128,7 +134,7 @@ Examples:
 
 """
 
-Data = Annotated[DataArrayLike[D, T], FieldType.DATA]
+Data = Annotated[DataArrayLike[TDims, TDtype], FieldType.DATA]
 """Type hint for data of DataArray or variable of Dataset.
 
 Examples:
@@ -187,8 +193,8 @@ Examples:
 
 
 # runtime functions (internal)
-def get_dims(type_: Type[DataArrayLike[D, T]]) -> Tuple[str, ...]:
-    """Extract dimensions (dims) from DataArrayLike[D, T]."""
+def get_dims(type_: Type[DataArrayLike[Any, Any]]) -> Tuple[str, ...]:
+    """Extract dimensions (dims) from DataArrayLike[TDims, TDtype]."""
     if get_origin(type_) is Annotated:
         type_ = get_args(type_)[0]
 
@@ -218,8 +224,8 @@ def get_dims(type_: Type[DataArrayLike[D, T]]) -> Tuple[str, ...]:
     return tuple(dims)
 
 
-def get_dtype(type_: Type[DataArrayLike[D, T]]) -> Union[type, str, None]:
-    """Extract a data type (dtype) from DataArrayLike[D, T]."""
+def get_dtype(type_: Type[DataArrayLike[Any, Any]]) -> Union[type, str, None]:
+    """Extract a data type (dtype) from DataArrayLike[TDims, TDtype]."""
     if get_origin(type_) is Annotated:
         type_ = get_args(type_)[0]
 
