@@ -27,7 +27,7 @@ DataClassLike = Union[Type[DataClass], DataClass]
 Dims = Tuple[str, ...]
 Dtype = Optional[str]
 NoneType = type(None)
-ParsedType = str
+ParsedType = Type[Any]
 T = TypeVar("T")
 
 
@@ -79,8 +79,7 @@ class ParsedField:
             type = ParsedDataArray.from_type(field.type)
             return cls(field.name, type, value)
 
-        type = f"{field.type.__module__}.{field.type.__qualname__}"
-        return cls(field.name, type, value)
+        return cls(field.name, unannotate(field.type), value)
 
 
 @dataclass(frozen=True)
