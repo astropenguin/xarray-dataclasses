@@ -42,4 +42,4 @@ jobs:
       - name: Test package (pytest)
         run : poetry run pytest -v tests
       - name: Test docs building (Sphinx)
-        run: poetry run scripts/docs
+        run: poetry run docs/build
