@@ -8,6 +8,7 @@ __version__ = "0.3.1"
 from . import common
 from . import dataarray
 from . import dataset
+from . import parser
 from . import typing
 from . import utils
 
