@@ -22,27 +22,27 @@ from .utils import copy_class, extend_class
 # type hints (internal)
 Order = Literal["C", "F"]
 Shape = Union[Sequence[int], int]
-DA = TypeVar("DA", bound=xr.DataArray)
+TDataArray = TypeVar("TDataArray", bound=xr.DataArray)
 
 
-class DataClassWithFactory(DataClass, Protocol[DA]):
-    __dataarray_factory__: Callable[..., DA]
+class DataClassWithFactory(DataClass, Protocol[TDataArray]):
+    __dataarray_factory__: Callable[..., TDataArray]
 
 
 # runtime functions (public)
 @overload
 def asdataarray(
-    inst: DataClassWithFactory[DA],
+    inst: DataClassWithFactory[TDataArray],
     dataarray_factory: Type[Any] = xr.DataArray,
-) -> DA:
+) -> TDataArray:
     ...
 
 
 @overload
 def asdataarray(
     inst: DataClass,
-    dataarray_factory: Type[DA] = xr.DataArray,
-) -> DA:
+    dataarray_factory: Type[TDataArray] = xr.DataArray,
+) -> TDataArray:
     ...
 
 
@@ -103,20 +103,20 @@ class DataArrayMixin:
 
     @classmethod
     def new(
-        cls: Type[DataClassWithFactory[DA]],
+        cls: Type[DataClassWithFactory[TDataArray]],
         *args: Any,
         **kwargs: Any,
-    ) -> DA:
+    ) -> TDataArray:
         """Create a DataArray instance."""
         raise NotImplementedError
 
     @classmethod
     def empty(
-        cls: Type[DataClassWithFactory[DA]],
+        cls: Type[DataClassWithFactory[TDataArray]],
         shape: Shape,
         order: Order = "C",
         **kwargs: Any,
-    ) -> DA:
+    ) -> TDataArray:
         """Create a DataArray instance without initializing data.
 
         Args:
@@ -135,11 +135,11 @@ class DataArrayMixin:
 
     @classmethod
     def zeros(
-        cls: Type[DataClassWithFactory[DA]],
+        cls: Type[DataClassWithFactory[TDataArray]],
         shape: Shape,
         order: Order = "C",
         **kwargs: Any,
-    ) -> DA:
+    ) -> TDataArray:
         """Create a DataArray instance filled with zeros.
 
         Args:
@@ -158,11 +158,11 @@ class DataArrayMixin:
 
     @classmethod
     def ones(
-        cls: Type[DataClassWithFactory[DA]],
+        cls: Type[DataClassWithFactory[TDataArray]],
         shape: Shape,
         order: Order = "C",
         **kwargs: Any,
-    ) -> DA:
+    ) -> TDataArray:
         """Create a DataArray instance filled with ones.
 
         Args:
@@ -181,12 +181,12 @@ class DataArrayMixin:
 
     @classmethod
     def full(
-        cls: Type[DataClassWithFactory[DA]],
+        cls: Type[DataClassWithFactory[TDataArray]],
         shape: Shape,
         fill_value: Any,
         order: Order = "C",
         **kwargs: Any,
-    ) -> DA:
+    ) -> TDataArray:
         """Create a DataArray instance filled with given value.
 
         Args:
@@ -215,16 +215,16 @@ class DataArrayMixin:
             return
 
         init = Temp.__init__
-        init.__annotations__["return"] = DA
+        init.__annotations__["return"] = TDataArray
 
         # create a concrete new method and bind
         @classmethod
         @wraps(init)
         def new(
-            cls: Type[DataClassWithFactory[DA]],
+            cls: Type[DataClassWithFactory[TDataArray]],
             *args: Any,
             **kwargs: Any,
-        ) -> DA:
+        ) -> TDataArray:
             return asdataarray(cls(*args, **kwargs))
 
         cls.new = new  # type: ignore
