@@ -1,7 +1,7 @@
 # standard library
-from dataclasses import dataclass
+from dataclasses import dataclass, Field
 from itertools import chain
-from typing import Any, ForwardRef, Optional, Tuple, Type, TypeVar
+from typing import Any, ForwardRef, Optional, Tuple, Type, TypeVar, Union
 
 
 # third-party packages
@@ -11,13 +11,19 @@ from typing_extensions import Annotated, get_args, get_origin, Literal
 
 
 # submodules
-from .typing import ArrayLike
+from .typing import ArrayLike, FieldType
+from .utils import make_generic
+
+
+# for Python 3.7 and 3.8
+make_generic(Field)
 
 
 # type hints
 Dims = Tuple[str, ...]
 Dtype = Optional[str]
 NoneType = type(None)
+ParsedType = str
 T = TypeVar("T")
 
 
@@ -40,6 +46,37 @@ class ParsedDataArray:
     def to_dataarray(self, data: Any) -> xr.DataArray:
         """Convert data to a DataArray with given dims and dtype."""
         return to_dataarray(data, self.dims, self.dtype)
+
+
+@dataclass(frozen=True)
+class ParsedField:
+    """Dataclass for parsed field information."""
+
+    name: str
+    """Name of a field."""
+    type: Union[ParsedDataArray, ParsedType]
+    """Parsed type of a field."""
+    value: Any
+    """Assigned value of a field."""
+
+    def __post_init__(self):
+        """Remove Annotated type from ``type``."""
+        super().__setattr__("type", unannotate(self.type))
+
+    @classmethod
+    def from_field(cls, field: Field[Any], value: Any) -> "ParsedField":
+        """Create an instance from a field and a value."""
+
+        if FieldType.COORD.annotates(field.type):
+            type = ParsedDataArray.from_type(field.type)
+            return cls(field.name, type, value)
+
+        if FieldType.DATA.annotates(field.type):
+            type = ParsedDataArray.from_type(field.type)
+            return cls(field.name, type, value)
+
+        type = f"{field.type.__module__}.{field.type.__qualname__}"
+        return cls(field.name, type, value)
 
 
 # helper features
