@@ -4,7 +4,13 @@ from typing import Any, ForwardRef, Optional, Tuple, TypeVar
 
 
 # third-party packages
+import numpy as np
+import xarray as xr
 from typing_extensions import Annotated, get_args, get_origin, Literal
+
+
+# submodules
+from .typing import ArrayLike
 
 
 # type hints
@@ -63,6 +69,24 @@ def parse_dtype(type_like: Any) -> Dtype:
         return str(args[0])
 
     raise ValueError(f"Could not parse {type_like}.")
+
+
+def to_dataarray(
+    data: Any,
+    dims: Dims,
+    dtype: Dtype,
+) -> xr.DataArray:
+    """Convert data to a DataArray with given dims and dtype."""
+    if not isinstance(data, ArrayLike):
+        data = np.asarray(data)  # type: ignore
+
+    if dtype is not None:
+        data = data.astype(dtype, copy=True)  # type: ignore
+
+    if data.ndim == 0:
+        data = data.reshape([1] * len(dims))  # type: ignore
+
+    return xr.DataArray(data, dims=dims)
 
 
 def unannotate(obj: T) -> T:
