@@ -19,27 +19,27 @@ from .utils import copy_class, extend_class
 
 
 # type hints (internal)
-DS = TypeVar("DS", bound=xr.Dataset)
+TDataset = TypeVar("TDataset", bound=xr.Dataset)
 
 
-class DataClassWithFactory(DataClass, Protocol[DS]):
-    __dataset_factory__: Callable[..., DS]
+class DataClassWithFactory(DataClass, Protocol[TDataset]):
+    __dataset_factory__: Callable[..., TDataset]
 
 
 # runtime functions (public)
 @overload
 def asdataset(
-    inst: DataClassWithFactory[DS],
+    inst: DataClassWithFactory[TDataset],
     dataset_factory: Type[Any] = xr.Dataset,
-) -> DS:
+) -> TDataset:
     ...
 
 
 @overload
 def asdataset(
     inst: DataClass,
-    dataset_factory: Type[DS] = xr.Dataset,
-) -> DS:
+    dataset_factory: Type[TDataset] = xr.Dataset,
+) -> TDataset:
     ...
 
 
@@ -99,10 +99,10 @@ class DatasetMixin:
 
     @classmethod
     def new(
-        cls: Type[DataClassWithFactory[DS]],
+        cls: Type[DataClassWithFactory[TDataset]],
         *args: Any,
         **kwargs: Any,
-    ) -> DS:
+    ) -> TDataset:
         """Create a Dataset instance."""
         raise NotImplementedError
 
@@ -117,16 +117,16 @@ class DatasetMixin:
             return
 
         init = Temp.__init__
-        init.__annotations__["return"] = DS
+        init.__annotations__["return"] = TDataset
 
         # create a concrete new method and bind
         @classmethod
         @wraps(init)
         def new(
-            cls: Type[DataClassWithFactory[DS]],
+            cls: Type[DataClassWithFactory[TDataset]],
             *args: Any,
             **kwargs: Any,
-        ) -> DS:
+        ) -> TDataset:
             return asdataset(cls(*args, **kwargs))
 
         cls.new = new  # type: ignore
