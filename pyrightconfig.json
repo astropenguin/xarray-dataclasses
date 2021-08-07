@@ -1,4 +1,5 @@
 {
     "typeCheckingMode": "strict",
-    "reportUnknownMemberType": "none"
+    "reportUnknownMemberType": "warning",
+    "reportUnknownVariableType": "warning"
 }

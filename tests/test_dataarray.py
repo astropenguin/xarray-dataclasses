@@ -46,8 +46,8 @@ expected = Custom(
     np.ones(SHAPE, float),
     dims=DIMS,
     coords={
-        "x": ("x", np.zeros(SHAPE[0])),
-        "y": ("y", np.zeros(SHAPE[1])),
+        "x": xr.DataArray(np.zeros(SHAPE[0]), dims="x"),
+        "y": xr.DataArray(np.zeros(SHAPE[1]), dims="y"),
     },
     attrs={"dpi": 100},
     name="image",

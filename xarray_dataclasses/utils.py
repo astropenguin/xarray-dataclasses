@@ -2,7 +2,11 @@ __all__ = ["copy_class", "extend_class", "make_generic"]
 
 
 # standard library
-from typing import Sequence, Type, TypeVar
+from typing import Any, Sequence, Type, TypeVar
+
+
+# constants
+COPIED_CLASS: str = "__xrdc_copied_class__"
 
 
 # type hints (internal)
@@ -11,23 +15,26 @@ GenericAlias = type(Sequence[int])
 
 
 # utility functions (internal)
-def copy_class(cls: type, prefix: str = "Copied") -> type:
-    """Copy a class as a new one whose name starts with prefix."""
+def copy_class(cls: Type[T]) -> Type[T]:
+    """Copy a class as a new one unless it is already copied."""
 
-    if cls.__name__.startswith(prefix):
-        raise ValueError("Could not copy a copied class.")
-
-    name = prefix + cls.__name__
+    if hasattr(cls, COPIED_CLASS):
+        raise RuntimeError("Could not copy an already copied class.")
 
     if cls.__bases__ == (object,):
         bases = ()
     else:
         bases = cls.__bases__
 
-    return type(name, bases, cls.__dict__.copy())
+    namespace = {
+        **cls.__dict__.copy(),
+        **{COPIED_CLASS: True},
+    }
+
+    return type(cls.__name__, bases, namespace)
 
 
-def extend_class(cls: type, mixin: type) -> type:
+def extend_class(cls: Type[T], mixin: Type[Any]) -> Type[T]:
     """Extend a class with a mix-in class."""
     if cls.__bases__ == (object,):
         bases = (mixin,)
