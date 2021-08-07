@@ -20,7 +20,6 @@ from typing import (
 
 
 # third-party packages
-import numpy as np
 from typing_extensions import (
     Annotated,
     Final,
@@ -61,18 +60,6 @@ TDtype = TypeVar("TDtype", covariant=True)
 NoneType: Final[type] = type(None)
 
 
-class ndarray(Protocol[TDtype]):
-    """Protocol version of numpy.ndarray."""
-
-    __array__: Callable[..., np.ndarray]
-
-
-class DataArray(Protocol[TDims, TDtype]):
-    """Protocol version of xarray.DataArray."""
-
-    __array__: Callable[..., np.ndarray]
-
-
 class DataClass(Protocol):
     """Type hint for dataclass instance."""
 
@@ -80,12 +67,23 @@ class DataClass(Protocol):
     __dataclass_fields__: Dict[str, Field[Any]]
 
 
-DataArrayLike = Union[
-    DataArray[TDims, TDtype],
-    ndarray[TDtype],
-    Sequence[TDtype],
-    TDtype,
-]
+class ArrayLike(Protocol[TDims, TDtype]):
+    """Type hint for array-like object."""
+
+    @property
+    def dtype(self) -> Any:
+        ...
+
+    @property
+    def ndim(self) -> Any:
+        ...
+
+    @property
+    def shape(self) -> Any:
+        ...
+
+
+DataArrayLike = Union[ArrayLike[TDims, TDtype], Sequence[TDtype], TDtype]
 """Type hint for DataArray-like object."""
 
 
