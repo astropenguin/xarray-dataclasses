@@ -1,3 +1,6 @@
+__all__ = ["parse"]
+
+
 # standard library
 from dataclasses import dataclass, Field
 from itertools import chain
@@ -123,6 +126,12 @@ class ParsedDataClass:
                 name.append(parsed_field)
 
         return cls(attr, coord, data, name)
+
+
+# main features
+def parse(dataclass: DataClassLike) -> ParsedDataClass:
+    """Parse a dataclass or dataclass instance."""
+    return ParsedDataClass.from_dataclass(dataclass)
 
 
 # helper features
