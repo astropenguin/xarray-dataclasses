@@ -40,8 +40,8 @@ make_generic(Field)
 
 
 # constants (internal)
-class Xarray(Enum):
-    """Identifiers for type hints of xarray-dataclasses."""
+class FieldType(Enum):
+    """Type hint annotations for xarray field types."""
 
     ATTR = auto()  #: Attribute member of DataArray or Dataset.
     COORD = auto()  #: Coordinate member of DataArray or Dataset.
@@ -84,7 +84,7 @@ DataArrayLike = Union[DataArray[D, T], ndarray[T], Sequence[T], T]
 
 
 # type hints (public)
-Attr = Annotated[T, Xarray.ATTR]
+Attr = Annotated[T, FieldType.ATTR]
 """Type hint for an attribute member of DataArray or Dataset.
 
 Examples:
@@ -105,7 +105,7 @@ Examples:
 
 """
 
-Coord = Annotated[DataArrayLike[D, T], Xarray.COORD]
+Coord = Annotated[DataArrayLike[D, T], FieldType.COORD]
 """Type hint for a coordinate member of DataArray or Dataset.
 
 Examples:
@@ -128,7 +128,7 @@ Examples:
 
 """
 
-Data = Annotated[DataArrayLike[D, T], Xarray.DATA]
+Data = Annotated[DataArrayLike[D, T], FieldType.DATA]
 """Type hint for data of DataArray or variable of Dataset.
 
 Examples:
@@ -164,7 +164,7 @@ Examples:
 
 """
 
-Name = Annotated[T, Xarray.NAME]
+Name = Annotated[T, FieldType.NAME]
 """Type hint for a name of DataArray.
 
 Examples:

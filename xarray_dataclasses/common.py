@@ -24,9 +24,9 @@ import xarray as xr
 from .typing import (
     DataArrayLike,
     DataClass,
+    FieldType,
     get_dims,
     get_dtype,
-    Xarray,
 )
 from .utils import make_generic
 
@@ -42,7 +42,7 @@ T = TypeVar("T")
 # runtime function (internal)
 def get_attrs(inst: DataClass) -> Dict[Hashable, Any]:
     """Return Attr-typed values for a DataArray or Dataset instance."""
-    return {f.name: v for f, v in _gen_fields(inst, Xarray.ATTR.annotates)}
+    return {f.name: v for f, v in _gen_fields(inst, FieldType.ATTR.annotates)}
 
 
 def get_coords(
@@ -60,13 +60,13 @@ def get_coords(
 
     """
     sizes = bound_to.sizes
-    fields = _gen_fields(inst, Xarray.COORD.annotates)
+    fields = _gen_fields(inst, FieldType.COORD.annotates)
     return {f.name: _to_dataarray(v, f.type, sizes) for f, v in fields}
 
 
 def get_data(inst: DataClass) -> xr.DataArray:
     """Return Data-typed value for a DataArray instance."""
-    fields = _gen_fields(inst, Xarray.DATA.annotates)
+    fields = _gen_fields(inst, FieldType.DATA.annotates)
     data = {f.name: _to_dataarray(v, f.type) for f, v in fields}
 
     if len(data) > 1:
@@ -80,7 +80,7 @@ def get_data(inst: DataClass) -> xr.DataArray:
 
 def get_data_name(cls: Type[DataClass]) -> str:
     """Return name of Data-typed field for a DataArray instance."""
-    fields = dict(_gen_fields(cls, Xarray.DATA.annotates))
+    fields = dict(_gen_fields(cls, FieldType.DATA.annotates))
 
     if len(fields) > 1:
         raise ValueError("Unique Data-typed field is allowed.")
@@ -93,7 +93,7 @@ def get_data_name(cls: Type[DataClass]) -> str:
 
 def get_data_vars(inst: DataClass) -> Dict[Hashable, xr.DataArray]:
     """Return Data-typed values for a Dataset instance."""
-    fields = _gen_fields(inst, Xarray.DATA.annotates)
+    fields = _gen_fields(inst, FieldType.DATA.annotates)
     data_vars: Dict[Hashable, xr.DataArray]
     data_vars = {f.name: _to_dataarray(v, f.type) for f, v in fields}
 
@@ -105,7 +105,7 @@ def get_data_vars(inst: DataClass) -> Dict[Hashable, xr.DataArray]:
 
 def get_name(inst: DataClass) -> Optional[Hashable]:
     """Return Name-typed value for a DataArray instance."""
-    names = {f.name: v for f, v in _gen_fields(inst, Xarray.NAME.annotates)}
+    names = {f.name: v for f, v in _gen_fields(inst, FieldType.NAME.annotates)}
 
     if len(names) > 1:
         raise ValueError("Unique Name-typed value is allowed.")
