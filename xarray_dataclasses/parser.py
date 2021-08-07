@@ -116,13 +116,13 @@ class ParsedDataClass:
             value = getattr(dataclass, field.name, field.default)
             parsed_field = ParsedField.from_field(field, value)
 
-            if FieldType.ATTR.annotates(field):
+            if FieldType.ATTR.annotates(field.type):
                 attr.append(parsed_field)
-            elif FieldType.COORD.annotates(field):
+            elif FieldType.COORD.annotates(field.type):
                 coord.append(parsed_field)
-            elif FieldType.DATA.annotates(field):
+            elif FieldType.DATA.annotates(field.type):
                 data.append(parsed_field)
-            elif FieldType.NAME.annotates(field):
+            elif FieldType.NAME.annotates(field.type):
                 name.append(parsed_field)
 
         return cls(attr, coord, data, name)
