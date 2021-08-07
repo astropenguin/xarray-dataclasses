@@ -1,6 +1,7 @@
 # standard library
+from dataclasses import dataclass
 from itertools import chain
-from typing import Any, ForwardRef, Optional, Tuple, TypeVar
+from typing import Any, ForwardRef, Optional, Tuple, Type, TypeVar
 
 
 # third-party packages
@@ -18,6 +19,27 @@ Dims = Tuple[str, ...]
 Dtype = Optional[str]
 NoneType = type(None)
 T = TypeVar("T")
+
+
+# dataclasses
+@dataclass(frozen=True)
+class ParsedDataArray:
+    """Dataclass for parsed DataArray information."""
+
+    dims: Dims
+    """Parsed dimensions of DataArray."""
+    dtype: Dtype
+    """Parsed data type of DataArray."""
+
+    @classmethod
+    def from_type(cls, type: Type[Any]) -> "ParsedDataArray":
+        """Create an instance from a Data or Coord type."""
+        dims, dtype = get_args(get_args(unannotate(type))[0])
+        return cls(parse_dims(dims), parse_dtype(dtype))
+
+    def to_dataarray(self, data: Any) -> xr.DataArray:
+        """Convert data to a DataArray with given dims and dtype."""
+        return to_dataarray(data, self.dims, self.dtype)
 
 
 # helper features
