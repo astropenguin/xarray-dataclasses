@@ -18,12 +18,8 @@ from .typing import DataClass
 from .utils import copy_class, extend_class
 
 
-# constants
-TEMP_CLASS_PREFIX: str = "__Copied"
-
-
 # type hints (internal)
-DS = TypeVar("DS", covariant=True, bound=xr.Dataset)
+DS = TypeVar("DS", bound=xr.Dataset)
 
 
 class DataClassWithFactory(DataClass, Protocol[DS]):
@@ -64,7 +60,7 @@ def asdataset(inst: Any, dataset_factory: Any = xr.Dataset) -> Any:
 
 
 def datasetclass(
-    cls: Optional[type] = None,
+    cls: Optional[Type[Any]] = None,
     *,
     init: bool = True,
     repr: bool = True,
@@ -76,7 +72,7 @@ def datasetclass(
 ) -> Union[Type[DataClass], Callable[[type], Type[DataClass]]]:
     """Class decorator to create a Dataset class."""
 
-    def to_dataclass(cls: type) -> Type[DataClass]:
+    def to_dataclass(cls: Type[Any]) -> Type[DataClass]:
         if shorthands:
             cls = extend_class(cls, DatasetMixin)
 
@@ -116,8 +112,8 @@ class DatasetMixin:
 
         # temporary class only for getting dataclass __init__
         try:
-            Temp = dataclass(copy_class(cls, TEMP_CLASS_PREFIX))
-        except ValueError:
+            Temp = dataclass(copy_class(cls))
+        except RuntimeError:
             return
 
         init = Temp.__init__

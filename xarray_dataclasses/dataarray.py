@@ -19,14 +19,10 @@ from .typing import DataClass
 from .utils import copy_class, extend_class
 
 
-# constants
-TEMP_CLASS_PREFIX: str = "__Copied"
-
-
 # type hints (internal)
 Order = Literal["C", "F"]
 Shape = Union[Sequence[int], int]
-DA = TypeVar("DA", covariant=True, bound=xr.DataArray)
+DA = TypeVar("DA", bound=xr.DataArray)
 
 
 class DataClassWithFactory(DataClass, Protocol[DA]):
@@ -68,7 +64,7 @@ def asdataarray(inst: Any, dataarray_factory: Any = xr.DataArray) -> Any:
 
 
 def dataarrayclass(
-    cls: Optional[type] = None,
+    cls: Optional[Type[Any]] = None,
     *,
     init: bool = True,
     repr: bool = True,
@@ -80,7 +76,7 @@ def dataarrayclass(
 ) -> Union[Type[DataClass], Callable[[type], Type[DataClass]]]:
     """Class decorator to create a DataArray class."""
 
-    def to_dataclass(cls: type) -> Type[DataClass]:
+    def to_dataclass(cls: Type[Any]) -> Type[DataClass]:
         if shorthands:
             cls = extend_class(cls, DataArrayMixin)
 
@@ -214,8 +210,8 @@ class DataArrayMixin:
 
         # temporary class only for getting dataclass __init__
         try:
-            Temp = dataclass(copy_class(cls, TEMP_CLASS_PREFIX))
-        except ValueError:
+            Temp = dataclass(copy_class(cls))
+        except RuntimeError:
             return
 
         init = Temp.__init__

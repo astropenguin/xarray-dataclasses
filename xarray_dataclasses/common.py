@@ -36,7 +36,6 @@ make_generic(Field)
 
 
 # type hints (internal)
-D = TypeVar("D")
 T = TypeVar("T")
 
 
@@ -139,8 +138,8 @@ def _gen_fields(
 
 
 def _to_dataarray(
-    data: DataArrayLike[D, T],
-    type_: Type[DataArrayLike[D, T]],
+    data: DataArrayLike[Any, Any],
+    type_: Type[DataArrayLike[Any, Any]],
     sizes: Optional[Mapping[Hashable, int]] = None,
 ) -> xr.DataArray:
     """Create a DataArray instance from DataArrayLike object.
