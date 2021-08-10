@@ -4,13 +4,13 @@ __all__ = ["parse"]
 # standard library
 from dataclasses import dataclass, Field
 from itertools import chain
-from typing import Any, ForwardRef, List, Optional, Tuple, Type, TypeVar, Union
+from typing import Any, Dict, ForwardRef, List, Optional, Tuple, Type, TypeVar, Union
 
 
 # third-party packages
 import numpy as np
 import xarray as xr
-from typing_extensions import Annotated, get_args, get_origin, Literal
+from typing_extensions import Annotated, get_args, get_origin, Literal, Protocol
 
 
 # submodules
@@ -27,59 +27,73 @@ DataClassLike = Union[Type[DataClass], DataClass]
 Dims = Tuple[str, ...]
 Dtype = Optional[str]
 NoneType = type(None)
-ParsedType = Type[Any]
 T = TypeVar("T")
 
 
-# dataclasses
-@dataclass(frozen=True)
-class ParsedDataArray:
-    """Dataclass for parsed DataArray information."""
-
-    dims: Dims
-    """Parsed dimensions of DataArray."""
-    dtype: Dtype
-    """Parsed data type of DataArray."""
-
-    @classmethod
-    def from_type(cls, type: Type[Any]) -> "ParsedDataArray":
-        """Create an instance from a Data or Coord type."""
-        dims, dtype = get_args(get_args(unannotate(type))[0])
-        return cls(parse_dims(dims), parse_dtype(dtype))
-
-    def to_dataarray(self, data: Any) -> xr.DataArray:
-        """Convert data to a DataArray with given dims and dtype."""
-        return to_dataarray(data, self.dims, self.dtype)
-
-
-@dataclass(frozen=True)
-class ParsedField:
+class ParsedField(Protocol):
     """Dataclass for parsed field information."""
 
     name: str
     """Name of a field."""
-    type: Union[ParsedDataArray, ParsedType]
+    type: Dict[str, Any]
     """Parsed type of a field."""
     value: Any
     """Assigned value of a field."""
 
-    def __post_init__(self):
-        """Remove Annotated type from ``type``."""
-        super().__setattr__("type", unannotate(self.type))
-
     @classmethod
     def from_field(cls, field: Field[Any], value: Any) -> "ParsedField":
         """Create an instance from a field and a value."""
+        ...
 
-        if FieldType.COORD.annotates(field.type):
-            type = ParsedDataArray.from_type(field.type)
-            return cls(field.name, type, value)
+    def instantiate(self) -> Any:
+        """Convert a value to an instance with given type information."""
+        ...
 
-        if FieldType.DATA.annotates(field.type):
-            type = ParsedDataArray.from_type(field.type)
-            return cls(field.name, type, value)
 
-        return cls(field.name, unannotate(field.type), value)
+# dataclasses
+@dataclass(frozen=True)
+class DataArray:
+    """Dataclass for parsed DataArray information."""
+
+    name: str
+    """Name of a field."""
+    type: Dict[str, Any]
+    """Parsed type of a field."""
+    value: Any
+    """Assigned value of a field."""
+
+    @classmethod
+    def from_field(cls, field: Field[Any], value: Any) -> "DataArray":
+        """Create an instance from a Coord/Data-type field and a value."""
+        dims, dtype = get_args(get_args(unannotate(field.type))[0])
+        type = dict(dims=parse_dims(dims), dtype=parse_dtype(dtype))
+        return cls(field.name, type, value)
+
+    def instantiate(self) -> xr.DataArray:
+        """Convert a value to a DataArray with given dims and dtype."""
+        return to_dataarray(self.value, **self.type)
+
+
+@dataclass(frozen=True)
+class GeneralType:
+    """Dataclass for parsed general-type information."""
+
+    name: str
+    """Name of a field."""
+    type: Dict[str, Any]
+    """Parsed type of a field."""
+    value: Any
+    """Assigned value of a field."""
+
+    @classmethod
+    def from_field(cls, field: Field[Any], value: Any) -> "GeneralType":
+        """Create an instance from a general-type field and a value."""
+        type = dict(type=unannotate(field.type))
+        return cls(field.name, type, value)
+
+    def instantiate(self) -> Any:
+        """Do not convert but just return a value."""
+        return self.value
 
 
 @dataclass(frozen=True)
@@ -113,16 +127,15 @@ class ParsedDataClass:
 
         for field in dataclass.__dataclass_fields__.values():
             value = getattr(dataclass, field.name, field.default)
-            parsed_field = ParsedField.from_field(field, value)
 
             if FieldType.ATTR.annotates(field.type):
-                attr.append(parsed_field)
+                attr.append(GeneralType.from_field(field, value))
             elif FieldType.COORD.annotates(field.type):
-                coord.append(parsed_field)
+                coord.append(DataArray.from_field(field, value))
             elif FieldType.DATA.annotates(field.type):
-                data.append(parsed_field)
+                data.append(DataArray.from_field(field, value))
             elif FieldType.NAME.annotates(field.type):
-                name.append(parsed_field)
+                name.append(GeneralType.from_field(field, value))
 
         return cls(attr, coord, data, name)
 
