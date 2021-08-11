@@ -61,14 +61,14 @@ NoneType: Final[type] = type(None)
 
 
 class DataClass(Protocol):
-    """Type hint for dataclass instance."""
+    """Type hint for dataclass objects."""
 
     __init__: Callable[..., None]
     __dataclass_fields__: Dict[str, Field[Any]]
 
 
 class ArrayLike(Protocol[TDims, TDtype]):
-    """Type hint for array-like object."""
+    """Type hint for array-like objects."""
 
     @property
     def dtype(self) -> Any:
@@ -84,7 +84,11 @@ class ArrayLike(Protocol[TDims, TDtype]):
 
 
 DataArrayLike = Union[ArrayLike[TDims, TDtype], Sequence[TDtype], TDtype]
-"""Type hint for DataArray-like object."""
+"""Type hint for DataArray-like objects."""
+
+
+DataClassLike = Union[Type[DataClass], DataClass]
+"""Type hint for DataClass-like objects."""
 
 
 # type hints (public)

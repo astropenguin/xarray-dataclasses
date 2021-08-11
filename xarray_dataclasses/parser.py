@@ -4,7 +4,7 @@ __all__ = ["parse"]
 # standard library
 from dataclasses import dataclass, Field
 from itertools import chain
-from typing import Any, Dict, ForwardRef, List, Optional, Tuple, Type, TypeVar, Union
+from typing import Any, Dict, ForwardRef, List, Optional, Tuple, TypeVar
 
 
 # third-party packages
@@ -14,7 +14,7 @@ from typing_extensions import Annotated, get_args, get_origin, Literal, Protocol
 
 
 # submodules
-from .typing import ArrayLike, DataClass, FieldType
+from .typing import ArrayLike, DataClassLike, FieldType
 from .utils import make_generic
 
 
@@ -23,7 +23,6 @@ make_generic(Field)
 
 
 # type hints
-DataClassLike = Union[Type[DataClass], DataClass]
 Dims = Tuple[str, ...]
 Dtype = Optional[str]
 NoneType = type(None)
