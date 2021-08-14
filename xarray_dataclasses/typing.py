@@ -20,9 +20,9 @@ from typing import (
 
 
 # third-party packages
+import xarray as xr
 from typing_extensions import (
     Annotated,
-    Final,
     get_args,
     get_origin,
     Literal,
@@ -30,14 +30,18 @@ from typing_extensions import (
 )
 
 
-# constants (internal)
+# constants
 class FieldType(Enum):
     """Type hint annotations for xarray field types."""
 
-    ATTR = auto()  #: Attribute member of DataArray or Dataset.
-    COORD = auto()  #: Coordinate member of DataArray or Dataset.
-    DATA = auto()  #: Data of DataArray or variable of Dataset.
-    NAME = auto()  #: Name of DataArray.
+    ATTR = auto()
+    """Attribute member of DataArray or Dataset."""
+    COORD = auto()
+    """Coordinate member of DataArray or Dataset."""
+    DATA = auto()
+    """Data of DataArray or variable of Dataset."""
+    NAME = auto()
+    """Name of DataAarray."""
 
     def annotates(self, type_: Any) -> bool:
         """Check if type is annotated by the identifier."""
@@ -45,11 +49,15 @@ class FieldType(Enum):
         return len(args) > 1 and self in args[1:]
 
 
-# type hints (internal)
+# type hints
+Dims = Tuple[str, ...]
+Dtype = Optional[str]
+NoneType = type(None)
 T = TypeVar("T")
+TDataArray = TypeVar("TDataArray", bound=xr.DataArray)
+TDataset = TypeVar("TDataset", bound=xr.Dataset)
 TDims = TypeVar("TDims", covariant=True)
 TDtype = TypeVar("TDtype", covariant=True)
-NoneType: Final[type] = type(None)
 
 
 class DataClass(Protocol):
@@ -62,17 +70,8 @@ class DataClass(Protocol):
 class ArrayLike(Protocol[TDims, TDtype]):
     """Type hint for array-like objects."""
 
-    @property
-    def dtype(self) -> Any:
-        ...
-
-    @property
-    def ndim(self) -> Any:
-        ...
-
-    @property
-    def shape(self) -> Any:
-        ...
+    astype: Callable[..., Any]
+    ndim: Any
 
 
 DataArrayLike = Union[ArrayLike[TDims, TDtype], Sequence[TDtype], TDtype]
@@ -83,7 +82,6 @@ DataClassLike = Union[Type[DataClass], DataClass]
 """Type hint for DataClass-like objects."""
 
 
-# type hints (public)
 Attr = Annotated[T, FieldType.ATTR]
 """Type hint for an attribute member of DataArray or Dataset.
 
@@ -186,6 +184,7 @@ Examples:
 """
 
 
+# runtime functions
 def get_dims(type_like: Any) -> Dims:
     """Parse a type-like object and get dims."""
     type_like = unannotate(type_like)

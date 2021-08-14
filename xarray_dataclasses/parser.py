@@ -3,51 +3,27 @@ __all__ = ["parse"]
 
 # standard library
 from dataclasses import dataclass, Field
-from typing import Any, Dict, List, Optional, Tuple, TypeVar
+from typing import Any, List, Optional, Type
 
 
 # third-party packages
 import numpy as np
 import xarray as xr
-from typing_extensions import get_args, Protocol
+from typing_extensions import get_args
 
 
 # submodules
 from .typing import (
     ArrayLike,
     DataClassLike,
+    Dims,
+    Dtype,
     FieldType,
     get_dims,
     get_dtype,
+    TDataArray,
     unannotate,
 )
-
-
-# type hints
-Dims = Tuple[str, ...]
-Dtype = Optional[str]
-NoneType = type(None)
-T = TypeVar("T")
-
-
-class ParsedField(Protocol):
-    """Dataclass for parsed field information."""
-
-    name: str
-    """Name of a field."""
-    type: Dict[str, Any]
-    """Parsed type of a field."""
-    value: Any
-    """Assigned value of a field."""
-
-    @classmethod
-    def from_field(cls, field: Field[Any], value: Any) -> "ParsedField":
-        """Create an instance from a field and a value."""
-        ...
-
-    def instantiate(self) -> Any:
-        """Convert a value to an instance with given type information."""
-        ...
 
 
 # dataclasses
