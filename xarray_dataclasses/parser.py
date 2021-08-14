@@ -15,11 +15,6 @@ from typing_extensions import Annotated, get_args, get_origin, Literal, Protocol
 
 # submodules
 from .typing import ArrayLike, DataClassLike, FieldType
-from .utils import make_generic
-
-
-# for Python 3.7 and 3.8
-make_generic(Field)
 
 
 # type hints

@@ -1,4 +1,4 @@
-__all__ = ["copy_class", "extend_class", "make_generic"]
+__all__ = ["copy_class", "extend_class"]
 
 
 # standard library

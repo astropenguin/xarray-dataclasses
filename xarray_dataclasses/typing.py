@@ -30,14 +30,6 @@ from typing_extensions import (
 )
 
 
-# submodules
-from .utils import make_generic
-
-
-# for Python 3.7 and 3.8
-make_generic(Field)
-
-
 # constants (internal)
 class FieldType(Enum):
     """Type hint annotations for xarray field types."""
