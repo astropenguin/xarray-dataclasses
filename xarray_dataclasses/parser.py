@@ -200,18 +200,36 @@ def to_dataarray(
     data: Any,
     dims: Dims,
     dtype: Dtype,
+    template: Optional[xr.DataArray] = None,
 ) -> xr.DataArray:
     """Convert data to a DataArray with given dims and dtype."""
     if not isinstance(data, ArrayLike):
-        data = np.asarray(data)  # type: ignore
+        data = np.asarray(data)
 
     if dtype is not None:
-        data = data.astype(dtype, copy=True)  # type: ignore
+        data = data.astype(dtype, copy=True)
 
-    if data.ndim == 0:
-        data = data.reshape([1] * len(dims))  # type: ignore
+    if template is not None:
+        template = to_subspace(template, dims)
 
-    return xr.DataArray(data, dims=dims)
+    if data.ndim == len(dims):
+        dataarray = xr.DataArray(data, dims=dims)
+
+        if template is None:
+            return dataarray
+        else:
+            return dataarray.broadcast_like(template)
+
+    if data.ndim == 0 and template is not None:
+        return xr.DataArray(data).expand_dims(template.sizes)
+
+    raise ValueError(f"Could not convert {data} with {dims} and {dtype}.")
+
+
+def to_subspace(dataarray: xr.DataArray, dims: Dims) -> xr.DataArray:
+    """Return the subspace of a DataArray with given dims."""
+    indexers = {dim: 0 for dim in dataarray.dims if dim not in dims}
+    return dataarray.isel(indexers)
 
 
 def unannotate(obj: T) -> T:
