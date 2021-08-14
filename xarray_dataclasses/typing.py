@@ -32,16 +32,16 @@ from typing_extensions import (
 
 # constants
 class FieldType(Enum):
-    """Type hint annotations for xarray field types."""
+    """Annotation for xarray-related fields."""
 
     ATTR = auto()
-    """Attribute member of DataArray or Dataset."""
+    """Attribute field of DataArray or Dataset."""
     COORD = auto()
-    """Coordinate member of DataArray or Dataset."""
+    """Coordinate field of DataArray or Dataset."""
     DATA = auto()
-    """Data of DataArray or variable of Dataset."""
+    """Data (variable) field of DataArray or Dataset."""
     NAME = auto()
-    """Name of DataAarray."""
+    """Name field of DataArray."""
 
     def annotates(self, type_: Any) -> bool:
         """Check if type is annotated by the identifier."""
@@ -88,15 +88,16 @@ Attr = Annotated[T, FieldType.ATTR]
 Examples:
     ::
 
+        from dataclasses import dataclass
         from typing import Literal
-        from xarray_dataclasses import dataarrayclass, Data, Attr
+        from xarray_dataclasses import Data, Attr
 
 
         X = Literal["x"]
         Y = Literal["y"]
 
 
-        @dataarrayclass
+        @dataclass
         class Image:
             data: Data[tuple[X, Y], float]
             dpi: Attr[int] = 300
@@ -109,15 +110,16 @@ Coord = Annotated[DataArrayLike[TDims, TDtype], FieldType.COORD]
 Examples:
     ::
 
+        from dataclasses import dataclass
         from typing import Literal
-        from xarray_dataclasses import dataarrayclass, Data, Coord
+        from xarray_dataclasses import Data, Coord
 
 
         X = Literal["x"]
         Y = Literal["y"]
 
 
-        @dataarrayclass
+        @dataclass
         class Image:
             data: Data[tuple[X, Y], float]
             weight: Coord[tuple[X, Y], float] = 1.0
@@ -132,29 +134,31 @@ Data = Annotated[DataArrayLike[TDims, TDtype], FieldType.DATA]
 Examples:
     ::
 
+        from dataclasses import dataclass
         from typing import Literal
-        from xarray_dataclasses import dataarrayclass, Data
+        from xarray_dataclasses import Data
 
 
         X = Literal["x"]
         Y = Literal["y"]
 
 
-        @dataarrayclass
+        @dataclass
         class Image:
             data: Data[tuple[X, Y], float]
 
     ::
 
+        from dataclasses import dataclass
         from typing import Literal
-        from xarray_dataclasses import datasetclass, Data
+        from xarray_dataclasses import Data
 
 
         X = Literal["x"]
         Y = Literal["y"]
 
 
-        @datasetclass
+        @dataclass
         class Images:
             red: Data[tuple[X, Y], float]
             green: Data[tuple[X, Y], float]
@@ -168,15 +172,16 @@ Name = Annotated[T, FieldType.NAME]
 Examples:
     ::
 
+        from dataclasses import dataclass
         from typing import Literal
-        from xarray_dataclasses import dataarrayclass, Data, Name
+        from xarray_dataclasses import Data, Name
 
 
         X = Literal["x"]
         Y = Literal["y"]
 
 
-        @dataarrayclass
+        @dataclass
         class Image:
             data: Data[tuple[X, Y], float]
             name: Name[str] = "default"
