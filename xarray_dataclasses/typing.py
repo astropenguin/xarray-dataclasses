@@ -4,13 +4,13 @@ __all__ = ["Attr", "Coord", "Data", "Name"]
 # standard library
 from dataclasses import Field
 from enum import auto, Enum
+from itertools import chain
 from typing import (
     Any,
     Callable,
-    cast,
     Dict,
     ForwardRef,
-    List,
+    Optional,
     Sequence,
     Tuple,
     Type,
@@ -186,52 +186,73 @@ Examples:
 """
 
 
-# runtime functions (internal)
-def get_dims(type_: Type[DataArrayLike[Any, Any]]) -> Tuple[str, ...]:
-    """Extract dimensions (dims) from DataArrayLike[TDims, TDtype]."""
-    if get_origin(type_) is Annotated:
-        type_ = get_args(type_)[0]
+def get_dims(type_like: Any) -> Dims:
+    """Parse a type-like object and get dims."""
+    type_like = unannotate(type_like)
 
-    dims_ = get_args(get_args(type_)[0])[0]
+    if type_like == () or type_like is NoneType:
+        return ()
 
-    if get_origin(dims_) is tuple:
-        dims_ = get_args(dims_)
-    else:
-        dims_ = (dims_,)
+    if isinstance(type_like, ForwardRef):
+        return (type_like.__forward_arg__,)
 
-    dims: List[str] = []
+    if isinstance(type_like, str):
+        return (type_like,)
 
-    for dim_ in dims_:
-        if dim_ == () or dim_ is NoneType:
-            continue
+    origin = get_origin(type_like)
+    args = get_args(type_like)
 
-        if isinstance(dim_, ForwardRef):
-            dims.append(dim_.__forward_arg__)
-            continue
+    if origin is tuple:
+        return tuple(chain(*map(get_dims, args)))
 
-        if get_origin(dim_) is Literal:
-            dims.append(str(get_args(dim_)[0]))
-            continue
+    if origin is Literal:
+        return tuple(map(str, args))
 
-        raise TypeError("Could not extract dimension.")
-
-    return tuple(dims)
+    raise ValueError(f"Could not parse {type_like}.")
 
 
-def get_dtype(type_: Type[DataArrayLike[Any, Any]]) -> Union[type, str, None]:
-    """Extract a data type (dtype) from DataArrayLike[TDims, TDtype]."""
-    if get_origin(type_) is Annotated:
-        type_ = get_args(type_)[0]
+def get_dtype(type_like: Any) -> Dtype:
+    """Parse a type-like object and get dtype."""
+    type_like = unannotate(type_like)
 
-    dtype_ = get_args(get_args(type_)[0])[1]
-
-    if dtype_ is Any:
+    if type_like is Any or type_like is NoneType:
         return None
 
-    if isinstance(dtype_, ForwardRef):
-        return dtype_.__forward_arg__
+    if isinstance(type_like, type):
+        return type_like.__name__
 
-    if get_origin(dtype_) is Literal:
-        return get_args(dtype_)[0]
+    if isinstance(type_like, ForwardRef):
+        return type_like.__forward_arg__
 
-    return cast(type, dtype_)
+    if isinstance(type_like, str):
+        return type_like
+
+    origin = get_origin(type_like)
+    args = get_args(type_like)
+
+    if origin is Literal and len(args) == 1:
+        return str(args[0])
+
+    raise ValueError(f"Could not parse {type_like}.")
+
+
+def unannotate(obj: T) -> T:
+    """Recursively remove Annotated types."""
+    if get_origin(obj) is Annotated:
+        obj = get_args(obj)[0]
+
+    origin = get_origin(obj)
+
+    if origin is None:
+        return obj
+
+    args = map(unannotate, get_args(obj))
+    args = tuple(filter(None, args))
+
+    try:
+        return origin[args]
+    except TypeError:
+        import typing
+
+        name = origin.__name__.capitalize()
+        return getattr(typing, name)[args]
