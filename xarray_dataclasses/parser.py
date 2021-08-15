@@ -47,12 +47,12 @@ class DataArray:
 
     @classmethod
     def from_field(cls, field: Field[Any], value: Any) -> "DataArray":
-        """Parse a dataclass field and create an instance."""
+        """Create an instance from a dataclass field."""
         t_dims, t_dtype = get_args(get_args(unannotate(field.type))[0])
         return cls(field.name, value, get_dims(t_dims), get_dtype(t_dtype))
 
     def __call__(self, reference: Optional[Reference] = None) -> xr.DataArray:
-        """Return a typed DataArray using the parsed information."""
+        """Return a typed DataArray from the parsed information."""
         return typed_dataarray(self.value, self.dims, self.dtype, reference)
 
 
@@ -69,7 +69,7 @@ class GeneralType:
 
     @classmethod
     def from_field(cls, field: Field[Any], value: Any) -> "GeneralType":
-        """Parse a dataclass field and create an instance."""
+        """Create an instance from a dataclass field."""
         return cls(field.name, value, unannotate(field.type))
 
     def __call__(self) -> Any:
@@ -198,6 +198,6 @@ def typed_dataarray(
 
 
 def subspace(reference: Reference, dims: Dims) -> Reference:
-    """Return the subspace of a DataArray or Dataset."""
+    """Return the subspace of a DataArray or a Dataset."""
     diff_dims = set(reference.dims) - set(dims)
     return reference.isel({dim: 0 for dim in diff_dims})
