@@ -1,4 +1,4 @@
-__all__ = ["copy_class", "extend_class", "make_generic"]
+__all__ = ["copy_class", "extend_class"]
 
 
 # standard library
@@ -9,12 +9,12 @@ from typing import Any, Sequence, Type, TypeVar
 COPIED_CLASS: str = "__xrdc_copied_class__"
 
 
-# type hints (internal)
+# type hints
 T = TypeVar("T")
 GenericAlias = type(Sequence[int])
 
 
-# utility functions (internal)
+# runtime functions
 def copy_class(cls: Type[T]) -> Type[T]:
     """Copy a class as a new one unless it is already copied."""
 

@@ -4,7 +4,7 @@ __all__ = ["asdataset", "datasetclass"]
 # standard library
 from dataclasses import dataclass
 from functools import wraps
-from typing import Any, Callable, Optional, overload, Type, TypeVar, Union
+from typing import Any, Callable, Optional, overload, Type, Union
 
 
 # third-party packages
@@ -13,33 +13,30 @@ from typing_extensions import Protocol
 
 
 # submodules
-from .common import get_attrs, get_coords, get_data_vars
-from .typing import DataClass
+from .typing import DataClass, TDataset
+from .parser import parse
 from .utils import copy_class, extend_class
 
 
-# type hints (internal)
-DS = TypeVar("DS", bound=xr.Dataset)
+# type hints
+class DataClassWithFactory(DataClass, Protocol[TDataset]):
+    __dataset_factory__: Callable[..., TDataset]
 
 
-class DataClassWithFactory(DataClass, Protocol[DS]):
-    __dataset_factory__: Callable[..., DS]
-
-
-# runtime functions (public)
+# runtime functions
 @overload
 def asdataset(
-    inst: DataClassWithFactory[DS],
+    inst: DataClassWithFactory[TDataset],
     dataset_factory: Type[Any] = xr.Dataset,
-) -> DS:
+) -> TDataset:
     ...
 
 
 @overload
 def asdataset(
     inst: DataClass,
-    dataset_factory: Type[DS] = xr.Dataset,
-) -> DS:
+    dataset_factory: Type[TDataset] = xr.Dataset,
+) -> TDataset:
     ...
 
 
@@ -50,13 +47,7 @@ def asdataset(inst: Any, dataset_factory: Any = xr.Dataset) -> Any:
     except AttributeError:
         pass
 
-    dataset = dataset_factory(get_data_vars(inst))
-    coords = get_coords(inst, dataset)
-
-    dataset.coords.update(coords)
-    dataset.attrs = get_attrs(inst)
-
-    return dataset
+    return parse(inst).to_dataset(dataset_factory)
 
 
 def datasetclass(
@@ -91,7 +82,7 @@ def datasetclass(
         return to_dataclass(cls)
 
 
-# mix-in class (internal)
+# mix-in class
 class DatasetMixin:
     """Mix-in class that provides shorthand methods."""
 
@@ -99,10 +90,10 @@ class DatasetMixin:
 
     @classmethod
     def new(
-        cls: Type[DataClassWithFactory[DS]],
+        cls: Type[DataClassWithFactory[TDataset]],
         *args: Any,
         **kwargs: Any,
-    ) -> DS:
+    ) -> TDataset:
         """Create a Dataset instance."""
         raise NotImplementedError
 
@@ -117,16 +108,16 @@ class DatasetMixin:
             return
 
         init = Temp.__init__
-        init.__annotations__["return"] = DS
+        init.__annotations__["return"] = TDataset
 
         # create a concrete new method and bind
         @classmethod
         @wraps(init)
         def new(
-            cls: Type[DataClassWithFactory[DS]],
+            cls: Type[DataClassWithFactory[TDataset]],
             *args: Any,
             **kwargs: Any,
-        ) -> DS:
+        ) -> TDataset:
             return asdataset(cls(*args, **kwargs))
 
         cls.new = new  # type: ignore
