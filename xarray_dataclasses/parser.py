@@ -33,46 +33,46 @@ Reference = Union[xr.DataArray, xr.Dataset]
 # dataclasses
 @dataclass(frozen=True)
 class DataArray:
-    """Dataclass for parsed DataArray information."""
+    """Parsed DataArray information."""
 
     name: str
-    """Name of a field."""
-    type: Dict[str, Any]
-    """Parsed type of a field."""
+    """Variable name for a DataArray."""
     value: Any
-    """Assigned value of a field."""
+    """Value to be assigned to a DataArray."""
+    dims: Dims
+    """Dimensions of a DataArray."""
+    dtype: Dtype
+    """Data type of a DataArray."""
 
     @classmethod
     def from_field(cls, field: Field[Any], value: Any) -> "DataArray":
-        """Create an instance from a Coord/Data-type field and a value."""
+        """Parse a dataclass field and create an instance."""
         t_dims, t_dtype = get_args(get_args(unannotate(field.type))[0])
-        type = dict(dims=get_dims(t_dims), dtype=get_dtype(t_dtype))
-        return cls(field.name, type, value)
+        return cls(field.name, value, get_dims(t_dims), get_dtype(t_dtype))
 
-    def instantiate(self) -> xr.DataArray:
-        """Convert a value to a DataArray with given dims and dtype."""
-        return to_dataarray(self.value, **self.type)
+    def __call__(self, reference: Optional[Reference] = None) -> xr.DataArray:
+        """Return a typed DataArray using the parsed information."""
+        return typed_dataarray(self.value, self.dims, self.dtype, reference)
 
 
 @dataclass(frozen=True)
 class GeneralType:
-    """Dataclass for parsed general-type information."""
+    """Parsed general-type information."""
 
     name: str
-    """Name of a field."""
-    type: Dict[str, Any]
-    """Parsed type of a field."""
+    """Variable name for a type."""
     value: Any
-    """Assigned value of a field."""
+    """Value to be assigned to a type."""
+    type: Type[Any]
+    """Type or type-hint object."""
 
     @classmethod
     def from_field(cls, field: Field[Any], value: Any) -> "GeneralType":
-        """Create an instance from a general-type field and a value."""
-        type = dict(type=unannotate(field.type))
-        return cls(field.name, type, value)
+        """Parse a dataclass field and create an instance."""
+        return cls(field.name, value, unannotate(field.type))
 
-    def instantiate(self) -> Any:
-        """Do not convert but just return a value."""
+    def __call__(self) -> Any:
+        """Return the value (without casting)."""
         return self.value
 
 
