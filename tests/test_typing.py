@@ -4,11 +4,11 @@ from typing import Any, ForwardRef, Tuple
 
 # third-party packages
 from pytest import mark
-from typing_extensions import Literal
+from typing_extensions import Annotated, Literal
 
 
 # submodules
-from xarray_dataclasses.typing import DataArrayLike, get_dims, get_dtype
+from xarray_dataclasses.typing import get_dims, get_dtype, unannotate
 
 
 # type hints
@@ -20,7 +20,6 @@ Y = Literal["y"]
 
 # test datasets
 testdata_dims = [
-    (None, ()),
     (Tuple[()], ()),
     (X, ("x",)),
     (x, ("x",)),
@@ -32,18 +31,30 @@ testdata_dims = [
 
 testdata_dtype = [
     (Any, None),
-    (int, int),
+    (int, "int"),
     ("int", "int"),
     (Literal["int"], "int"),
 ]
 
+testdata_unannotate = [
+    (x, x),
+    (X, X),
+    (Annotated[X, 0], X),
+    (Annotated[Tuple[Annotated[X, 0]], 0], Tuple[X]),
+]
+
 
 # test functions
-@mark.parametrize("dims, expected", testdata_dims)
-def test_dims(dims: Any, expected: Any) -> None:
-    assert get_dims(DataArrayLike[dims, Any]) == expected
+@mark.parametrize("t_dims, dims", testdata_dims)
+def test_get_dims(t_dims: Any, dims: Any) -> None:
+    assert get_dims(t_dims) == dims
 
 
-@mark.parametrize("dtype, expected", testdata_dtype)
-def test_dtype(dtype: Any, expected: Any) -> None:
-    assert get_dtype(DataArrayLike[Any, dtype]) == expected
+@mark.parametrize("t_dtype, dtype", testdata_dtype)
+def test_get_dtype(t_dtype: Any, dtype: Any) -> None:
+    assert get_dtype(t_dtype) == dtype
+
+
+@mark.parametrize("t_before, t_after", testdata_unannotate)
+def test_unannotate(t_before: Any, t_after: Any) -> None:
+    assert unannotate(t_before) == t_after
