@@ -15,7 +15,7 @@ from typing_extensions import get_args
 # submodules
 from .typing import (
     ArrayLike,
-    DataClassLike,
+    DataClass,
     Dims,
     Dtype,
     FieldType,
@@ -28,6 +28,7 @@ from .typing import (
 
 
 # type hints
+DataClassLike = Union[Type[DataClass], DataClass]
 Reference = Union[xr.DataArray, xr.Dataset]
 
 

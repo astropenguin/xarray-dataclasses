@@ -5,29 +5,12 @@ __all__ = ["Attr", "Coord", "Data", "Name"]
 from dataclasses import Field
 from enum import auto, Enum
 from itertools import chain
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    ForwardRef,
-    Optional,
-    Sequence,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-)
+from typing import Any, Callable, Dict, ForwardRef, Optional, Tuple, TypeVar, Union
 
 
 # third-party packages
 import xarray as xr
-from typing_extensions import (
-    Annotated,
-    get_args,
-    get_origin,
-    Literal,
-    Protocol,
-)
+from typing_extensions import Annotated, get_args, get_origin, Literal, Protocol
 
 
 # constants
@@ -75,12 +58,6 @@ class ArrayLike(Protocol[TDims, TDtype]):
     ndim: Any
 
 
-DataArrayLike = Union[ArrayLike[TDims, TDtype], Sequence[TDtype], TDtype]
-"""Type hint for DataArray-like objects."""
-
-DataClassLike = Union[Type[DataClass], DataClass]
-"""Type hint for DataClass-like objects."""
-
 Attr = Annotated[T, FieldType.ATTR]
 """Type hint for an attribute member of DataArray or Dataset.
 
@@ -103,7 +80,7 @@ Examples:
 
 """
 
-Coord = Annotated[DataArrayLike[TDims, TDtype], FieldType.COORD]
+Coord = Annotated[Union[ArrayLike[TDims, TDtype], TDtype], FieldType.COORD]
 """Type hint for a coordinate member of DataArray or Dataset.
 
 Examples:
@@ -127,7 +104,7 @@ Examples:
 
 """
 
-Data = Annotated[DataArrayLike[TDims, TDtype], FieldType.DATA]
+Data = Annotated[Union[ArrayLike[TDims, TDtype], TDtype], FieldType.DATA]
 """Type hint for data of DataArray or variable of Dataset.
 
 Examples:
