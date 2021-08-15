@@ -1,5 +1,5 @@
 # standard library
-from typing import Any, ForwardRef, Tuple
+from typing import Any, ForwardRef, Tuple, Union
 
 
 # third-party packages
@@ -40,7 +40,7 @@ testdata_unannotate = [
     (x, x),
     (X, X),
     (Annotated[X, 0], X),
-    (Annotated[Tuple[Annotated[X, 0]], 0], Tuple[X]),
+    (Union[Annotated[X, 0], Y], Union[X, Y]),
 ]
 
 
