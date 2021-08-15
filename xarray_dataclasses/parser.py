@@ -3,7 +3,7 @@ __all__ = ["parse"]
 
 # standard library
 from dataclasses import dataclass, Field
-from typing import Any, List, Optional, Type
+from typing import Any, List, Optional, Type, Union
 
 
 # third-party packages
@@ -24,6 +24,10 @@ from .typing import (
     TDataArray,
     unannotate,
 )
+
+
+# type hints
+Reference = Union[xr.DataArray, xr.Dataset]
 
 
 # dataclasses
@@ -123,11 +127,11 @@ def parse(dataclass: DataClassLike) -> ParsedDataClass:
 
 
 # helper features
-def to_dataarray(
+def typed_dataarray(
     data: Any,
     dims: Dims,
     dtype: Dtype,
-    template: Optional[xr.DataArray] = None,
+    reference: Optional[Reference] = None,
 ) -> xr.DataArray:
     """Convert data to a DataArray with given dims and dtype."""
     if not isinstance(data, ArrayLike):
@@ -136,24 +140,20 @@ def to_dataarray(
     if dtype is not None:
         data = data.astype(dtype, copy=True)
 
-    if template is not None:
-        template = to_subspace(template, dims)
-
     if data.ndim == len(dims):
         dataarray = xr.DataArray(data, dims=dims)
+    elif data.ndim == 0 and reference is not None:
+        dataarray = xr.DataArray(data)
+    else:
+        raise ValueError(f"Could not convert {data} with {dims}.")
 
-        if template is None:
-            return dataarray
-        else:
-            return dataarray.broadcast_like(template)
-
-    if data.ndim == 0 and template is not None:
-        return xr.DataArray(data).expand_dims(template.sizes)
-
-    raise ValueError(f"Could not convert {data} with {dims} and {dtype}.")
+    if reference is None:
+        return dataarray
+    else:
+        return dataarray.broadcast_like(subspace(reference, dims))
 
 
-def to_subspace(dataarray: xr.DataArray, dims: Dims) -> xr.DataArray:
-    """Return the subspace of a DataArray with given dims."""
-    indexers = {dim: 0 for dim in dataarray.dims if dim not in dims}
-    return dataarray.isel(indexers)
+def subspace(reference: Reference, dims: Dims) -> Reference:
+    """Return the subspace of a DataArray or Dataset."""
+    diff_dims = set(reference.dims) - set(dims)
+    return reference.isel({dim: 0 for dim in diff_dims})
