@@ -5,12 +5,28 @@ __all__ = ["Attr", "Coord", "Data", "Name"]
 from dataclasses import Field
 from enum import auto, Enum
 from itertools import chain
-from typing import Any, Callable, Dict, ForwardRef, Optional, Tuple, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    ForwardRef,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 
 # third-party packages
 import xarray as xr
-from typing_extensions import Annotated, get_args, get_origin, Literal, Protocol
+from typing_extensions import (
+    Annotated,
+    get_args,
+    get_origin,
+    Literal,
+    Protocol,
+    runtime_checkable,
+)
 
 
 # constants
@@ -51,6 +67,7 @@ class DataClass(Protocol):
     __dataclass_fields__: Dict[str, Field[Any]]
 
 
+@runtime_checkable
 class ArrayLike(Protocol[TDims, TDtype]):
     """Type hint for array-like objects."""
 
