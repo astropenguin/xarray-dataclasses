@@ -17,7 +17,6 @@ _make_field_generic()
 
 
 # submodules
-from . import common
 from . import dataarray
 from . import dataset
 from . import parser
@@ -28,4 +27,5 @@ from . import utils
 # aliases
 from .dataarray import *
 from .dataset import *
+from .parser import *
 from .typing import *
