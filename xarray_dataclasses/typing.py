@@ -53,6 +53,7 @@ class FieldType(Enum):
 Dims = Tuple[str, ...]
 Dtype = Optional[str]
 NoneType = type(None)
+
 T = TypeVar("T")
 TDataArray = TypeVar("TDataArray", bound=xr.DataArray)
 TDataset = TypeVar("TDataset", bound=xr.Dataset)
@@ -77,10 +78,8 @@ class ArrayLike(Protocol[TDims, TDtype]):
 DataArrayLike = Union[ArrayLike[TDims, TDtype], Sequence[TDtype], TDtype]
 """Type hint for DataArray-like objects."""
 
-
 DataClassLike = Union[Type[DataClass], DataClass]
 """Type hint for DataClass-like objects."""
-
 
 Attr = Annotated[T, FieldType.ATTR]
 """Type hint for an attribute member of DataArray or Dataset.
