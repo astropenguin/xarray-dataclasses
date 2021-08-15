@@ -128,6 +128,11 @@ class DataStructure:
 
 
 # runtime functions
+def parse(dataclass: DataClassLike) -> DataStructure:
+    """Create a data structure from a dataclass."""
+    return DataStructure.from_dataclass(dataclass)
+
+
 def to_dataarray(
     data_structure: DataStructure,
     dataarray_factory: Type[TDataArray] = xr.DataArray,
@@ -166,13 +171,6 @@ def to_dataset(
     return dataset
 
 
-# main features
-def parse(dataclass: DataClassLike) -> ParsedDataClass:
-    """Parse a dataclass or dataclass instance."""
-    return ParsedDataClass.from_dataclass(dataclass)
-
-
-# helper features
 def typed_dataarray(
     data: Any,
     dims: Dims,
