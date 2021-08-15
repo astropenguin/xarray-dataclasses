@@ -22,6 +22,7 @@ from .typing import (
     get_dims,
     get_dtype,
     TDataArray,
+    TDataset,
     unannotate,
 )
 
@@ -77,33 +78,25 @@ class GeneralType:
 
 
 @dataclass(frozen=True)
-class ParsedDataClass:
-    """Dataclass for parsed dataclass or dataclass instance."""
+class DataStructure:
+    """Parsed dataclass information."""
 
-    attr: List[ParsedField]
-    """Parsed Attr-typed field(s) information."""
-    coord: List[ParsedField]
-    """Parsed Coord-typed field(s) information."""
-    data: List[ParsedField]
-    """Parsed Data-typed field(s) information."""
-    name: List[ParsedField]
-    """Parsed Name-typed field(s) information."""
-
-    def __post_init__(self):
-        """Validate the number of fields in ``data`` and ``name``."""
-        if len(self.data) == 0:
-            raise RuntimeError("Could not find any Data-typed fields.")
-
-        if len(self.name) > 1:
-            raise RuntimeError("Found more than one Name-typed fields.")
+    attr: List[GeneralType]
+    """Parsed attr-type information."""
+    coord: List[DataArray]
+    """Parsed coord-type information."""
+    data: List[DataArray]
+    """Parsed data-type information."""
+    name: List[GeneralType]
+    """Parsed name-type information."""
 
     @classmethod
-    def from_dataclass(cls, dataclass: DataClassLike) -> "ParsedDataClass":
-        """Create an instance from a dataclass or dataclass instance."""
-        attr: List[ParsedField] = []
-        coord: List[ParsedField] = []
-        data: List[ParsedField] = []
-        name: List[ParsedField] = []
+    def from_dataclass(cls, dataclass: DataClassLike) -> "DataStructure":
+        """Create an instance from a dataclass."""
+        attr: List[GeneralType] = []
+        coord: List[DataArray] = []
+        data: List[DataArray] = []
+        name: List[GeneralType] = []
 
         for field in dataclass.__dataclass_fields__.values():
             value = getattr(dataclass, field.name, field.default)
@@ -118,6 +111,59 @@ class ParsedDataClass:
                 name.append(GeneralType.from_field(field, value))
 
         return cls(attr, coord, data, name)
+
+    def to_dataarray(
+        self,
+        dataarray_factory: Type[TDataArray] = xr.DataArray,
+    ) -> TDataArray:
+        """Return a DataArray from the parsed information."""
+        return to_dataarray(self, dataarray_factory)
+
+    def to_dataset(
+        self,
+        dataset_factory: Type[TDataset] = xr.Dataset,
+    ) -> TDataset:
+        """Create a Dataset from the parsed information."""
+        return to_dataset(self, dataset_factory)
+
+
+# runtime functions
+def to_dataarray(
+    data_structure: DataStructure,
+    dataarray_factory: Type[TDataArray] = xr.DataArray,
+) -> TDataArray:
+    """Create a DataArray from a parsed dataclass."""
+    dataarray = dataarray_factory(data_structure.data[0]())
+
+    for coord in data_structure.coord:
+        dataarray.coords.update({coord.name: coord(dataarray)})
+
+    for attr in data_structure.attr:
+        dataarray.attrs.update({attr.name: attr()})
+
+    for name in data_structure.name:
+        dataarray.name = name()
+
+    return dataarray
+
+
+def to_dataset(
+    data_structure: DataStructure,
+    dataset_factory: Type[TDataset] = xr.Dataset,
+) -> TDataset:
+    """Create a Dataset from a parsed dataclass."""
+    dataset = dataset_factory()
+
+    for data in data_structure.data:
+        dataset.update({data.name: data()})
+
+    for coord in data_structure.coord:
+        dataset.coords.update({coord.name: coord(dataset)})
+
+    for attr in data_structure.attr:
+        dataset.attrs.update({attr.name: attr()})
+
+    return dataset
 
 
 # main features
