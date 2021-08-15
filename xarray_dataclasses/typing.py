@@ -1,4 +1,4 @@
-__all__ = ["Attr", "Coord", "Data", "Name"]
+__all__ = ["Attr", "Coord", "Coordof", "Data", "Dataof", "Name"]
 
 
 # standard library
@@ -37,7 +37,11 @@ class FieldType(Enum):
     """Attribute field of DataArray or Dataset."""
     COORD = auto()
     """Coordinate field of DataArray or Dataset."""
+    COORDOF = auto()
+    """Coordinate field of DataArray or Dataset."""
     DATA = auto()
+    """Data (variable) field of DataArray or Dataset."""
+    DATAOF = auto()
     """Data (variable) field of DataArray or Dataset."""
     NAME = auto()
     """Name field of DataArray."""
@@ -121,6 +125,9 @@ Examples:
 
 """
 
+Coordof = Annotated[Union[T, ArrayLike[Any, Any], Any], FieldType.COORDOF]
+"""Type hint for a coordinate member of DataArray or Dataset."""
+
 Data = Annotated[Union[ArrayLike[TDims, TDtype], TDtype], FieldType.DATA]
 """Type hint for data of DataArray or variable of Dataset.
 
@@ -158,6 +165,9 @@ Examples:
             blue: Data[tuple[X, Y], float]
 
 """
+
+Dataof = Annotated[Union[T, ArrayLike[Any, Any], Any], FieldType.DATAOF]
+"""Type hint for data of DataArray or variable of Dataset."""
 
 Name = Annotated[T, FieldType.NAME]
 """Type hint for a name of DataArray.
