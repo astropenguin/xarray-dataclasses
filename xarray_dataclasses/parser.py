@@ -115,17 +115,19 @@ class DataStructure:
 
     def to_dataarray(
         self,
+        reference: Optional[Reference] = None,
         dataarray_factory: Type[TDataArray] = xr.DataArray,
     ) -> TDataArray:
         """Return a DataArray from the parsed information."""
-        return to_dataarray(self, dataarray_factory)
+        return to_dataarray(self, reference, dataarray_factory)
 
     def to_dataset(
         self,
+        reference: Optional[Reference] = None,
         dataset_factory: Type[TDataset] = xr.Dataset,
     ) -> TDataset:
         """Create a Dataset from the parsed information."""
-        return to_dataset(self, dataset_factory)
+        return to_dataset(self, reference, dataset_factory)
 
 
 # runtime functions
@@ -136,10 +138,11 @@ def parse(dataclass: DataClassLike) -> DataStructure:
 
 def to_dataarray(
     data_structure: DataStructure,
+    reference: Optional[Reference] = None,
     dataarray_factory: Type[TDataArray] = xr.DataArray,
 ) -> TDataArray:
     """Create a DataArray from a parsed dataclass."""
-    dataarray = dataarray_factory(data_structure.data[0]())
+    dataarray = dataarray_factory(data_structure.data[0](reference))
 
     for coord in data_structure.coord:
         dataarray.coords.update({coord.name: coord(dataarray)})
@@ -155,13 +158,14 @@ def to_dataarray(
 
 def to_dataset(
     data_structure: DataStructure,
+    reference: Optional[Reference] = None,
     dataset_factory: Type[TDataset] = xr.Dataset,
 ) -> TDataset:
     """Create a Dataset from a parsed dataclass."""
     dataset = dataset_factory()
 
     for data in data_structure.data:
-        dataset.update({data.name: data()})
+        dataset.update({data.name: data(reference)})
 
     for coord in data_structure.coord:
         dataset.coords.update({coord.name: coord(dataset)})

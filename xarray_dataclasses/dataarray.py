@@ -52,7 +52,7 @@ def asdataarray(inst: Any, dataarray_factory: Any = xr.DataArray) -> Any:
     except AttributeError:
         pass
 
-    return parse(inst).to_dataarray(dataarray_factory)
+    return parse(inst).to_dataarray(dataarray_factory=dataarray_factory)
 
 
 def dataarrayclass(

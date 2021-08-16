@@ -47,7 +47,7 @@ def asdataset(inst: Any, dataset_factory: Any = xr.Dataset) -> Any:
     except AttributeError:
         pass
 
-    return parse(inst).to_dataset(dataset_factory)
+    return parse(inst).to_dataset(dataset_factory=dataset_factory)
 
 
 def datasetclass(
