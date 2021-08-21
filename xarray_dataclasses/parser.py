@@ -25,6 +25,7 @@ from .typing import (
     TDataset,
     unannotate,
 )
+from .utils import resolve_class
 
 
 # type hints
@@ -59,7 +60,18 @@ class DataArray:
 
 @dataclass(frozen=True)
 class GeneralType:
-    """Parsed general-type information."""
+    """Representation for general-type variables."""
+
+    name: str  #: Name of a variable.
+    type: str  #: Type (full path) of a variable.
+    value: Any  #: Value to be assigned to a vabiable.
+
+    @classmethod
+    def from_field(cls, field: Field[Any], value: Any) -> "GeneralType":
+        """Create an instance from a dataclass field."""
+        type = resolve_class(unannotate(field.type))
+        return cls(field.name, type, value)
+
 
     name: str  #: Variable name for a type.
     value: Any  #: Value to be assigned to a type.
