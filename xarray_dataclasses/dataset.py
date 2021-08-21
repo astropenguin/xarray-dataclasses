@@ -5,6 +5,7 @@ __all__ = ["asdataset", "AsDataset", "datasetclass"]
 from dataclasses import dataclass
 from functools import wraps
 from typing import Any, Callable, Optional, overload, Type, Union
+from warnings import warn
 
 
 # third-party packages
@@ -62,6 +63,14 @@ def datasetclass(
     shorthands: bool = True,
 ) -> Union[Type[DataClass], Callable[[type], Type[DataClass]]]:
     """Class decorator to create a Dataset class."""
+
+    warn(
+        DeprecationWarning(
+            "This decorator will be removed in v1.0.0. ",
+            "Please consider to use the Python's dataclass ",
+            "and the mix-in class (AsDataset) instead.",
+        )
+    )
 
     def to_dataclass(cls: Type[Any]) -> Type[DataClass]:
         if shorthands:
