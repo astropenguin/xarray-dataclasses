@@ -64,6 +64,7 @@ TDims = TypeVar("TDims", covariant=True)
 TDtype = TypeVar("TDtype", covariant=True)
 
 
+@runtime_checkable
 class DataClass(Protocol):
     """Type hint for dataclass objects."""
 
