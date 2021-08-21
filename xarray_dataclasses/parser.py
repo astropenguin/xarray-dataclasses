@@ -182,7 +182,7 @@ def typed_dataarray(
     dtype: Dtype,
     reference: Optional[Reference] = None,
 ) -> xr.DataArray:
-    """Convert data to a DataArray with given dims and dtype."""
+    """Create a DataArray with given dims and dtype."""
     if not isinstance(data, ArrayLike):
         data = np.asarray(data)
 
@@ -199,10 +199,6 @@ def typed_dataarray(
     if reference is None:
         return dataarray
     else:
-        return dataarray.broadcast_like(subspace(reference, dims))
-
-
-def subspace(reference: Reference, dims: Dims) -> Reference:
-    """Return the subspace of a DataArray or a Dataset."""
-    diff_dims = set(reference.dims) - set(dims)
-    return reference.isel({dim: 0 for dim in diff_dims})
+        diff_dims = set(reference.dims) - set(dims)
+        subspace = reference.isel({dim: 0 for dim in diff_dims})
+        return dataarray.broadcast_like(subspace)
