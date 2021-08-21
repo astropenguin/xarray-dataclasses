@@ -24,10 +24,10 @@ After you update something, commit your change with **a message which starts wit
 Using a simple verb in the present tense is preferable.
 
 ```shell
-$ git commit -m "#24 Add dataset module"
+git commit -m "#24 Add dataset module"
 ```
 
-Please make sure that your code (1) is formatted by [Black][black], (2) is checked by [Flake8][flake8] with the bundled config file (`.flake8`), (3) passes the tests (`tests/test_*.py`) run by [pytest][pytest], and (4) passes the static type check run by [Pyright][pyright].
+Please make sure that your code (1) is formatted by [Black][black], (2) is checked by [Flake8][flake8], (3) passes the tests (`tests/test_*.py`) run by [pytest][pytest], and (4) passes the static type check run by [Pyright][pyright].
 They are necessary to pass the status checks when you create a pull request (see also [the section of GitHub Actions](#github-actions)).
 
 If you add a new feature, please also make sure that you prepare tests for it.
@@ -51,12 +51,12 @@ Thank you for your contribution!
 
 ## Development environment
 
-We manage the development environment (i.e., Python and JavaScript and their dependencies) with [Poetry][poetry] and [Node JS][nodejs].
+We manage the development environment (i.e., Python and JavaScript and their dependencies) with [Poetry][poetry] and [Node.js][nodejs].
 After cloning the repository you forked, you can setup the environment by the following command.
 
 ```shell
-$ poetry install
-$ npm install
+poetry install
+npm install
 ```
 
 ## GitHub Actions
@@ -68,10 +68,10 @@ It is used for status checks when a pull request is created.
 If you would like to check them in local, the following commands are almost equivalent (the difference is that the workflow is run under multiple Python versions).
 
 ```shell
-$ poetry run pytest docs tests xarray_dataclasses
-$ poetry run flake8 docs tests xarray_dataclasses
-$ poetry run black --check docs tests xarray_dataclasses
-$ npm run pyright docs tests xarray_dataclasses
+poetry run pytest docs tests xarray_dataclasses
+poetry run flake8 docs tests xarray_dataclasses
+poetry run black --check docs tests xarray_dataclasses
+npm run pyright docs tests xarray_dataclasses
 ```
 
 ### Publish to PyPI
