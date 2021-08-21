@@ -10,7 +10,7 @@ from typing_extensions import Literal
 
 
 # submodules
-from xarray_dataclasses.dataarray import DataArrayMixin
+from xarray_dataclasses.dataarray import AsDataArray
 from xarray_dataclasses.typing import Attr, Coord, Data, Name
 
 
@@ -30,7 +30,7 @@ class Custom(xr.DataArray):
 
 
 @dataclass
-class Image(DataArrayMixin):
+class Image(AsDataArray):
     __dataarray_factory__ = Custom
 
     data: Data[Tuple[X, Y], float]

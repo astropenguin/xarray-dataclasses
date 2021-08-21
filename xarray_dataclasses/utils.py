@@ -1,6 +1,3 @@
-__all__ = ["copy_class", "extend_class"]
-
-
 # standard library
 import re
 from pprint import pformat

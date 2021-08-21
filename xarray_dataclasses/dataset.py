@@ -1,10 +1,11 @@
-__all__ = ["asdataset", "datasetclass"]
+__all__ = ["asdataset", "AsDataset", "datasetclass"]
 
 
 # standard library
 from dataclasses import dataclass
 from functools import wraps
 from typing import Any, Callable, Optional, overload, Type, Union
+from warnings import warn
 
 
 # third-party packages
@@ -63,9 +64,17 @@ def datasetclass(
 ) -> Union[Type[DataClass], Callable[[type], Type[DataClass]]]:
     """Class decorator to create a Dataset class."""
 
+    warn(
+        DeprecationWarning(
+            "This decorator will be removed in v1.0.0. ",
+            "Please consider to use the Python's dataclass ",
+            "and the mix-in class (AsDataset) instead.",
+        )
+    )
+
     def to_dataclass(cls: Type[Any]) -> Type[DataClass]:
         if shorthands:
-            cls = extend_class(cls, DatasetMixin)
+            cls = extend_class(cls, AsDataset)
 
         return dataclass(
             init=init,
@@ -83,7 +92,7 @@ def datasetclass(
 
 
 # mix-in class
-class DatasetMixin:
+class AsDataset:
     """Mix-in class that provides shorthand methods."""
 
     __dataset_factory__ = xr.Dataset
