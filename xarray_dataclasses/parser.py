@@ -119,8 +119,8 @@ class ClassType:
 
 
 @dataclass(frozen=True)
-class DataStructure:
-    """Parsed dataclass information."""
+class Structure:
+    """Structure of a dataclass or its instance."""
 
     attr: List[GeneralType]  #: Representations of attr-type variables.
     coord: List[DataArrayType]  #: Representations of coord-type variables.
@@ -128,8 +128,8 @@ class DataStructure:
     name: List[GeneralType]  #: Representations of name-type variables.
 
     @classmethod
-    def from_dataclass(cls, dataclass: DataClassLike) -> "DataStructure":
-        """Create an instance from a dataclass."""
+    def from_dataclass(cls, dataclass: DataClassLike) -> "Structure":
+        """Create an instance from a dataclass or its instance."""
         attr: List[GeneralType] = []
         coord: List[DataArrayType] = []
         data: List[DataArrayType] = []
@@ -158,7 +158,7 @@ class DataStructure:
         reference: Optional[Reference] = None,
         dataarray_factory: Type[TDataArray] = xr.DataArray,
     ) -> TDataArray:
-        """Return a DataArray from the parsed information."""
+        """Create a typed DataArray from the structure."""
         return to_dataarray(self, reference, dataarray_factory)
 
     def to_dataset(
@@ -166,51 +166,51 @@ class DataStructure:
         reference: Optional[Reference] = None,
         dataset_factory: Type[TDataset] = xr.Dataset,
     ) -> TDataset:
-        """Create a Dataset from the parsed information."""
+        """Create a typed Dataset from the structure."""
         return to_dataset(self, reference, dataset_factory)
 
 
 # runtime functions
-def parse(dataclass: DataClassLike) -> DataStructure:
+def parse(dataclass: DataClassLike) -> Structure:
     """Create a data structure from a dataclass."""
-    return DataStructure.from_dataclass(dataclass)
+    return Structure.from_dataclass(dataclass)
 
 
 def to_dataarray(
-    data_structure: DataStructure,
+    structure: Structure,
     reference: Optional[Reference] = None,
     dataarray_factory: Type[TDataArray] = xr.DataArray,
 ) -> TDataArray:
-    """Create a DataArray from a parsed dataclass."""
-    dataarray = dataarray_factory(data_structure.data[0](reference))
+    """Create a typed DataArray from a structure."""
+    dataarray = dataarray_factory(structure.data[0](reference))
 
-    for coord in data_structure.coord:
+    for coord in structure.coord:
         dataarray.coords.update({coord.name: coord(dataarray)})
 
-    for attr in data_structure.attr:
+    for attr in structure.attr:
         dataarray.attrs.update({attr.name: attr.value})
 
-    for name in data_structure.name:
+    for name in structure.name:
         dataarray.name = name.value
 
     return dataarray
 
 
 def to_dataset(
-    data_structure: DataStructure,
+    structure: Structure,
     reference: Optional[Reference] = None,
     dataset_factory: Type[TDataset] = xr.Dataset,
 ) -> TDataset:
-    """Create a Dataset from a parsed dataclass."""
+    """Create a typed Dataset from a structure."""
     dataset = dataset_factory()
 
-    for data in data_structure.data:
+    for data in structure.data:
         dataset.update({data.name: data(reference)})
 
-    for coord in data_structure.coord:
+    for coord in structure.coord:
         dataset.coords.update({coord.name: coord(dataset)})
 
-    for attr in data_structure.attr:
+    for attr in structure.attr:
         dataset.attrs.update({attr.name: attr.value})
 
     return dataset
@@ -222,7 +222,7 @@ def typedarray(
     dtype: Dtype,
     reference: Optional[Reference] = None,
 ) -> xr.DataArray:
-    """Create a DataArray with given dims and dtype."""
+    """Create a typed DataArray with given dims and dtype."""
     if not isinstance(data, ArrayLike):
         data = np.asarray(data)
 
