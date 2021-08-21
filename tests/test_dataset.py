@@ -10,8 +10,8 @@ from typing_extensions import Literal
 
 
 # submodules
-from xarray_dataclasses.dataarray import DataArrayMixin
-from xarray_dataclasses.dataset import DatasetMixin
+from xarray_dataclasses.dataarray import AsDataArray
+from xarray_dataclasses.dataset import AsDataset
 from xarray_dataclasses.typing import Attr, Coord, Data
 
 # constants
@@ -30,12 +30,12 @@ class Custom(xr.Dataset):
 
 
 @dataclass
-class Image(DataArrayMixin):
+class Image(AsDataArray):
     data: Data[Tuple[X, Y], float]
 
 
 @dataclass
-class RGBImage(DatasetMixin):
+class RGBImage(AsDataset):
     __dataset_factory__ = Custom
 
     red: Data[Tuple[X, Y], float]

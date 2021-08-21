@@ -1,4 +1,4 @@
-__all__ = ["asdataarray", "dataarrayclass"]
+__all__ = ["asdataarray", "AsDataArray", "dataarrayclass"]
 
 
 # standard library
@@ -70,7 +70,7 @@ def dataarrayclass(
 
     def to_dataclass(cls: Type[Any]) -> Type[DataClass]:
         if shorthands:
-            cls = extend_class(cls, DataArrayMixin)
+            cls = extend_class(cls, AsDataArray)
 
         return dataclass(
             init=init,
@@ -88,7 +88,7 @@ def dataarrayclass(
 
 
 # mix-in class
-class DataArrayMixin:
+class AsDataArray:
     """Mix-in class that provides shorthand methods."""
 
     __dataarray_factory__ = xr.DataArray

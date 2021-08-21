@@ -1,4 +1,4 @@
-__all__ = ["asdataset", "datasetclass"]
+__all__ = ["asdataset", "AsDataset", "datasetclass"]
 
 
 # standard library
@@ -65,7 +65,7 @@ def datasetclass(
 
     def to_dataclass(cls: Type[Any]) -> Type[DataClass]:
         if shorthands:
-            cls = extend_class(cls, DatasetMixin)
+            cls = extend_class(cls, AsDataset)
 
         return dataclass(
             init=init,
@@ -83,7 +83,7 @@ def datasetclass(
 
 
 # mix-in class
-class DatasetMixin:
+class AsDataset:
     """Mix-in class that provides shorthand methods."""
 
     __dataset_factory__ = xr.Dataset
