@@ -9,7 +9,7 @@ from typing import Any, List, Optional, Type, Union
 # third-party packages
 import numpy as np
 import xarray as xr
-from typing_extensions import get_args
+from typing_extensions import Protocol, TypedDict
 
 
 # submodules
@@ -31,33 +31,10 @@ from .utils import resolve_class
 # type hints
 DataClassLike = Union[Type[DataClass], DataClass]
 Reference = Union[xr.DataArray, xr.Dataset]
+Types = TypedDict("Types", dims=Dims, dtype=Dtype)
 
 
 # dataclasses
-@dataclass(frozen=True)
-class DataArray:
-    """Parsed DataArray information."""
-
-    name: str
-    """Variable name for a DataArray."""
-    value: Any
-    """Value to be assigned to a DataArray."""
-    dims: Dims
-    """Dimensions of a DataArray."""
-    dtype: Dtype
-    """Data type of a DataArray."""
-
-    @classmethod
-    def from_field(cls, field: Field[Any], value: Any) -> "DataArray":
-        """Create an instance from a dataclass field."""
-        t_dims, t_dtype = get_args(get_args(unannotate(field.type))[0])
-        return cls(field.name, value, get_dims(t_dims), get_dtype(t_dtype))
-
-    def __call__(self, reference: Optional[Reference] = None) -> xr.DataArray:
-        """Return a typed DataArray from the parsed information."""
-        return typed_dataarray(self.value, self.dims, self.dtype, reference)
-
-
 @dataclass(frozen=True)
 class GeneralType:
     """Representation for general-type variables."""
@@ -73,35 +50,63 @@ class GeneralType:
         return cls(field.name, type, value)
 
 
-    name: str  #: Variable name for a type.
-    value: Any  #: Value to be assigned to a type.
-    type: Type[Any]  #: Type or type-hint object.
+class DataArrayType(Protocol):
+    """Reperesentation for DataArray variables."""
+
+    name: str  #: Name of a variable
+    type: Union[Types, str]  #: Type (full path or dict) of a variable.
+    value: Any  #: Value to be assigned to a variable.
 
     @classmethod
-    def from_field(cls, field: Field[Any], value: Any) -> "GeneralType":
+    def from_field(cls, field: Field[Any], value: Any) -> "DataArrayType":
         """Create an instance from a dataclass field."""
-        return cls(field.name, value, unannotate(field.type))
+        ...
+
+    def __call__(self, reference: Optional[Reference] = None) -> xr.DataArray:
+        """Create a typed DataArray from the representation."""
+
+
+@dataclass(frozen=True)
+class DataType:
+    """Representation for DataArray variables."""
+
+    name: str  #: Name of a variable
+    type: Types  #: Type (dict) of a variable.
+    value: Any  #: Value to be assigned to a variable.
+
+    @classmethod
+    def from_field(cls, field: Field[Any], value: Any) -> "DataType":
+        """Create an instance from a dataclass field."""
+        type = unannotate(field.type).__args__[0]
+
+        types: Types = {
+            "dims": get_dims(type.__args__[0]),
+            "dtype": get_dtype(type.__args__[1]),
+        }
+
+        return cls(field.name, types, value)
+
+    def __call__(self, reference: Optional[Reference] = None) -> xr.DataArray:
+        """Create a typed DataArray from the representation."""
+        dims, dtype = self.type["dims"], self.type["dtype"]
+        return typedarray(self.value, dims, dtype, reference)
 
 
 @dataclass(frozen=True)
 class DataStructure:
     """Parsed dataclass information."""
 
-    attr: List[GeneralType]
-    """Parsed attr-type information."""
-    coord: List[DataArray]
-    """Parsed coord-type information."""
-    data: List[DataArray]
-    """Parsed data-type information."""
-    name: List[GeneralType]
-    """Parsed name-type information."""
+    attr: List[GeneralType]  #: Representations of attr-type variables.
+    coord: List[DataArrayType]  #: Representations of coord-type variables.
+    data: List[DataArrayType]  #: Representations of data-type variables.
+    name: List[GeneralType]  #: Representations of name-type variables.
 
     @classmethod
     def from_dataclass(cls, dataclass: DataClassLike) -> "DataStructure":
         """Create an instance from a dataclass."""
         attr: List[GeneralType] = []
-        coord: List[DataArray] = []
-        data: List[DataArray] = []
+        coord: List[DataArrayType] = []
+        data: List[DataArrayType] = []
         name: List[GeneralType] = []
 
         for field in dataclass.__dataclass_fields__.values():
@@ -110,9 +115,9 @@ class DataStructure:
             if FieldType.ATTR.annotates(field.type):
                 attr.append(GeneralType.from_field(field, value))
             elif FieldType.COORD.annotates(field.type):
-                coord.append(DataArray.from_field(field, value))
+                coord.append(DataType.from_field(field, value))
             elif FieldType.DATA.annotates(field.type):
-                data.append(DataArray.from_field(field, value))
+                data.append(DataType.from_field(field, value))
             elif FieldType.NAME.annotates(field.type):
                 name.append(GeneralType.from_field(field, value))
 
@@ -181,7 +186,7 @@ def to_dataset(
     return dataset
 
 
-def typed_dataarray(
+def typedarray(
     data: Any,
     dims: Dims,
     dtype: Dtype,
