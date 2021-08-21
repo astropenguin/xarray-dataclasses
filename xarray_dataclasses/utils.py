@@ -42,13 +42,3 @@ def extend_class(cls: Type[T], mixin: Type[Any]) -> Type[T]:
         bases = (*cls.__bases__, mixin)
 
     return type(cls.__name__, bases, cls.__dict__.copy())
-
-
-def make_generic(cls: Type[T]) -> Type[T]:
-    """Make a class generic (only for type check)."""
-    try:
-        cls.__class_getitem__  # type: ignore
-    except AttributeError:
-        cls.__class_getitem__ = classmethod(GenericAlias)  # type: ignore
-
-    return cls
