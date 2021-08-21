@@ -259,7 +259,7 @@ Attributes:
 
 xarray-dataclasses provides advanced type hints, `Dataof` and `Coordof`.
 Unlike `Data` and `Coord`, they receives a dataclass that defines a DataArray class.
-This is useful, for example, when one wants to add metadata to dimensions for [plotting].
+This is useful, for example, when users want to add metadata to dimensions for [plotting].
 For example:
 
 ```python
