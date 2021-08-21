@@ -2,11 +2,14 @@ __all__ = ["copy_class", "extend_class"]
 
 
 # standard library
-from typing import Any, Sequence, Type, TypeVar
+import re
+from pprint import pformat
+from typing import Any, Pattern, Sequence, Type, TypeVar
 
 
 # constants
 COPIED_CLASS: str = "__xrdc_copied_class__"
+CLASS_REPR: Pattern[str] = re.compile(r"^<class '(.+)'>$")
 
 
 # type hints
@@ -44,11 +47,12 @@ def extend_class(cls: Type[T], mixin: Type[Any]) -> Type[T]:
     return type(cls.__name__, bases, cls.__dict__.copy())
 
 
-def make_generic(cls: Type[T]) -> Type[T]:
-    """Make a class generic (only for type check)."""
-    try:
-        cls.__class_getitem__  # type: ignore
-    except AttributeError:
-        cls.__class_getitem__ = classmethod(GenericAlias)  # type: ignore
+def resolve_class(cls: Type[Any]) -> str:
+    """Return the prettified representation of a class."""
+    class_repr = pformat(cls)
+    match = CLASS_REPR.search(class_repr)
 
-    return cls
+    if match:
+        return match.group(1)
+    else:
+        return class_repr

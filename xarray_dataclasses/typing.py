@@ -1,4 +1,4 @@
-__all__ = ["Attr", "Coord", "Data", "Name"]
+__all__ = ["Attr", "Coord", "Coordof", "Data", "Dataof", "Name"]
 
 
 # standard library
@@ -33,14 +33,12 @@ from typing_extensions import (
 class FieldType(Enum):
     """Annotation for xarray-related fields."""
 
-    ATTR = auto()
-    """Attribute field of DataArray or Dataset."""
-    COORD = auto()
-    """Coordinate field of DataArray or Dataset."""
-    DATA = auto()
-    """Data (variable) field of DataArray or Dataset."""
-    NAME = auto()
-    """Name field of DataArray."""
+    ATTR = auto()  #: Attribute field of DataArray or Dataset.
+    COORD = auto()  #: Coordinate field of DataArray or Dataset.
+    COORDOF = auto()  #: Coordinate field of DataArray or Dataset.
+    DATA = auto()  #: Data (variable) field of DataArray or Dataset.
+    DATAOF = auto()  #: Data (variable) field of DataArray or Dataset.
+    NAME = auto()  #: Name field of DataArray.
 
     def annotates(self, type_: Any) -> bool:
         """Check if type is annotated by the identifier."""
@@ -60,6 +58,7 @@ TDims = TypeVar("TDims", covariant=True)
 TDtype = TypeVar("TDtype", covariant=True)
 
 
+@runtime_checkable
 class DataClass(Protocol):
     """Type hint for dataclass objects."""
 
@@ -83,7 +82,7 @@ Examples:
 
         from dataclasses import dataclass
         from typing import Literal
-        from xarray_dataclasses import Data, Attr
+        from xarray_dataclasses import Attr, Data
 
 
         X = Literal["x"]
@@ -93,7 +92,7 @@ Examples:
         @dataclass
         class Image:
             data: Data[tuple[X, Y], float]
-            dpi: Attr[int] = 300
+            units: Attr[str] = "cd / m^2"
 
 """
 
@@ -105,7 +104,7 @@ Examples:
 
         from dataclasses import dataclass
         from typing import Literal
-        from xarray_dataclasses import Data, Coord
+        from xarray_dataclasses import Coord, Data
 
 
         X = Literal["x"]
@@ -115,9 +114,43 @@ Examples:
         @dataclass
         class Image:
             data: Data[tuple[X, Y], float]
-            weight: Coord[tuple[X, Y], float] = 1.0
             x: Coord[X, int] = 0
             y: Coord[Y, int] = 0
+
+"""
+
+Coordof = Annotated[Union[T, ArrayLike[Any, Any], Any], FieldType.COORDOF]
+"""Type hint for a coordinate member of DataArray or Dataset.
+
+Unlike ``Coord``, it receives a dataclass that defines a DataArray class.
+
+Examples:
+    ::
+
+        from dataclasses import dataclass
+        from typing import Literal
+        from xarray_dataclasses import Data, Coordof
+
+
+        X = Literal["x"]
+        Y = Literal["y"]
+
+
+        @dataclass
+        class XAxis:
+            data: Data[X, int]
+
+
+        @dataclass
+        class YAxis:
+            data: Data[Y, int]
+
+
+        @dataclass
+        class Image:
+            data: Data[tuple[X, Y], float]
+            x: Coordof[XAxis] = 0
+            y: Coordof[YAxis] = 0
 
 """
 
@@ -152,10 +185,52 @@ Examples:
 
 
         @dataclass
-        class Images:
+        class Image:
             red: Data[tuple[X, Y], float]
             green: Data[tuple[X, Y], float]
             blue: Data[tuple[X, Y], float]
+
+"""
+
+Dataof = Annotated[Union[T, ArrayLike[Any, Any], Any], FieldType.DATAOF]
+"""Type hint for data of DataArray or variable of Dataset.
+
+Unlike ``Data``, it receives a dataclass that defines a DataArray class.
+
+Examples:
+    ::
+
+        from dataclasses import dataclass
+        from typing import Literal
+        from xarray_dataclasses import Coordof, Data, Dataof
+
+
+        X = Literal["x"]
+        Y = Literal["y"]
+
+
+        @dataclass
+        class XAxis:
+            data: Data[X, int]
+
+
+        @dataclass
+        class YAxis:
+            data: Data[Y, int]
+
+
+        @dataclass
+        class Image:
+            data: Data[tuple[X, Y], float]
+            x: Coordof[XAxis] = 0
+            y: Coordof[YAxis] = 0
+
+
+        @dataclass
+        class ColorImage:
+            red: Dataof[Image]
+            green: Dataof[Image]
+            red: Dataof[Image]
 
 """
 
@@ -177,7 +252,7 @@ Examples:
         @dataclass
         class Image:
             data: Data[tuple[X, Y], float]
-            name: Name[str] = "default"
+            name: Name[str] = "image"
 
 """
 
