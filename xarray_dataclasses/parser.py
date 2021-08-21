@@ -61,21 +61,14 @@ class DataArray:
 class GeneralType:
     """Parsed general-type information."""
 
-    name: str
-    """Variable name for a type."""
-    value: Any
-    """Value to be assigned to a type."""
-    type: Type[Any]
-    """Type or type-hint object."""
+    name: str  #: Variable name for a type.
+    value: Any  #: Value to be assigned to a type.
+    type: Type[Any]  #: Type or type-hint object.
 
     @classmethod
     def from_field(cls, field: Field[Any], value: Any) -> "GeneralType":
         """Create an instance from a dataclass field."""
         return cls(field.name, value, unannotate(field.type))
-
-    def __call__(self) -> Any:
-        """Return the value (without casting)."""
-        return self.value
 
 
 @dataclass(frozen=True)
@@ -148,10 +141,10 @@ def to_dataarray(
         dataarray.coords.update({coord.name: coord(dataarray)})
 
     for attr in data_structure.attr:
-        dataarray.attrs.update({attr.name: attr()})
+        dataarray.attrs.update({attr.name: attr.value})
 
     for name in data_structure.name:
-        dataarray.name = name()
+        dataarray.name = name.value
 
     return dataarray
 
@@ -171,7 +164,7 @@ def to_dataset(
         dataset.coords.update({coord.name: coord(dataset)})
 
     for attr in data_structure.attr:
-        dataset.attrs.update({attr.name: attr()})
+        dataset.attrs.update({attr.name: attr.value})
 
     return dataset
 
