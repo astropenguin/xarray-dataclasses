@@ -33,18 +33,12 @@ from typing_extensions import (
 class FieldType(Enum):
     """Annotation for xarray-related fields."""
 
-    ATTR = auto()
-    """Attribute field of DataArray or Dataset."""
-    COORD = auto()
-    """Coordinate field of DataArray or Dataset."""
-    COORDOF = auto()
-    """Coordinate field of DataArray or Dataset."""
-    DATA = auto()
-    """Data (variable) field of DataArray or Dataset."""
-    DATAOF = auto()
-    """Data (variable) field of DataArray or Dataset."""
-    NAME = auto()
-    """Name field of DataArray."""
+    ATTR = auto()  #: Attribute field of DataArray or Dataset.
+    COORD = auto()  #: Coordinate field of DataArray or Dataset.
+    COORDOF = auto()  #: Coordinate field of DataArray or Dataset.
+    DATA = auto()  #: Data (variable) field of DataArray or Dataset.
+    DATAOF = auto()  #: Data (variable) field of DataArray or Dataset.
+    NAME = auto()  #: Name field of DataArray.
 
     def annotates(self, type_: Any) -> bool:
         """Check if type is annotated by the identifier."""

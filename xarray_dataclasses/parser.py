@@ -172,7 +172,7 @@ class Structure:
 
 # runtime functions
 def parse(dataclass: DataClassLike) -> Structure:
-    """Create a data structure from a dataclass."""
+    """Create a structure from a dataclass."""
     return Structure.from_dataclass(dataclass)
 
 
