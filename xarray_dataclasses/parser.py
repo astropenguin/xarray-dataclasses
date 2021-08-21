@@ -2,7 +2,7 @@ __all__ = ["parse"]
 
 
 # standard library
-from dataclasses import dataclass, Field
+from dataclasses import InitVar, dataclass, Field
 from typing import Any, List, Optional, Type, Union
 
 
@@ -68,7 +68,7 @@ class DataArrayType(Protocol):
 
 @dataclass(frozen=True)
 class DataType:
-    """Representation for DataArray variables."""
+    """Representation for DataArray variables with dims and dtypes."""
 
     name: str  #: Name of a variable
     type: Types  #: Type (dict) of a variable.
@@ -90,6 +90,32 @@ class DataType:
         """Create a typed DataArray from the representation."""
         dims, dtype = self.type["dims"], self.type["dtype"]
         return typedarray(self.value, dims, dtype, reference)
+
+
+@dataclass(frozen=True)
+class ClassType:
+    """Representation for DataArray variables with dataclass."""
+
+    name: str  #: Name of a variable
+    type: str  #: Type (full path) of a variable.
+    value: Any  #: Value to be assigned to a variable.
+    dataclass: InitVar[Type[DataClass]]  #: Runtime dataclass of a variable.
+
+    def __post_init__(self, dataclass: InitVar[Type[DataClass]]) -> None:
+        super().__setattr__("dataclass", dataclass)
+
+    @classmethod
+    def from_field(cls, field: Field[Any], value: Any) -> "ClassType":
+        """Create an instance from a dataclass field."""
+        type = unannotate(field.type).__args__[0]
+        return cls(field.name, resolve_class(type), value, type)
+
+    def __call__(self, reference: Optional[Reference] = None) -> xr.DataArray:
+        """Create a typed DataArray from the representation."""
+        if isinstance(self.value, self.dataclass):
+            return parse(self.value).to_dataarray(reference)
+        else:
+            return parse(self.dataclass(self.value)).to_dataarray(reference)
 
 
 @dataclass(frozen=True)
@@ -116,8 +142,12 @@ class DataStructure:
                 attr.append(GeneralType.from_field(field, value))
             elif FieldType.COORD.annotates(field.type):
                 coord.append(DataType.from_field(field, value))
+            elif FieldType.COORDOF.annotates(field.type):
+                coord.append(ClassType.from_field(field, value))
             elif FieldType.DATA.annotates(field.type):
                 data.append(DataType.from_field(field, value))
+            elif FieldType.DATAOF.annotates(field.type):
+                data.append(ClassType.from_field(field, value))
             elif FieldType.NAME.annotates(field.type):
                 name.append(GeneralType.from_field(field, value))
 
