@@ -339,6 +339,8 @@ class Image(AsDataArray):
     y: Coord[Y, int] = 0
 ```
 
+Note: for Python 3.7 and 3.8, use `typing_extension.Literal` instead.
+
 <!-- References -->
 [Pyright]: https://github.com/microsoft/pyright
 [the Python's dataclass]: https://docs.python.org/3/library/dataclasses.html
