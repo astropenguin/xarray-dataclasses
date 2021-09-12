@@ -19,6 +19,7 @@ _make_field_generic()
 # submodules
 from . import dataarray
 from . import dataset
+from . import deprecated
 from . import parser
 from . import typing
 from . import utils
@@ -27,5 +28,6 @@ from . import utils
 # aliases
 from .dataarray import *
 from .dataset import *
+from .deprecated import *
 from .parser import *
 from .typing import *

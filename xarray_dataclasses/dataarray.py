@@ -1,11 +1,10 @@
-__all__ = ["asdataarray", "AsDataArray", "dataarrayclass"]
+__all__ = ["asdataarray", "AsDataArray"]
 
 
 # standard library
 from dataclasses import dataclass
 from functools import wraps
-from typing import Any, Callable, Optional, overload, Sequence, Type, Union
-from warnings import warn
+from typing import Any, Callable, overload, Sequence, Type, Union
 
 
 # third-party packages
@@ -17,7 +16,7 @@ from typing_extensions import Literal, Protocol
 # submodules
 from .parser import parse
 from .typing import DataClass, TDataArray
-from .utils import copy_class, extend_class
+from .utils import copy_class
 
 
 # type hints
@@ -54,46 +53,6 @@ def asdataarray(inst: Any, dataarray_factory: Any = xr.DataArray) -> Any:
         pass
 
     return parse(inst).to_dataarray(dataarray_factory=dataarray_factory)
-
-
-def dataarrayclass(
-    cls: Optional[Type[Any]] = None,
-    *,
-    init: bool = True,
-    repr: bool = True,
-    eq: bool = True,
-    order: bool = False,
-    unsafe_hash: bool = False,
-    frozen: bool = False,
-    shorthands: bool = True,
-) -> Union[Type[DataClass], Callable[[type], Type[DataClass]]]:
-    """Class decorator to create a DataArray class."""
-
-    warn(
-        DeprecationWarning(
-            "This decorator will be removed in v1.0.0. ",
-            "Please consider to use the Python's dataclass ",
-            "and the mix-in class (AsDataArray) instead.",
-        )
-    )
-
-    def to_dataclass(cls: Type[Any]) -> Type[DataClass]:
-        if shorthands:
-            cls = extend_class(cls, AsDataArray)
-
-        return dataclass(
-            init=init,
-            repr=repr,
-            eq=eq,
-            order=order,
-            unsafe_hash=unsafe_hash,
-            frozen=frozen,
-        )(cls)
-
-    if cls is None:
-        return to_dataclass
-    else:
-        return to_dataclass(cls)
 
 
 # mix-in class

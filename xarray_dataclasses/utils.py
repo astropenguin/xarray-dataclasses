@@ -1,7 +1,7 @@
 # standard library
 import re
 from pprint import pformat
-from typing import Any, Pattern, Sequence, Type, TypeVar
+from typing import Any, Pattern, Type, TypeVar
 
 
 # constants
@@ -11,7 +11,6 @@ CLASS_REPR: Pattern[str] = re.compile(r"^<class '(.+)'>$")
 
 # type hints
 T = TypeVar("T")
-GenericAlias = type(Sequence[int])
 
 
 # runtime functions
@@ -32,16 +31,6 @@ def copy_class(cls: Type[T]) -> Type[T]:
     }
 
     return type(cls.__name__, bases, namespace)
-
-
-def extend_class(cls: Type[T], mixin: Type[Any]) -> Type[T]:
-    """Extend a class with a mix-in class."""
-    if cls.__bases__ == (object,):
-        bases = (mixin,)
-    else:
-        bases = (*cls.__bases__, mixin)
-
-    return type(cls.__name__, bases, cls.__dict__.copy())
 
 
 def resolve_class(cls: Type[Any]) -> str:

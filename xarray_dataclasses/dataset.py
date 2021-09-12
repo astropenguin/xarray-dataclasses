@@ -1,11 +1,10 @@
-__all__ = ["asdataset", "AsDataset", "datasetclass"]
+__all__ = ["asdataset", "AsDataset"]
 
 
 # standard library
 from dataclasses import dataclass
 from functools import wraps
-from typing import Any, Callable, Optional, overload, Type, Union
-from warnings import warn
+from typing import Any, Callable, overload, Type
 
 
 # third-party packages
@@ -16,7 +15,7 @@ from typing_extensions import Protocol
 # submodules
 from .typing import DataClass, TDataset
 from .parser import parse
-from .utils import copy_class, extend_class
+from .utils import copy_class
 
 
 # type hints
@@ -49,46 +48,6 @@ def asdataset(inst: Any, dataset_factory: Any = xr.Dataset) -> Any:
         pass
 
     return parse(inst).to_dataset(dataset_factory=dataset_factory)
-
-
-def datasetclass(
-    cls: Optional[Type[Any]] = None,
-    *,
-    init: bool = True,
-    repr: bool = True,
-    eq: bool = True,
-    order: bool = False,
-    unsafe_hash: bool = False,
-    frozen: bool = False,
-    shorthands: bool = True,
-) -> Union[Type[DataClass], Callable[[type], Type[DataClass]]]:
-    """Class decorator to create a Dataset class."""
-
-    warn(
-        DeprecationWarning(
-            "This decorator will be removed in v1.0.0. ",
-            "Please consider to use the Python's dataclass ",
-            "and the mix-in class (AsDataset) instead.",
-        )
-    )
-
-    def to_dataclass(cls: Type[Any]) -> Type[DataClass]:
-        if shorthands:
-            cls = extend_class(cls, AsDataset)
-
-        return dataclass(
-            init=init,
-            repr=repr,
-            eq=eq,
-            order=order,
-            unsafe_hash=unsafe_hash,
-            frozen=frozen,
-        )(cls)
-
-    if cls is None:
-        return to_dataclass
-    else:
-        return to_dataclass(cls)
 
 
 # mix-in class
