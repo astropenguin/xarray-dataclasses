@@ -1,0 +1,28 @@
+{
+    "name": "Python 3.9",
+    "build": {
+        "context": "..",
+        "dockerfile": "Dockerfile",
+    },
+    "extensions": [
+        "github.vscode-pull-request-github",
+        "mhutchie.git-graph",
+        "ms-python.python",
+        "streetsidesoftware.code-spell-checker",
+        "tamasfe.even-better-toml",
+    ],
+    "settings": {
+        "files.insertFinalNewline": true,
+        "files.trimTrailingWhitespace": true,
+        "python.formatting.provider": "black",
+        "python.languageServer": "Pylance",
+        "python.linting.enabled": true,
+        "python.linting.lintOnSave": true,
+        "python.linting.flake8Enabled": true,
+        "[python]": {
+            "editor.formatOnSave": true,
+            "editor.insertSpaces": true,
+            "editor.tabSize": 4,
+        },
+    },
+}
