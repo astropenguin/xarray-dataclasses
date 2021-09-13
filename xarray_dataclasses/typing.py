@@ -258,54 +258,60 @@ Examples:
 
 
 # runtime functions
-def get_dims(type_like: Any) -> Dims:
-    """Parse a type-like object and get dims."""
-    type_like = unannotate(type_like)
+def get_dims(obj: Any) -> Dims:
+    """Parse an object to get dims."""
+    obj = unannotate(obj)
 
-    if type_like == () or type_like is NoneType:
+    if obj == ():
         return ()
 
-    if isinstance(type_like, ForwardRef):
-        return (type_like.__forward_arg__,)
+    if obj is NoneType:
+        return ()
 
-    if isinstance(type_like, str):
-        return (type_like,)
+    if isinstance(obj, str):
+        return (obj,)
 
-    origin = get_origin(type_like)
-    args = get_args(type_like)
+    if isinstance(obj, ForwardRef):
+        return (obj.__forward_arg__,)
+
+    args = get_args(obj)
+    origin = get_origin(obj)
 
     if origin is tuple:
         return tuple(chain(*map(get_dims, args)))
 
-    if origin is Literal:
-        return tuple(map(str, args))
+    if origin is Literal and len(args) == 1:
+        return (str(args[0]),)
 
-    raise ValueError(f"Could not parse {type_like}.")
+    raise ValueError(f"Could not parse {obj} as dims.")
 
 
-def get_dtype(type_like: Any) -> Dtype:
-    """Parse a type-like object and get dtype."""
-    type_like = unannotate(type_like)
+def get_dtype(obj: Any) -> Dtype:
+    """Parse an object to get dtype."""
+    obj = unannotate(obj)
 
-    if type_like is Any or type_like is NoneType:
+    if obj is Any:
         return None
 
-    if isinstance(type_like, type):
-        return type_like.__name__
+    if obj is NoneType:
+        return None
 
-    if isinstance(type_like, ForwardRef):
-        return type_like.__forward_arg__
+    if isinstance(obj, str):
+        return obj
 
-    if isinstance(type_like, str):
-        return type_like
+    if isinstance(obj, type):
+        return obj.__name__
 
-    origin = get_origin(type_like)
-    args = get_args(type_like)
+    if isinstance(obj, ForwardRef):
+        return obj.__forward_arg__
+
+    args = get_args(obj)
+    origin = get_origin(obj)
 
     if origin is Literal and len(args) == 1:
         return str(args[0])
 
-    raise ValueError(f"Could not parse {type_like}.")
+    raise ValueError(f"Could not parse {obj} as dtype.")
 
 
 def unannotate(obj: T) -> T:
