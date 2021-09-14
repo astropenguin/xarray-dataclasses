@@ -24,24 +24,24 @@ DatasetFactory = Callable[..., R]
 
 
 class DataClass(Protocol[P]):
-    """Type hint for dataclass objects."""
+    """Type hint for a dataclass object."""
 
     __init__: Callable[P, None]
     __dataclass_fields__: Dict[str, Field[Any]]
 
 
 class DataClassWithFactory(Protocol[P, R]):
-    """Type hint for dataclass objects."""
+    """Type hint for a dataclass object with a Dataset factory."""
 
     __init__: Callable[P, None]
     __dataclass_fields__: Dict[str, Field[Any]]
     __dataset_factory__: DatasetFactory[R]
 
 
-# runtime functions
+# runtime functions and classes
 @overload
 def asdataset(
-    inst: DataClassWithFactory[P, R],
+    dataclass: DataClassWithFactory[P, R],
     dataset_factory: DatasetFactory[Any] = xr.Dataset,
 ) -> R:
     ...
@@ -49,23 +49,34 @@ def asdataset(
 
 @overload
 def asdataset(
-    inst: DataClass[P],
+    dataclass: DataClass[P],
     dataset_factory: DatasetFactory[R] = xr.Dataset,
 ) -> R:
     ...
 
 
-def asdataset(inst: Any, dataset_factory: Any = xr.Dataset) -> Any:
-    """Convert a Dataset-class instance to Dataset one."""
+def asdataset(
+    dataclass: Any,
+    dataset_factory: Any = xr.Dataset,
+) -> Any:
+    """Create a Dataset object from a dataclass object.
+
+    Args:
+        dataclass: Dataclass object that defines typed Dataset.
+        dataset_factory: Factory function of Dataset.
+
+    Returns:
+        Dataset object created from the dataclass object.
+
+    """
     try:
-        dataset_factory = inst.__dataset_factory__
+        dataset_factory = dataclass.__dataset_factory__
     except AttributeError:
         pass
 
-    return parse(inst).to_dataset(dataset_factory=dataset_factory)
+    return parse(dataclass).to_dataset(dataset_factory=dataset_factory)
 
 
-# mix-in class
 class AsDataset:
     """Mix-in class that provides shorthand methods."""
 
@@ -79,7 +90,7 @@ class AsDataset:
         *args: P.args,
         **kwargs: P.kwargs,
     ) -> R:
-        """Create a Dataset instance."""
+        """Create a Dataset object."""
         raise NotImplementedError
 
     def __init_subclass__(cls, **kwargs: Any) -> None:

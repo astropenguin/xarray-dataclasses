@@ -27,24 +27,24 @@ DataArrayFactory = Callable[..., R]
 
 
 class DataClass(Protocol[P]):
-    """Type hint for dataclass objects."""
+    """Type hint for a dataclass object."""
 
     __init__: Callable[P, None]
     __dataclass_fields__: Dict[str, Field[Any]]
 
 
 class DataClassWithFactory(Protocol[P, R]):
-    """Type hint for dataclass objects."""
+    """Type hint for a dataclass object with a DataArray factory."""
 
     __init__: Callable[P, None]
     __dataclass_fields__: Dict[str, Field[Any]]
     __dataarray_factory__: DataArrayFactory[R]
 
 
-# runtime functions
+# runtime functions and classes
 @overload
 def asdataarray(
-    inst: DataClassWithFactory[P, R],
+    dataclass: DataClassWithFactory[P, R],
     dataarray_factory: DataArrayFactory[Any] = xr.DataArray,
 ) -> R:
     ...
@@ -52,23 +52,34 @@ def asdataarray(
 
 @overload
 def asdataarray(
-    inst: DataClass[P],
+    dataclass: DataClass[P],
     dataarray_factory: DataArrayFactory[R] = xr.DataArray,
 ) -> R:
     ...
 
 
-def asdataarray(inst: Any, dataarray_factory: Any = xr.DataArray) -> Any:
-    """Convert a DataArray-class instance to DataArray one."""
+def asdataarray(
+    dataclass: Any,
+    dataarray_factory: Any = xr.DataArray,
+) -> Any:
+    """Create a DataArray object from a dataclass object.
+
+    Args:
+        dataclass: Dataclass object that defines typed DataArray.
+        dataset_factory: Factory function of DataArray.
+
+    Returns:
+        Dataset object created from the dataclass object.
+
+    """
     try:
-        dataarray_factory = inst.__dataarray_factory__
+        dataarray_factory = dataclass.__dataarray_factory__
     except AttributeError:
         pass
 
-    return parse(inst).to_dataarray(dataarray_factory=dataarray_factory)
+    return parse(dataclass).to_dataarray(dataarray_factory=dataarray_factory)
 
 
-# mix-in class
 class AsDataArray:
     """Mix-in class that provides shorthand methods."""
 
@@ -82,7 +93,7 @@ class AsDataArray:
         *args: P.args,
         **kwargs: P.kwargs,
     ) -> R:
-        """Create a DataArray instance."""
+        """Create a DataArray object."""
         raise NotImplementedError
 
     @classmethod
@@ -92,16 +103,16 @@ class AsDataArray:
         order: Order = "C",
         **kwargs: Any,
     ) -> R:
-        """Create a DataArray instance without initializing data.
+        """Create a DataArray object without initializing data.
 
         Args:
-            shape: Shape of the new DataArray instance.
+            shape: Shape of the new DataArray object.
             order: Whether to store data in row-major (C-style)
                 or column-major (Fortran-style) order in memory.
             kwargs: Args of the DataArray class except for data.
 
         Returns:
-            DataArray instance filled without initializing data.
+            DataArray object filled without initializing data.
 
         """
         name = parse(cls).data[0].name
@@ -115,16 +126,16 @@ class AsDataArray:
         order: Order = "C",
         **kwargs: Any,
     ) -> R:
-        """Create a DataArray instance filled with zeros.
+        """Create a DataArray object filled with zeros.
 
         Args:
-            shape: Shape of the new DataArray instance.
+            shape: Shape of the new DataArray object.
             order: Whether to store data in row-major (C-style)
                 or column-major (Fortran-style) order in memory.
             kwargs: Args of the DataArray class except for data.
 
         Returns:
-            DataArray instance filled with zeros.
+            DataArray object filled with zeros.
 
         """
         name = parse(cls).data[0].name
@@ -138,16 +149,16 @@ class AsDataArray:
         order: Order = "C",
         **kwargs: Any,
     ) -> R:
-        """Create a DataArray instance filled with ones.
+        """Create a DataArray object filled with ones.
 
         Args:
-            shape: Shape of the new DataArray instance.
+            shape: Shape of the new DataArray object.
             order: Whether to store data in row-major (C-style)
                 or column-major (Fortran-style) order in memory.
             kwargs: Args of the DataArray class except for data.
 
         Returns:
-            DataArray instance filled with ones.
+            DataArray object filled with ones.
 
         """
         name = parse(cls).data[0].name
@@ -162,17 +173,17 @@ class AsDataArray:
         order: Order = "C",
         **kwargs: Any,
     ) -> R:
-        """Create a DataArray instance filled with given value.
+        """Create a DataArray object filled with given value.
 
         Args:
-            shape: Shape of the new DataArray instance.
-            fill_value: Value for the new DataArray instance.
+            shape: Shape of the new DataArray object.
+            fill_value: Value for the new DataArray object.
             order: Whether to store data in row-major (C-style)
                 or column-major (Fortran-style) order in memory.
             kwargs: Args of the DataArray class except for data.
 
         Returns:
-            DataArray instance filled with given value.
+            DataArray object filled with given value.
 
         """
         name = parse(cls).data[0].name
