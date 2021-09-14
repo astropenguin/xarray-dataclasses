@@ -72,7 +72,9 @@ def asdataarray(inst: Any, dataarray_factory: Any = xr.DataArray) -> Any:
 class AsDataArray:
     """Mix-in class that provides shorthand methods."""
 
-    __dataarray_factory__ = xr.DataArray
+    def __dataarray_factory__(self, data: Any) -> xr.DataArray:
+        """Default DataArray factory (xarray.DataArray)."""
+        return xr.DataArray(data)
 
     @classmethod
     def new(
