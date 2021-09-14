@@ -160,7 +160,18 @@ class Structure:
         dataarray_factory: Callable[..., RDataArray] = xr.DataArray,
     ) -> RDataArray:
         """Create a typed DataArray from the structure."""
-        return to_dataarray(self, reference, dataarray_factory)
+        dataarray = dataarray_factory(self.data[0](reference))
+
+        for coord in self.coord:
+            dataarray.coords.update({coord.name: coord(dataarray)})
+
+        for attr in self.attr:
+            dataarray.attrs.update({attr.name: attr.value})
+
+        for name in self.name:
+            dataarray.name = name.value
+
+        return dataarray
 
     def to_dataset(
         self,
@@ -168,50 +179,21 @@ class Structure:
         dataset_factory: Callable[..., RDataset] = xr.Dataset,
     ) -> RDataset:
         """Create a typed Dataset from the structure."""
-        return to_dataset(self, reference, dataset_factory)
+        dataset = dataset_factory()
+
+        for data in self.data:
+            dataset.update({data.name: data(reference)})
+
+        for coord in self.coord:
+            dataset.coords.update({coord.name: coord(dataset)})
+
+        for attr in self.attr:
+            dataset.attrs.update({attr.name: attr.value})
+
+        return dataset
 
 
 # runtime functions
-def to_dataarray(
-    structure: Structure,
-    reference: Reference = None,
-    dataarray_factory: Callable[..., RDataArray] = xr.DataArray,
-) -> RDataArray:
-    """Create a typed DataArray from a structure."""
-    dataarray = dataarray_factory(structure.data[0](reference))
-
-    for coord in structure.coord:
-        dataarray.coords.update({coord.name: coord(dataarray)})
-
-    for attr in structure.attr:
-        dataarray.attrs.update({attr.name: attr.value})
-
-    for name in structure.name:
-        dataarray.name = name.value
-
-    return dataarray
-
-
-def to_dataset(
-    structure: Structure,
-    reference: Reference = None,
-    dataset_factory: Callable[..., RDataset] = xr.Dataset,
-) -> RDataset:
-    """Create a typed Dataset from a structure."""
-    dataset = dataset_factory()
-
-    for data in structure.data:
-        dataset.update({data.name: data(reference)})
-
-    for coord in structure.coord:
-        dataset.coords.update({coord.name: coord(dataset)})
-
-    for attr in structure.attr:
-        dataset.attrs.update({attr.name: attr.value})
-
-    return dataset
-
-
 def typedarray(
     data: Any,
     dims: Dims,
