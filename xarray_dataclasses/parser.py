@@ -30,22 +30,6 @@ RDataset = TypeVar("RDataset", bound=xr.Dataset)
 Types = TypedDict("Types", dims=Dims, dtype=Dtype)
 
 
-# dataclasses
-@dataclass(frozen=True)
-class GeneralType:
-    """Representation for general-type variables."""
-
-    name: str  #: Name of a variable.
-    type: str  #: Type (full path) of a variable.
-    value: Any  #: Value to be assigned to a vabiable.
-
-    @classmethod
-    def from_field(cls, field: Field[Any], value: Any) -> "GeneralType":
-        """Create an instance from a dataclass field."""
-        type = resolve_class(unannotate(field.type))
-        return cls(field.name, type, value)
-
-
 class DataArrayType(Protocol):
     """Reperesentation for DataArray variables."""
 
@@ -60,6 +44,22 @@ class DataArrayType(Protocol):
 
     def __call__(self, reference: Reference = None) -> xr.DataArray:
         """Create a typed DataArray from the representation."""
+
+
+# dataclasses
+@dataclass(frozen=True)
+class GeneralType:
+    """Representation for general-type variables."""
+
+    name: str  #: Name of a variable.
+    type: str  #: Type (full path) of a variable.
+    value: Any  #: Value to be assigned to a vabiable.
+
+    @classmethod
+    def from_field(cls, field: Field[Any], value: Any) -> "GeneralType":
+        """Create an instance from a dataclass field."""
+        type = resolve_class(unannotate(field.type))
+        return cls(field.name, type, value)
 
 
 @dataclass(frozen=True)
