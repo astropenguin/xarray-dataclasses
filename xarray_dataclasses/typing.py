@@ -18,7 +18,6 @@ from typing import (
 
 
 # third-party packages
-import xarray as xr
 from typing_extensions import (
     Annotated,
     get_args,
@@ -50,10 +49,7 @@ class FieldType(Enum):
 Dims = Tuple[str, ...]
 Dtype = Optional[str]
 NoneType = type(None)
-
 T = TypeVar("T")
-TDataArray = TypeVar("TDataArray", bound=xr.DataArray)
-TDataset = TypeVar("TDataset", bound=xr.Dataset)
 TDims = TypeVar("TDims", covariant=True)
 TDtype = TypeVar("TDtype", covariant=True)
 
