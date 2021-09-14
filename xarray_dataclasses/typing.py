@@ -2,13 +2,11 @@ __all__ = ["Attr", "Coord", "Coordof", "Data", "Dataof", "Name"]
 
 
 # standard library
-from dataclasses import Field
 from enum import auto, Enum
 from itertools import chain
 from typing import (
     Any,
     Callable,
-    Dict,
     ForwardRef,
     Optional,
     Tuple,
@@ -56,14 +54,6 @@ TDataArray = TypeVar("TDataArray", bound=xr.DataArray)
 TDataset = TypeVar("TDataset", bound=xr.Dataset)
 TDims = TypeVar("TDims", covariant=True)
 TDtype = TypeVar("TDtype", covariant=True)
-
-
-@runtime_checkable
-class DataClass(Protocol):
-    """Type hint for dataclass objects."""
-
-    __init__: Callable[..., None]
-    __dataclass_fields__: Dict[str, Field[Any]]
 
 
 @runtime_checkable

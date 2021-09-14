@@ -3,19 +3,18 @@ __all__ = ["parse"]
 
 # standard library
 from dataclasses import InitVar, dataclass, Field
-from typing import Any, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 
 # third-party packages
 import numpy as np
 import xarray as xr
-from typing_extensions import Protocol, TypedDict
+from typing_extensions import Protocol, TypedDict, runtime_checkable
 
 
 # submodules
 from .typing import (
     ArrayLike,
-    DataClass,
     Dims,
     Dtype,
     FieldType,
@@ -29,9 +28,19 @@ from .utils import resolve_class
 
 
 # type hints
-DataClassLike = Union[Type[DataClass], DataClass]
 Reference = Union[xr.DataArray, xr.Dataset]
 Types = TypedDict("Types", dims=Dims, dtype=Dtype)
+
+
+@runtime_checkable
+class DataClass(Protocol):
+    """Type hint for a dataclass object."""
+
+    __init__: Callable[..., None]
+    __dataclass_fields__: Dict[str, Field[Any]]
+
+
+DataClassLike = Union[Type[DataClass], DataClass]
 
 
 # dataclasses
