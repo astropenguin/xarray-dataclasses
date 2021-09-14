@@ -1,6 +1,6 @@
 # standard library
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Any, Tuple
 
 
 # third-party packages
@@ -31,13 +31,14 @@ class Custom(xr.DataArray):
 
 @dataclass
 class Image(AsDataArray):
-    __dataarray_factory__ = Custom
-
     data: Data[Tuple[X, Y], float]
     x: Coord[X, int] = 0
     y: Coord[Y, int] = 0
     dpi: Attr[int] = 100
     name: Name[str] = "image"
+
+    def __dataarray_factory__(self, data: Any = None) -> Custom:
+        return Custom(data)
 
 
 # test datasets
