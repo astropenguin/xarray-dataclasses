@@ -1,6 +1,6 @@
 # standard library
 from dataclasses import InitVar, dataclass, Field
-from typing import Any, List, Type, Union
+from typing import Any, Callable, List, Type, TypeVar, Union
 
 
 # third-party packages
@@ -18,8 +18,6 @@ from .typing import (
     FieldType,
     get_dims,
     get_dtype,
-    TDataArray,
-    TDataset,
     unannotate,
 )
 from .utils import resolve_class
@@ -27,6 +25,8 @@ from .utils import resolve_class
 
 # type hints
 Reference = Union[xr.DataArray, xr.Dataset, None]
+RDataArray = TypeVar("RDataArray", bound=xr.DataArray)
+RDataset = TypeVar("RDataset", bound=xr.Dataset)
 Types = TypedDict("Types", dims=Dims, dtype=Dtype)
 
 
@@ -157,16 +157,16 @@ class Structure:
     def to_dataarray(
         self,
         reference: Reference = None,
-        dataarray_factory: Type[TDataArray] = xr.DataArray,
-    ) -> TDataArray:
+        dataarray_factory: Callable[..., RDataArray] = xr.DataArray,
+    ) -> RDataArray:
         """Create a typed DataArray from the structure."""
         return to_dataarray(self, reference, dataarray_factory)
 
     def to_dataset(
         self,
         reference: Reference = None,
-        dataset_factory: Type[TDataset] = xr.Dataset,
-    ) -> TDataset:
+        dataset_factory: Callable[..., RDataset] = xr.Dataset,
+    ) -> RDataset:
         """Create a typed Dataset from the structure."""
         return to_dataset(self, reference, dataset_factory)
 
@@ -175,8 +175,8 @@ class Structure:
 def to_dataarray(
     structure: Structure,
     reference: Reference = None,
-    dataarray_factory: Type[TDataArray] = xr.DataArray,
-) -> TDataArray:
+    dataarray_factory: Callable[..., RDataArray] = xr.DataArray,
+) -> RDataArray:
     """Create a typed DataArray from a structure."""
     dataarray = dataarray_factory(structure.data[0](reference))
 
@@ -195,8 +195,8 @@ def to_dataarray(
 def to_dataset(
     structure: Structure,
     reference: Reference = None,
-    dataset_factory: Type[TDataset] = xr.Dataset,
-) -> TDataset:
+    dataset_factory: Callable[..., RDataset] = xr.Dataset,
+) -> RDataset:
     """Create a typed Dataset from a structure."""
     dataset = dataset_factory()
 
