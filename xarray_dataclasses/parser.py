@@ -1,6 +1,3 @@
-__all__ = ["parse"]
-
-
 # standard library
 from dataclasses import InitVar, dataclass, Field
 from typing import Any, Callable, Dict, List, Optional, Type, Union
@@ -122,9 +119,11 @@ class ClassType:
     def __call__(self, reference: Optional[Reference] = None) -> xr.DataArray:
         """Create a typed DataArray from the representation."""
         if isinstance(self.value, self.dataclass):
-            return parse(self.value).to_dataarray(reference)
+            dataclass = self.value
         else:
-            return parse(self.dataclass(self.value)).to_dataarray(reference)
+            dataclass = self.dataclass(self.value)
+
+        return Structure.from_dataclass(dataclass).to_dataarray(reference)
 
 
 @dataclass(frozen=True)
@@ -180,11 +179,6 @@ class Structure:
 
 
 # runtime functions
-def parse(dataclass: DataClassLike) -> Structure:
-    """Create a structure from a dataclass."""
-    return Structure.from_dataclass(dataclass)
-
-
 def to_dataarray(
     structure: Structure,
     reference: Optional[Reference] = None,

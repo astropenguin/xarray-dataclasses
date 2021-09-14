@@ -8,7 +8,7 @@ from typing_extensions import Literal
 
 
 # submodules
-from xarray_dataclasses.parser import parse
+from xarray_dataclasses.parser import Structure
 from xarray_dataclasses.typing import Attr, Coord, Coordof, Data, Dataof, Name
 
 
@@ -47,10 +47,10 @@ class Image:
     blue: Dataof[Matrix]
 
 
-xaxis_structure = parse(XAxis)
-yaxis_structure = parse(YAxis)
-matrix_structure = parse(Matrix)
-image_structure = parse(Image)
+xaxis_structure = Structure.from_dataclass(XAxis)
+yaxis_structure = Structure.from_dataclass(YAxis)
+matrix_structure = Structure.from_dataclass(Matrix)
+image_structure = Structure.from_dataclass(Image)
 
 
 # test functions

@@ -13,7 +13,7 @@ from typing_extensions import ParamSpec, Protocol
 
 
 # submodules
-from .parser import parse
+from .parser import Structure
 from .utils import copy_class
 
 
@@ -74,7 +74,8 @@ def asdataset(
     except AttributeError:
         pass
 
-    return parse(dataclass).to_dataset(dataset_factory=dataset_factory)
+    structure = Structure.from_dataclass(dataclass)
+    return structure.to_dataset(dataset_factory=dataset_factory)
 
 
 class AsDataset:

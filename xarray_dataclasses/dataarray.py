@@ -14,7 +14,7 @@ from typing_extensions import Literal, ParamSpec, Protocol
 
 
 # submodules
-from .parser import parse
+from .parser import Structure
 from .utils import copy_class
 
 
@@ -77,7 +77,8 @@ def asdataarray(
     except AttributeError:
         pass
 
-    return parse(dataclass).to_dataarray(dataarray_factory=dataarray_factory)
+    structure = Structure.from_dataclass(dataclass)
+    return structure.to_dataarray(dataarray_factory=dataarray_factory)
 
 
 class AsDataArray:
@@ -115,7 +116,7 @@ class AsDataArray:
             DataArray object filled without initializing data.
 
         """
-        name = parse(cls).data[0].name
+        name = Structure.from_dataclass(cls).data[0].name
         data = np.empty(shape, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
 
@@ -138,7 +139,7 @@ class AsDataArray:
             DataArray object filled with zeros.
 
         """
-        name = parse(cls).data[0].name
+        name = Structure.from_dataclass(cls).data[0].name
         data = np.zeros(shape, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
 
@@ -161,7 +162,7 @@ class AsDataArray:
             DataArray object filled with ones.
 
         """
-        name = parse(cls).data[0].name
+        name = Structure.from_dataclass(cls).data[0].name
         data = np.ones(shape, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
 
@@ -186,7 +187,7 @@ class AsDataArray:
             DataArray object filled with given value.
 
         """
-        name = parse(cls).data[0].name
+        name = Structure.from_dataclass(cls).data[0].name
         data = np.full(shape, fill_value, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
 
