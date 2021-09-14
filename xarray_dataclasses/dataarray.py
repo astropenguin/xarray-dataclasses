@@ -2,46 +2,59 @@ __all__ = ["asdataarray", "AsDataArray"]
 
 
 # standard library
-from dataclasses import dataclass
+from dataclasses import dataclass, Field
 from functools import wraps
-from typing import Any, Callable, overload, Sequence, Type, Union
+from typing import Any, Callable, Dict, overload, Sequence, Type, TypeVar, Union
 
 
 # third-party packages
 import numpy as np
 import xarray as xr
-from typing_extensions import Literal, Protocol
+from typing_extensions import Literal, ParamSpec, Protocol
 
 
 # submodules
 from .parser import parse
-from .typing import DataClass, TDataArray
 from .utils import copy_class
 
 
 # type hints
 Order = Literal["C", "F"]
 Shape = Union[Sequence[int], int]
+P = ParamSpec("P")
+R = TypeVar("R", bound=xr.DataArray)
+DataArrayFactory = Callable[..., R]
 
 
-class DataClassWithFactory(DataClass, Protocol[TDataArray]):
-    __dataarray_factory__: Callable[..., TDataArray]
+class DataClass(Protocol[P]):
+    """Type hint for dataclass objects."""
+
+    __init__: Callable[P, None]
+    __dataclass_fields__: Dict[str, Field[Any]]
+
+
+class DataClassWithFactory(Protocol[P, R]):
+    """Type hint for dataclass objects."""
+
+    __init__: Callable[P, None]
+    __dataclass_fields__: Dict[str, Field[Any]]
+    __dataarray_factory__: DataArrayFactory[R]
 
 
 # runtime functions
 @overload
 def asdataarray(
-    inst: DataClassWithFactory[TDataArray],
-    dataarray_factory: Type[Any] = xr.DataArray,
-) -> TDataArray:
+    inst: DataClassWithFactory[P, R],
+    dataarray_factory: DataArrayFactory[Any] = xr.DataArray,
+) -> R:
     ...
 
 
 @overload
 def asdataarray(
-    inst: DataClass,
-    dataarray_factory: Type[TDataArray] = xr.DataArray,
-) -> TDataArray:
+    inst: DataClass[P],
+    dataarray_factory: DataArrayFactory[R] = xr.DataArray,
+) -> R:
     ...
 
 
@@ -63,20 +76,20 @@ class AsDataArray:
 
     @classmethod
     def new(
-        cls: Type[DataClassWithFactory[TDataArray]],
-        *args: Any,
-        **kwargs: Any,
-    ) -> TDataArray:
+        cls: Type[DataClassWithFactory[P, R]],
+        *args: P.args,
+        **kwargs: P.kwargs,
+    ) -> R:
         """Create a DataArray instance."""
         raise NotImplementedError
 
     @classmethod
     def empty(
-        cls: Type[DataClassWithFactory[TDataArray]],
+        cls: Type[DataClassWithFactory[P, R]],
         shape: Shape,
         order: Order = "C",
         **kwargs: Any,
-    ) -> TDataArray:
+    ) -> R:
         """Create a DataArray instance without initializing data.
 
         Args:
@@ -95,11 +108,11 @@ class AsDataArray:
 
     @classmethod
     def zeros(
-        cls: Type[DataClassWithFactory[TDataArray]],
+        cls: Type[DataClassWithFactory[P, R]],
         shape: Shape,
         order: Order = "C",
         **kwargs: Any,
-    ) -> TDataArray:
+    ) -> R:
         """Create a DataArray instance filled with zeros.
 
         Args:
@@ -118,11 +131,11 @@ class AsDataArray:
 
     @classmethod
     def ones(
-        cls: Type[DataClassWithFactory[TDataArray]],
+        cls: Type[DataClassWithFactory[P, R]],
         shape: Shape,
         order: Order = "C",
         **kwargs: Any,
-    ) -> TDataArray:
+    ) -> R:
         """Create a DataArray instance filled with ones.
 
         Args:
@@ -141,12 +154,12 @@ class AsDataArray:
 
     @classmethod
     def full(
-        cls: Type[DataClassWithFactory[TDataArray]],
+        cls: Type[DataClassWithFactory[P, R]],
         shape: Shape,
         fill_value: Any,
         order: Order = "C",
         **kwargs: Any,
-    ) -> TDataArray:
+    ) -> R:
         """Create a DataArray instance filled with given value.
 
         Args:
@@ -175,16 +188,16 @@ class AsDataArray:
             return
 
         init = Temp.__init__
-        init.__annotations__["return"] = TDataArray
+        init.__annotations__["return"] = R
 
         # create a concrete new method and bind
         @classmethod
         @wraps(init)
         def new(
-            cls: Type[DataClassWithFactory[TDataArray]],
-            *args: Any,
-            **kwargs: Any,
-        ) -> TDataArray:
+            cls: Type[DataClassWithFactory[P, R]],
+            *args: P.args,
+            **kwargs: P.kwargs,
+        ) -> R:
             return asdataarray(cls(*args, **kwargs))
 
         cls.new = new  # type: ignore

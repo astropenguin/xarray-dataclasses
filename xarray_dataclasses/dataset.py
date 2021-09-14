@@ -2,41 +2,56 @@ __all__ = ["asdataset", "AsDataset"]
 
 
 # standard library
-from dataclasses import dataclass
+from dataclasses import dataclass, Field
 from functools import wraps
-from typing import Any, Callable, overload, Type
+from typing import Any, Callable, Dict, overload, Type, TypeVar
 
 
 # third-party packages
 import xarray as xr
-from typing_extensions import Protocol
+from typing_extensions import ParamSpec, Protocol
 
 
 # submodules
-from .typing import DataClass, TDataset
 from .parser import parse
 from .utils import copy_class
 
 
 # type hints
-class DataClassWithFactory(DataClass, Protocol[TDataset]):
-    __dataset_factory__: Callable[..., TDataset]
+P = ParamSpec("P")
+R = TypeVar("R", bound=xr.Dataset)
+DatasetFactory = Callable[..., R]
+
+
+class DataClass(Protocol[P]):
+    """Type hint for dataclass objects."""
+
+    __init__: Callable[P, None]
+    __dataclass_fields__: Dict[str, Field[Any]]
+
+
+class DataClassWithFactory(Protocol[P, R]):
+    """Type hint for dataclass objects."""
+
+    __init__: Callable[P, None]
+    __dataclass_fields__: Dict[str, Field[Any]]
+    __dataset_factory__: DatasetFactory[R]
 
 
 # runtime functions
 @overload
 def asdataset(
-    inst: DataClassWithFactory[TDataset],
-    dataset_factory: Type[Any] = xr.Dataset,
-) -> TDataset:
+    inst: DataClassWithFactory[P, R],
+    dataset_factory: DatasetFactory[Any] = xr.Dataset,
+) -> R:
     ...
 
 
 @overload
 def asdataset(
-    inst: DataClass,
-    dataset_factory: Type[TDataset] = xr.Dataset,
-) -> TDataset:
+    inst: DataClass[P],
+    dataset_factory: DatasetFactory[R] = xr.Dataset,
+) -> R:
     ...
 
 
@@ -58,10 +73,10 @@ class AsDataset:
 
     @classmethod
     def new(
-        cls: Type[DataClassWithFactory[TDataset]],
-        *args: Any,
-        **kwargs: Any,
-    ) -> TDataset:
+        cls: Type[DataClassWithFactory[P, R]],
+        *args: P.args,
+        **kwargs: P.kwargs,
+    ) -> R:
         """Create a Dataset instance."""
         raise NotImplementedError
 
@@ -76,16 +91,16 @@ class AsDataset:
             return
 
         init = Temp.__init__
-        init.__annotations__["return"] = TDataset
+        init.__annotations__["return"] = R
 
         # create a concrete new method and bind
         @classmethod
         @wraps(init)
         def new(
-            cls: Type[DataClassWithFactory[TDataset]],
-            *args: Any,
-            **kwargs: Any,
-        ) -> TDataset:
+            cls: Type[DataClassWithFactory[P, R]],
+            *args: P.args,
+            **kwargs: P.kwargs,
+        ) -> R:
             return asdataset(cls(*args, **kwargs))
 
         cls.new = new  # type: ignore
