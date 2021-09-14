@@ -14,7 +14,7 @@ from typing_extensions import Literal, ParamSpec, Protocol
 
 
 # submodules
-from .parser import Structure
+from .parser import DataModel
 from .utils import copy_class
 
 
@@ -71,13 +71,12 @@ def asdataarray(
         Dataset object created from the dataclass object.
 
     """
-    try:
-        dataarray_factory = dataclass.__dataarray_factory__
-    except AttributeError:
-        pass
+    model = DataModel.from_dataclass(dataclass)
 
-    structure = Structure.from_dataclass(dataclass)
-    return structure.to_dataarray(dataarray_factory=dataarray_factory)
+    try:
+        return model.to_dataarray(None, dataclass.__dataarray_factory__)
+    except AttributeError:
+        return model.to_dataarray(None, dataarray_factory)
 
 
 class AsDataArray:
@@ -115,7 +114,7 @@ class AsDataArray:
             DataArray object filled without initializing data.
 
         """
-        name = Structure.from_dataclass(cls).data[0].name
+        name = DataModel.from_dataclass(cls).data[0].name
         data = np.empty(shape, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
 
@@ -138,7 +137,7 @@ class AsDataArray:
             DataArray object filled with zeros.
 
         """
-        name = Structure.from_dataclass(cls).data[0].name
+        name = DataModel.from_dataclass(cls).data[0].name
         data = np.zeros(shape, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
 
@@ -161,7 +160,7 @@ class AsDataArray:
             DataArray object filled with ones.
 
         """
-        name = Structure.from_dataclass(cls).data[0].name
+        name = DataModel.from_dataclass(cls).data[0].name
         data = np.ones(shape, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
 
@@ -186,7 +185,7 @@ class AsDataArray:
             DataArray object filled with given value.
 
         """
-        name = Structure.from_dataclass(cls).data[0].name
+        name = DataModel.from_dataclass(cls).data[0].name
         data = np.full(shape, fill_value, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
 

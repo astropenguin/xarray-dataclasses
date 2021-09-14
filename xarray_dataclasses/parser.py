@@ -113,11 +113,11 @@ class ClassType:
         else:
             dataclass = self.dataclass(self.value)
 
-        return Structure.from_dataclass(dataclass).to_dataarray(reference)
+        return DataModel.from_dataclass(dataclass).to_dataarray(reference)
 
 
 @dataclass(frozen=True)
-class Structure:
+class DataModel:
     """Structure of a dataclass or its instance."""
 
     attr: List[GeneralType]  #: Representations of attr-type variables.
@@ -129,7 +129,7 @@ class Structure:
     def from_dataclass(
         cls,
         dataclass: Union[Type[DataClass], DataClass],
-    ) -> "Structure":
+    ) -> "DataModel":
         """Create an instance from a dataclass or its instance."""
         attr: List[GeneralType] = []
         coord: List[DataArrayType] = []

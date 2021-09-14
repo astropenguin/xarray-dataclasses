@@ -13,7 +13,7 @@ from typing_extensions import ParamSpec, Protocol
 
 
 # submodules
-from .parser import Structure
+from .parser import DataModel
 from .utils import copy_class
 
 
@@ -68,13 +68,12 @@ def asdataset(
         Dataset object created from the dataclass object.
 
     """
-    try:
-        dataset_factory = dataclass.__dataset_factory__
-    except AttributeError:
-        pass
+    model = DataModel.from_dataclass(dataclass)
 
-    structure = Structure.from_dataclass(dataclass)
-    return structure.to_dataset(dataset_factory=dataset_factory)
+    try:
+        return model.to_dataset(None, dataclass.__dataset_factory__)
+    except AttributeError:
+        return model.to_dataset(None, dataset_factory)
 
 
 class AsDataset:
