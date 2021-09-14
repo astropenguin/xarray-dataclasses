@@ -43,7 +43,7 @@ class RGBImage(AsDataset):
     y: Coord[Y, int] = 0
     dpi: Attr[int] = 100
 
-    def __dataset_factory__(self, data_vars: Any) -> Custom:
+    def __dataset_factory__(self, data_vars: Any = None) -> Custom:
         return Custom(data_vars)
 
 

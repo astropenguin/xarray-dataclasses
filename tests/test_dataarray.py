@@ -37,7 +37,7 @@ class Image(AsDataArray):
     dpi: Attr[int] = 100
     name: Name[str] = "image"
 
-    def __dataarray_factory__(self, data: Any) -> Custom:
+    def __dataarray_factory__(self, data: Any = None) -> Custom:
         return Custom(data)
 
 
