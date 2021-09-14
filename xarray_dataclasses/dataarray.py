@@ -23,7 +23,6 @@ Order = Literal["C", "F"]
 Shape = Union[Sequence[int], int]
 P = ParamSpec("P")
 R = TypeVar("R", bound=xr.DataArray)
-DataArrayFactory = Callable[..., R]
 
 
 class DataClass(Protocol[P]):
@@ -38,22 +37,22 @@ class DataClassWithFactory(Protocol[P, R]):
 
     __init__: Callable[P, None]
     __dataclass_fields__: Dict[str, Field[Any]]
-    __dataarray_factory__: DataArrayFactory[R]
+    __dataarray_factory__: Callable[..., R]
 
 
 # runtime functions and classes
 @overload
 def asdataarray(
-    dataclass: DataClassWithFactory[P, R],
-    dataarray_factory: DataArrayFactory[Any] = xr.DataArray,
+    dataclass: DataClassWithFactory[Any, R],
+    dataarray_factory: Any = xr.DataArray,
 ) -> R:
     ...
 
 
 @overload
 def asdataarray(
-    dataclass: DataClass[P],
-    dataarray_factory: DataArrayFactory[R] = xr.DataArray,
+    dataclass: DataClass[Any],
+    dataarray_factory: Callable[..., R] = xr.DataArray,
 ) -> R:
     ...
 
