@@ -1,6 +1,6 @@
 # standard library
 from dataclasses import InitVar, dataclass, Field
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Type, Union
 
 
 # third-party packages
@@ -25,7 +25,7 @@ from .utils import resolve_class
 
 
 # type hints
-Reference = Union[xr.DataArray, xr.Dataset]
+Reference = Union[xr.DataArray, xr.Dataset, None]
 Types = TypedDict("Types", dims=Dims, dtype=Dtype)
 
 
@@ -68,7 +68,7 @@ class DataArrayType(Protocol):
         """Create an instance from a dataclass field."""
         ...
 
-    def __call__(self, reference: Optional[Reference] = None) -> xr.DataArray:
+    def __call__(self, reference: Reference = None) -> xr.DataArray:
         """Create a typed DataArray from the representation."""
 
 
@@ -92,7 +92,7 @@ class DataType:
 
         return cls(field.name, types, value)
 
-    def __call__(self, reference: Optional[Reference] = None) -> xr.DataArray:
+    def __call__(self, reference: Reference = None) -> xr.DataArray:
         """Create a typed DataArray from the representation."""
         dims, dtype = self.type["dims"], self.type["dtype"]
         return typedarray(self.value, dims, dtype, reference)
@@ -107,7 +107,7 @@ class ClassType:
     value: Any  #: Value to be assigned to a variable.
     dataclass: InitVar[Type[DataClass]]  #: Runtime dataclass of a variable.
 
-    def __post_init__(self, dataclass: InitVar[Type[DataClass]]) -> None:
+    def __post_init__(self, dataclass: Type[DataClass]) -> None:
         super().__setattr__("dataclass", dataclass)
 
     @classmethod
@@ -116,7 +116,7 @@ class ClassType:
         type = unannotate(field.type).__args__[0]
         return cls(field.name, resolve_class(type), value, type)
 
-    def __call__(self, reference: Optional[Reference] = None) -> xr.DataArray:
+    def __call__(self, reference: Reference = None) -> xr.DataArray:
         """Create a typed DataArray from the representation."""
         if isinstance(self.value, self.dataclass):
             dataclass = self.value
@@ -163,7 +163,7 @@ class Structure:
 
     def to_dataarray(
         self,
-        reference: Optional[Reference] = None,
+        reference: Reference = None,
         dataarray_factory: Type[TDataArray] = xr.DataArray,
     ) -> TDataArray:
         """Create a typed DataArray from the structure."""
@@ -171,7 +171,7 @@ class Structure:
 
     def to_dataset(
         self,
-        reference: Optional[Reference] = None,
+        reference: Reference = None,
         dataset_factory: Type[TDataset] = xr.Dataset,
     ) -> TDataset:
         """Create a typed Dataset from the structure."""
@@ -181,7 +181,7 @@ class Structure:
 # runtime functions
 def to_dataarray(
     structure: Structure,
-    reference: Optional[Reference] = None,
+    reference: Reference = None,
     dataarray_factory: Type[TDataArray] = xr.DataArray,
 ) -> TDataArray:
     """Create a typed DataArray from a structure."""
@@ -201,7 +201,7 @@ def to_dataarray(
 
 def to_dataset(
     structure: Structure,
-    reference: Optional[Reference] = None,
+    reference: Reference = None,
     dataset_factory: Type[TDataset] = xr.Dataset,
 ) -> TDataset:
     """Create a typed Dataset from a structure."""
@@ -223,7 +223,7 @@ def typedarray(
     data: Any,
     dims: Dims,
     dtype: Dtype,
-    reference: Optional[Reference] = None,
+    reference: Reference = None,
 ) -> xr.DataArray:
     """Create a typed DataArray with given dims and dtype."""
     if not isinstance(data, ArrayLike):
