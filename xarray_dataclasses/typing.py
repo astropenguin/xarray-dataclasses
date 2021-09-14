@@ -2,11 +2,13 @@ __all__ = ["Attr", "Coord", "Coordof", "Data", "Dataof", "Name"]
 
 
 # standard library
+from dataclasses import Field
 from enum import auto, Enum
 from itertools import chain
 from typing import (
     Any,
     Callable,
+    Dict,
     ForwardRef,
     Optional,
     Tuple,
@@ -64,6 +66,17 @@ class ArrayLike(Protocol[TDims, TDtype]):
     ndim: Any
 
 
+@runtime_checkable
+class DataClass(Protocol):
+    """Type hint for a dataclass object."""
+
+    __init__: Callable[..., None]
+    __dataclass_fields__: Dict[str, Field[Any]]
+
+
+TDataClass = TypeVar("TDataClass", bound=DataClass)
+
+
 Attr = Annotated[T, FieldType.ATTR]
 """Type hint for an attribute member of DataArray or Dataset.
 
@@ -109,7 +122,7 @@ Examples:
 
 """
 
-Coordof = Annotated[Union[T, ArrayLike[Any, Any], Any], FieldType.COORDOF]
+Coordof = Annotated[Union[TDataClass, Any], FieldType.COORDOF]
 """Type hint for a coordinate member of DataArray or Dataset.
 
 Unlike ``Coord``, it receives a dataclass that defines a DataArray class.
@@ -182,7 +195,7 @@ Examples:
 
 """
 
-Dataof = Annotated[Union[T, ArrayLike[Any, Any], Any], FieldType.DATAOF]
+Dataof = Annotated[Union[TDataClass, Any], FieldType.DATAOF]
 """Type hint for data of DataArray or variable of Dataset.
 
 Unlike ``Data``, it receives a dataclass that defines a DataArray class.
