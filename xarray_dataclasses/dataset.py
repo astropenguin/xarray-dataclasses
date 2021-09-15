@@ -93,18 +93,12 @@ def asdataset(
     return dataset
 
 
-class AsDataset:
-    """Mix-in class that provides shorthand methods."""
+class AsDatasetMeta(type):
+    """Metaclass of the AsDataset class."""
 
-    def __dataset_factory__(self, data_vars: Any) -> xr.Dataset:
-        """Default Dataset factory (xarray.Dataset)."""
-        return xr.Dataset(data_vars)
-
-    @classmethod
     @property
     def new(cls: Type[DataClassWithFactory[P, R]]) -> Callable[P, R]:
         """Create a Dataset object from dataclass parameters."""
-
         init = copy_function(cls.__init__)  # type: ignore
         init.__annotations__["return"] = R
         init.__doc__ = cls.__doc__
@@ -118,3 +112,11 @@ class AsDataset:
             return asdataset(cls(*args, **kwargs))
 
         return wrapper.__get__(cls)  # type: ignore
+
+
+class AsDataset(metaclass=AsDatasetMeta):
+    """Mix-in class that provides shorthand methods."""
+
+    def __dataset_factory__(self, data_vars: Any) -> xr.Dataset:
+        """Default Dataset factory (xarray.Dataset)."""
+        return xr.Dataset(data_vars)

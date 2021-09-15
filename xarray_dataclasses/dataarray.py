@@ -96,18 +96,12 @@ def asdataarray(
     return dataarray
 
 
-class AsDataArray:
-    """Mix-in class that provides shorthand methods."""
+class AsDataArrayMeta(type):
+    """Metaclass of the AsDataArray class."""
 
-    def __dataarray_factory__(self, data: Any) -> xr.DataArray:
-        """Default DataArray factory (xarray.DataArray)."""
-        return xr.DataArray(data)
-
-    @classmethod
     @property
     def new(cls: Type[DataClassWithFactory[P, R]]) -> Callable[P, R]:
         """Create a DataArray object from dataclass parameters."""
-
         init = copy_function(cls.__init__)  # type: ignore
         init.__annotations__["return"] = R
         init.__doc__ = cls.__doc__
@@ -121,6 +115,14 @@ class AsDataArray:
             return asdataarray(cls(*args, **kwargs))
 
         return wrapper.__get__(cls)  # type: ignore
+
+
+class AsDataArray(metaclass=AsDataArrayMeta):
+    """Mix-in class that provides shorthand methods."""
+
+    def __dataarray_factory__(self, data: Any) -> xr.DataArray:
+        """Default DataArray factory (xarray.DataArray)."""
+        return xr.DataArray(data)
 
     @classmethod
     def empty(
