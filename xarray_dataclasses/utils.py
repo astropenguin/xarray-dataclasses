@@ -26,7 +26,7 @@ def copy_function(function: T, deep: bool = False) -> T:
         Copied function.
 
     """
-    copied = FunctionType(
+    copied = type(function)(
         function.__code__,
         function.__globals__,
         function.__name__,
@@ -46,7 +46,7 @@ def copy_function(function: T, deep: bool = False) -> T:
     copied.__name__ = function.__name__
     copied.__qualname__ = function.__qualname__
 
-    return copied  # type: ignore
+    return copied
 
 
 def resolve_class(cls: Type[Any]) -> str:
