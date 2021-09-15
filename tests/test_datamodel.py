@@ -8,7 +8,7 @@ from typing_extensions import Literal
 
 
 # submodules
-from xarray_dataclasses.parser import DataModel
+from xarray_dataclasses.datamodel import DataModel
 from xarray_dataclasses.typing import Attr, Coord, Coordof, Data, Dataof, Name
 
 
@@ -92,9 +92,9 @@ def test_matrix_coord() -> None:
     assert matrix_model.coord[0].name == "mask"
     assert matrix_model.coord[0].type == {"dims": ("x", "y"), "dtype": "bool"}
     assert matrix_model.coord[1].name == "x"
-    assert matrix_model.coord[1].type == "tests.test_parser.XAxis"
+    assert matrix_model.coord[1].type == "tests.test_datamodel.XAxis"
     assert matrix_model.coord[2].name == "y"
-    assert matrix_model.coord[2].type == "tests.test_parser.YAxis"
+    assert matrix_model.coord[2].type == "tests.test_datamodel.YAxis"
 
 
 def test_matrix_data() -> None:
@@ -104,8 +104,8 @@ def test_matrix_data() -> None:
 
 def test_image_data() -> None:
     assert image_model.data[0].name == "red"
-    assert image_model.data[0].type == "tests.test_parser.Matrix"
+    assert image_model.data[0].type == "tests.test_datamodel.Matrix"
     assert image_model.data[1].name == "green"
-    assert image_model.data[1].type == "tests.test_parser.Matrix"
+    assert image_model.data[1].type == "tests.test_datamodel.Matrix"
     assert image_model.data[2].name == "blue"
-    assert image_model.data[2].type == "tests.test_parser.Matrix"
+    assert image_model.data[2].type == "tests.test_datamodel.Matrix"

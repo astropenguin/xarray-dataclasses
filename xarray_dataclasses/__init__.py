@@ -20,7 +20,7 @@ _make_field_generic()
 from . import dataarray
 from . import dataset
 from . import deprecated
-from . import parser
+from . import datamodel
 from . import typing
 from . import utils
 
@@ -29,5 +29,5 @@ from . import utils
 from .dataarray import *
 from .dataset import *
 from .deprecated import *
-from .parser import *
+from .datamodel import *
 from .typing import *

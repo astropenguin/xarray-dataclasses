@@ -13,7 +13,7 @@ from typing_extensions import ParamSpec, Protocol
 
 
 # submodules
-from .parser import DataModel
+from .datamodel import DataModel
 from .utils import copy_class
 
 
