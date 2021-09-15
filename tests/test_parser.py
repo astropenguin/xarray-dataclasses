@@ -8,7 +8,7 @@ from typing_extensions import Literal
 
 
 # submodules
-from xarray_dataclasses.parser import DataModel
+from xarray_dataclasses.datamodel import DataModel
 from xarray_dataclasses.typing import Attr, Coord, Coordof, Data, Dataof, Name
 
 
