@@ -4,7 +4,7 @@ __all__ = ["asdataset", "AsDataset"]
 # standard library
 from dataclasses import dataclass, Field
 from functools import wraps
-from typing import Any, Callable, Dict, overload, Type, TypeVar
+from typing import Any, Callable, Dict, overload, Type, TypeVar, Union
 
 
 # third-party packages
@@ -20,6 +20,7 @@ from .utils import copy_class
 # type hints
 P = ParamSpec("P")
 R = TypeVar("R", bound=xr.Dataset)
+Reference = Union[xr.DataArray, xr.Dataset, None]
 
 
 class DataClass(Protocol[P]):
@@ -41,6 +42,7 @@ class DataClassWithFactory(Protocol[P, R]):
 @overload
 def asdataset(
     dataclass: DataClassWithFactory[Any, R],
+    reference: Reference = None,
     dataset_factory: Any = xr.Dataset,
 ) -> R:
     ...
@@ -49,6 +51,7 @@ def asdataset(
 @overload
 def asdataset(
     dataclass: DataClass[Any],
+    reference: Reference = None,
     dataset_factory: Callable[..., R] = xr.Dataset,
 ) -> R:
     ...
@@ -56,24 +59,38 @@ def asdataset(
 
 def asdataset(
     dataclass: Any,
+    reference: Any = None,
     dataset_factory: Any = xr.Dataset,
 ) -> Any:
     """Create a Dataset object from a dataclass object.
 
     Args:
         dataclass: Dataclass object that defines typed Dataset.
+        reference: DataArray or Dataset object as a reference of shape.
         dataset_factory: Factory function of Dataset.
 
     Returns:
         Dataset object created from the dataclass object.
 
     """
-    model = DataModel.from_dataclass(dataclass)
-
     try:
-        return model.to_dataset(None, dataclass.__dataset_factory__)
+        dataset_factory = dataclass.__dataset_factory__
     except AttributeError:
-        return model.to_dataset(None, dataset_factory)
+        pass
+
+    model = DataModel.from_dataclass(dataclass)
+    dataset = dataset_factory()
+
+    for data in model.data:
+        dataset.update({data.name: data(reference)})
+
+    for coord in model.coord:
+        dataset.coords.update({coord.name: coord(dataset)})
+
+    for attr in model.attr:
+        dataset.attrs.update({attr.name: attr()})
+
+    return dataset
 
 
 class AsDataset:

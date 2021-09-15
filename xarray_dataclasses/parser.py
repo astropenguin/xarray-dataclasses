@@ -25,8 +25,6 @@ from .utils import resolve_class
 
 # type hints
 R = TypeVar("R")
-RDataArray = TypeVar("RDataArray", bound=xr.DataArray)
-RDataset = TypeVar("RDataset", bound=xr.Dataset)
 Reference = Union[xr.DataArray, xr.Dataset, None]
 Factory = Callable[[Any, Reference], R]
 
@@ -103,10 +101,12 @@ class Dataof(FieldModel[xr.DataArray]):
         type = resolve_class(dataclass)
 
         def factory(value: Any, reference: Reference) -> xr.DataArray:
+            from .dataarray import asdataarray
+
             if not is_dataclass(value):
                 value = dataclass(value)
 
-            return DataModel.from_dataclass(value).to_dataarray(reference)
+            return asdataarray(value, reference)
 
         return cls(field.name, type, value, factory)
 
@@ -164,44 +164,6 @@ class DataModel:
                 model.name.append(General.from_field(field_, value))
 
         return model
-
-    def to_dataarray(
-        self,
-        reference: Reference = None,
-        dataarray_factory: Callable[..., RDataArray] = xr.DataArray,
-    ) -> RDataArray:
-        """Create a DataArray object from the data model."""
-        dataarray = dataarray_factory(self.data[0](reference))
-
-        for coord in self.coord:
-            dataarray.coords.update({coord.name: coord(dataarray)})
-
-        for attr in self.attr:
-            dataarray.attrs.update({attr.name: attr()})
-
-        for name in self.name:
-            dataarray.name = name()
-
-        return dataarray
-
-    def to_dataset(
-        self,
-        reference: Reference = None,
-        dataset_factory: Callable[..., RDataset] = xr.Dataset,
-    ) -> RDataset:
-        """Create a Dataset object from the data model."""
-        dataset = dataset_factory()
-
-        for data in self.data:
-            dataset.update({data.name: data(reference)})
-
-        for coord in self.coord:
-            dataset.coords.update({coord.name: coord(dataset)})
-
-        for attr in self.attr:
-            dataset.attrs.update({attr.name: attr()})
-
-        return dataset
 
 
 # runtime functions

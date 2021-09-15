@@ -19,10 +19,11 @@ from .utils import copy_class
 
 
 # type hints
-Order = Literal["C", "F"]
-Shape = Union[Sequence[int], int]
 P = ParamSpec("P")
 R = TypeVar("R", bound=xr.DataArray)
+Order = Literal["C", "F"]
+Shape = Union[Sequence[int], int]
+Reference = Union[xr.DataArray, xr.Dataset, None]
 
 
 class DataClass(Protocol[P]):
@@ -44,6 +45,7 @@ class DataClassWithFactory(Protocol[P, R]):
 @overload
 def asdataarray(
     dataclass: DataClassWithFactory[Any, R],
+    reference: Reference = None,
     dataarray_factory: Any = xr.DataArray,
 ) -> R:
     ...
@@ -52,6 +54,7 @@ def asdataarray(
 @overload
 def asdataarray(
     dataclass: DataClass[Any],
+    reference: Reference = None,
     dataarray_factory: Callable[..., R] = xr.DataArray,
 ) -> R:
     ...
@@ -59,24 +62,38 @@ def asdataarray(
 
 def asdataarray(
     dataclass: Any,
+    reference: Any = None,
     dataarray_factory: Any = xr.DataArray,
 ) -> Any:
     """Create a DataArray object from a dataclass object.
 
     Args:
         dataclass: Dataclass object that defines typed DataArray.
+        reference: DataArray or Dataset object as a reference of shape.
         dataset_factory: Factory function of DataArray.
 
     Returns:
         Dataset object created from the dataclass object.
 
     """
-    model = DataModel.from_dataclass(dataclass)
-
     try:
-        return model.to_dataarray(None, dataclass.__dataarray_factory__)
+        dataarray_factory = dataclass.__dataarray_factory__
     except AttributeError:
-        return model.to_dataarray(None, dataarray_factory)
+        pass
+
+    model = DataModel.from_dataclass(dataclass)
+    dataarray = dataarray_factory(model.data[0](reference))
+
+    for coord in model.coord:
+        dataarray.coords.update({coord.name: coord(dataarray)})
+
+    for attr in model.attr:
+        dataarray.attrs.update({attr.name: attr()})
+
+    for name in model.name:
+        dataarray.name = name()
+
+    return dataarray
 
 
 class AsDataArray:
