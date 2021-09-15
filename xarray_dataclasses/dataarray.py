@@ -2,7 +2,7 @@ __all__ = ["asdataarray", "AsDataArray"]
 
 
 # standard library
-from dataclasses import dataclass, Field
+from dataclasses import Field
 from functools import wraps
 from typing import Any, Callable, Dict, overload, Sequence, Type, TypeVar, Union
 
@@ -15,7 +15,6 @@ from typing_extensions import Literal, ParamSpec, Protocol
 
 # submodules
 from .datamodel import DataModel
-from .utils import copy_class
 
 
 # type hints
@@ -104,13 +103,19 @@ class AsDataArray:
         return xr.DataArray(data)
 
     @classmethod
-    def new(
-        cls: Type[DataClassWithFactory[P, R]],
-        *args: P.args,
-        **kwargs: P.kwargs,
-    ) -> R:
-        """Create a DataArray object."""
-        raise NotImplementedError
+    @property
+    def new(cls: Type[DataClassWithFactory[P, R]]) -> Callable[P, R]:
+        """Create a DataArray object from dataclass parameters."""
+
+        @wraps(cls.__init__)
+        def wrapper(
+            cls: Type[DataClassWithFactory[P, R]],
+            *args: P.args,
+            **kwargs: P.kwargs,
+        ) -> R:
+            return asdataarray(cls(*args, **kwargs))
+
+        return wrapper.__get__(cls)  # type: ignore
 
     @classmethod
     def empty(
@@ -205,28 +210,3 @@ class AsDataArray:
         name = DataModel.from_dataclass(cls).data[0].name
         data = np.full(shape, fill_value, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
-
-    def __init_subclass__(cls, **kwargs: Any) -> None:
-        """Update new() based on the dataclass definition."""
-        super().__init_subclass__(**kwargs)
-
-        # temporary class only for getting dataclass __init__
-        try:
-            Temp = dataclass(copy_class(cls))
-        except RuntimeError:
-            return
-
-        init = Temp.__init__
-        init.__annotations__["return"] = R
-
-        # create a concrete new method and bind
-        @classmethod
-        @wraps(init)
-        def new(
-            cls: Type[DataClassWithFactory[P, R]],
-            *args: P.args,
-            **kwargs: P.kwargs,
-        ) -> R:
-            return asdataarray(cls(*args, **kwargs))
-
-        cls.new = new  # type: ignore

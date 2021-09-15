@@ -2,7 +2,7 @@ __all__ = ["asdataset", "AsDataset"]
 
 
 # standard library
-from dataclasses import dataclass, Field
+from dataclasses import Field
 from functools import wraps
 from typing import Any, Callable, Dict, overload, Type, TypeVar, Union
 
@@ -14,7 +14,6 @@ from typing_extensions import ParamSpec, Protocol
 
 # submodules
 from .datamodel import DataModel
-from .utils import copy_class
 
 
 # type hints
@@ -101,35 +100,16 @@ class AsDataset:
         return xr.Dataset(data_vars)
 
     @classmethod
-    def new(
-        cls: Type[DataClassWithFactory[P, R]],
-        *args: P.args,
-        **kwargs: P.kwargs,
-    ) -> R:
-        """Create a Dataset object."""
-        raise NotImplementedError
+    @property
+    def new(cls: Type[DataClassWithFactory[P, R]]) -> Callable[P, R]:
+        """Create a Dataset object from dataclass parameters."""
 
-    def __init_subclass__(cls, **kwargs: Any) -> None:
-        """Update new() based on the dataclass definition."""
-        super().__init_subclass__(**kwargs)
-
-        # temporary class only for getting dataclass __init__
-        try:
-            Temp = dataclass(copy_class(cls))
-        except RuntimeError:
-            return
-
-        init = Temp.__init__
-        init.__annotations__["return"] = R
-
-        # create a concrete new method and bind
-        @classmethod
-        @wraps(init)
-        def new(
+        @wraps(cls.__init__)
+        def wrapper(
             cls: Type[DataClassWithFactory[P, R]],
             *args: P.args,
             **kwargs: P.kwargs,
         ) -> R:
             return asdataset(cls(*args, **kwargs))
 
-        cls.new = new  # type: ignore
+        return wrapper.__get__(cls)  # type: ignore
