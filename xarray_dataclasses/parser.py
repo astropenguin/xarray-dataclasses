@@ -29,7 +29,7 @@ Reference = Union[xr.DataArray, xr.Dataset, None]
 Factory = Callable[[Any, Reference], R]
 
 
-class DataArrayType(TypedDict):
+class DataArrayDict(TypedDict):
     """Type hint for a DataArray type."""
 
     dims: Dims
@@ -69,7 +69,7 @@ class FieldModel(Generic[R]):
 class Data(FieldModel[xr.DataArray]):
     """Model for the coord or data fields."""
 
-    type: DataArrayType
+    type: DataArrayDict
     """Type of the field."""
 
     @classmethod
@@ -79,7 +79,7 @@ class Data(FieldModel[xr.DataArray]):
 
         dims = get_dims(args[0])
         dtype = get_dtype(args[1])
-        type: DataArrayType = {"dims": dims, "dtype": dtype}
+        type: DataArrayDict = {"dims": dims, "dtype": dtype}
 
         def factory(value: Any, reference: Reference) -> xr.DataArray:
             return typedarray(value, dims, dtype, reference)
