@@ -14,6 +14,7 @@ from typing_extensions import ParamSpec, Protocol
 
 # submodules
 from .datamodel import DataModel
+from .utils import copy_function
 
 
 # type hints
@@ -104,7 +105,11 @@ class AsDataset:
     def new(cls: Type[DataClassWithFactory[P, R]]) -> Callable[P, R]:
         """Create a Dataset object from dataclass parameters."""
 
-        @wraps(cls.__init__)
+        init = copy_function(cls.__init__)  # type: ignore
+        init.__annotations__["return"] = R
+        init.__doc__ = cls.__doc__
+
+        @wraps(init)
         def wrapper(
             cls: Type[DataClassWithFactory[P, R]],
             *args: P.args,
