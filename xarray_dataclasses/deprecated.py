@@ -3,19 +3,29 @@ __all__ = ["dataarrayclass", "datasetclass"]
 
 
 # standard library
-from dataclasses import dataclass
-from typing import Any, Callable, Optional, Type, TypeVar, Union
+from dataclasses import dataclass, Field
+from typing import Any, Callable, Dict, Optional, Type, TypeVar, Union
 from warnings import warn
 
 
+# dependencies
+from typing_extensions import Protocol
+
+
 # submodules
-from .typing import DataClass
 from .dataarray import AsDataArray
 from .dataset import AsDataset
 
 
 # type hints
 T = TypeVar("T")
+
+
+class DataClass(Protocol):
+    """Type hint for a dataclass object."""
+
+    __init__: Callable[..., None]
+    __dataclass_fields__: Dict[str, Field[Any]]
 
 
 # functions to be deprecated

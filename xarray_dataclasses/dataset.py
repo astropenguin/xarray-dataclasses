@@ -4,7 +4,7 @@ __all__ = ["asdataset", "AsDataset"]
 # standard library
 from dataclasses import dataclass, Field
 from functools import wraps
-from typing import Any, Callable, Dict, overload, Type, TypeVar
+from typing import Any, Callable, Dict, overload, Type, TypeVar, Union
 
 
 # third-party packages
@@ -13,14 +13,14 @@ from typing_extensions import ParamSpec, Protocol
 
 
 # submodules
-from .parser import parse
+from .parser import DataModel
 from .utils import copy_class
 
 
 # type hints
 P = ParamSpec("P")
 R = TypeVar("R", bound=xr.Dataset)
-DatasetFactory = Callable[..., R]
+Reference = Union[xr.DataArray, xr.Dataset, None]
 
 
 class DataClass(Protocol[P]):
@@ -35,34 +35,38 @@ class DataClassWithFactory(Protocol[P, R]):
 
     __init__: Callable[P, None]
     __dataclass_fields__: Dict[str, Field[Any]]
-    __dataset_factory__: DatasetFactory[R]
+    __dataset_factory__: Callable[..., R]
 
 
 # runtime functions and classes
 @overload
 def asdataset(
-    dataclass: DataClassWithFactory[P, R],
-    dataset_factory: DatasetFactory[Any] = xr.Dataset,
+    dataclass: DataClassWithFactory[Any, R],
+    reference: Reference = None,
+    dataset_factory: Any = xr.Dataset,
 ) -> R:
     ...
 
 
 @overload
 def asdataset(
-    dataclass: DataClass[P],
-    dataset_factory: DatasetFactory[R] = xr.Dataset,
+    dataclass: DataClass[Any],
+    reference: Reference = None,
+    dataset_factory: Callable[..., R] = xr.Dataset,
 ) -> R:
     ...
 
 
 def asdataset(
     dataclass: Any,
+    reference: Any = None,
     dataset_factory: Any = xr.Dataset,
 ) -> Any:
     """Create a Dataset object from a dataclass object.
 
     Args:
         dataclass: Dataclass object that defines typed Dataset.
+        reference: DataArray or Dataset object as a reference of shape.
         dataset_factory: Factory function of Dataset.
 
     Returns:
@@ -74,7 +78,19 @@ def asdataset(
     except AttributeError:
         pass
 
-    return parse(dataclass).to_dataset(dataset_factory=dataset_factory)
+    model = DataModel.from_dataclass(dataclass)
+    dataset = dataset_factory()
+
+    for data in model.data:
+        dataset.update({data.name: data(reference)})
+
+    for coord in model.coord:
+        dataset.coords.update({coord.name: coord(dataset)})
+
+    for attr in model.attr:
+        dataset.attrs.update({attr.name: attr()})
+
+    return dataset
 
 
 class AsDataset:

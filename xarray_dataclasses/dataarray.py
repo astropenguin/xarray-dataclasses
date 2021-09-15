@@ -14,16 +14,16 @@ from typing_extensions import Literal, ParamSpec, Protocol
 
 
 # submodules
-from .parser import parse
+from .parser import DataModel
 from .utils import copy_class
 
 
 # type hints
-Order = Literal["C", "F"]
-Shape = Union[Sequence[int], int]
 P = ParamSpec("P")
 R = TypeVar("R", bound=xr.DataArray)
-DataArrayFactory = Callable[..., R]
+Order = Literal["C", "F"]
+Reference = Union[xr.DataArray, xr.Dataset, None]
+Shape = Union[Sequence[int], int]
 
 
 class DataClass(Protocol[P]):
@@ -38,34 +38,38 @@ class DataClassWithFactory(Protocol[P, R]):
 
     __init__: Callable[P, None]
     __dataclass_fields__: Dict[str, Field[Any]]
-    __dataarray_factory__: DataArrayFactory[R]
+    __dataarray_factory__: Callable[..., R]
 
 
 # runtime functions and classes
 @overload
 def asdataarray(
-    dataclass: DataClassWithFactory[P, R],
-    dataarray_factory: DataArrayFactory[Any] = xr.DataArray,
+    dataclass: DataClassWithFactory[Any, R],
+    reference: Reference = None,
+    dataarray_factory: Any = xr.DataArray,
 ) -> R:
     ...
 
 
 @overload
 def asdataarray(
-    dataclass: DataClass[P],
-    dataarray_factory: DataArrayFactory[R] = xr.DataArray,
+    dataclass: DataClass[Any],
+    reference: Reference = None,
+    dataarray_factory: Callable[..., R] = xr.DataArray,
 ) -> R:
     ...
 
 
 def asdataarray(
     dataclass: Any,
+    reference: Any = None,
     dataarray_factory: Any = xr.DataArray,
 ) -> Any:
     """Create a DataArray object from a dataclass object.
 
     Args:
         dataclass: Dataclass object that defines typed DataArray.
+        reference: DataArray or Dataset object as a reference of shape.
         dataset_factory: Factory function of DataArray.
 
     Returns:
@@ -77,7 +81,19 @@ def asdataarray(
     except AttributeError:
         pass
 
-    return parse(dataclass).to_dataarray(dataarray_factory=dataarray_factory)
+    model = DataModel.from_dataclass(dataclass)
+    dataarray = dataarray_factory(model.data[0](reference))
+
+    for coord in model.coord:
+        dataarray.coords.update({coord.name: coord(dataarray)})
+
+    for attr in model.attr:
+        dataarray.attrs.update({attr.name: attr()})
+
+    for name in model.name:
+        dataarray.name = name()
+
+    return dataarray
 
 
 class AsDataArray:
@@ -115,7 +131,7 @@ class AsDataArray:
             DataArray object filled without initializing data.
 
         """
-        name = parse(cls).data[0].name
+        name = DataModel.from_dataclass(cls).data[0].name
         data = np.empty(shape, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
 
@@ -138,7 +154,7 @@ class AsDataArray:
             DataArray object filled with zeros.
 
         """
-        name = parse(cls).data[0].name
+        name = DataModel.from_dataclass(cls).data[0].name
         data = np.zeros(shape, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
 
@@ -161,7 +177,7 @@ class AsDataArray:
             DataArray object filled with ones.
 
         """
-        name = parse(cls).data[0].name
+        name = DataModel.from_dataclass(cls).data[0].name
         data = np.ones(shape, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
 
@@ -186,7 +202,7 @@ class AsDataArray:
             DataArray object filled with given value.
 
         """
-        name = parse(cls).data[0].name
+        name = DataModel.from_dataclass(cls).data[0].name
         data = np.full(shape, fill_value, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
 

@@ -18,7 +18,6 @@ from typing import (
 
 
 # third-party packages
-import xarray as xr
 from typing_extensions import (
     Annotated,
     get_args,
@@ -31,47 +30,55 @@ from typing_extensions import (
 
 # constants
 class FieldType(Enum):
-    """Annotation for xarray-related fields."""
+    """Annotation for xarray-related field types."""
 
-    ATTR = auto()  #: Attribute field of DataArray or Dataset.
-    COORD = auto()  #: Coordinate field of DataArray or Dataset.
-    COORDOF = auto()  #: Coordinate field of DataArray or Dataset.
-    DATA = auto()  #: Data (variable) field of DataArray or Dataset.
-    DATAOF = auto()  #: Data (variable) field of DataArray or Dataset.
-    NAME = auto()  #: Name field of DataArray.
+    ATTR = auto()
+    """Annotation for an attribute field type."""
 
-    def annotates(self, type_: Any) -> bool:
-        """Check if type is annotated by the identifier."""
-        args = get_args(type_)
-        return len(args) > 1 and self in args[1:]
+    COORD = auto()
+    """Annotation for a coordinate field type."""
+
+    COORDOF = auto()
+    """Annotation for a coordinate field type."""
+
+    DATA = auto()
+    """Annotation for a data (variable) field type."""
+
+    DATAOF = auto()
+    """Annotation for a data (variable) field type."""
+
+    NAME = auto()
+    """Annotation for a name field type."""
+
+    def annotates(self, type: Any) -> bool:
+        """Check if a field type is annotated."""
+        return self in get_args(type)[1:]
 
 
 # type hints
+T = TypeVar("T")
+TDims = TypeVar("TDims", covariant=True)
+TDtype = TypeVar("TDtype", covariant=True)
 Dims = Tuple[str, ...]
 Dtype = Optional[str]
 NoneType = type(None)
 
-T = TypeVar("T")
-TDataArray = TypeVar("TDataArray", bound=xr.DataArray)
-TDataset = TypeVar("TDataset", bound=xr.Dataset)
-TDims = TypeVar("TDims", covariant=True)
-TDtype = TypeVar("TDtype", covariant=True)
-
-
-@runtime_checkable
-class DataClass(Protocol):
-    """Type hint for dataclass objects."""
-
-    __init__: Callable[..., None]
-    __dataclass_fields__: Dict[str, Field[Any]]
-
 
 @runtime_checkable
 class ArrayLike(Protocol[TDims, TDtype]):
-    """Type hint for array-like objects."""
+    """Type hint for an array-like object."""
 
     astype: Callable[..., Any]
     ndim: Any
+
+
+class DataClass(Protocol):
+    """Type hint for a dataclass or its object."""
+
+    __dataclass_fields__: Dict[str, Field[Any]]
+
+
+TDataClass = TypeVar("TDataClass", bound=DataClass)
 
 
 Attr = Annotated[T, FieldType.ATTR]
@@ -119,7 +126,7 @@ Examples:
 
 """
 
-Coordof = Annotated[Union[T, ArrayLike[Any, Any], Any], FieldType.COORDOF]
+Coordof = Annotated[Union[TDataClass, Any], FieldType.COORDOF]
 """Type hint for a coordinate member of DataArray or Dataset.
 
 Unlike ``Coord``, it receives a dataclass that defines a DataArray class.
@@ -192,7 +199,7 @@ Examples:
 
 """
 
-Dataof = Annotated[Union[T, ArrayLike[Any, Any], Any], FieldType.DATAOF]
+Dataof = Annotated[Union[TDataClass, Any], FieldType.DATAOF]
 """Type hint for data of DataArray or variable of Dataset.
 
 Unlike ``Data``, it receives a dataclass that defines a DataArray class.
