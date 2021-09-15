@@ -7,7 +7,6 @@ from enum import auto, Enum
 from itertools import chain
 from typing import (
     Any,
-    Callable,
     Dict,
     ForwardRef,
     Optional,
@@ -68,8 +67,19 @@ NoneType = type(None)
 class ArrayLike(Protocol[TDims, TDtype]):
     """Type hint for an array-like object."""
 
-    astype: Callable[..., Any]
-    ndim: Any
+    def astype(self: T, dtype: Any) -> T:
+        """Method for converting data type of the object."""
+        ...
+
+    @property
+    def ndim(self) -> int:
+        """Number of dimensions of the object."""
+        ...
+
+    @property
+    def shape(self) -> Union[Tuple[int, ...], int]:
+        """Shape of the object."""
+        ...
 
 
 class DataClass(Protocol):
