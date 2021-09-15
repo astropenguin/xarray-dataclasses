@@ -1,6 +1,6 @@
 # standard library
 from dataclasses import dataclass, field, Field, InitVar, is_dataclass
-from typing import Any, Callable, Generic, List, TypeVar, Union
+from typing import Any, Callable, cast, Generic, List, TypeVar, Union
 
 
 # third-party packages
@@ -173,23 +173,39 @@ def typedarray(
     dtype: Dtype,
     reference: Reference = None,
 ) -> xr.DataArray:
-    """Create a DataArray object with given dims and dtype."""
-    if not isinstance(data, ArrayLike):
-        data = np.asarray(data)
+    """Create a DataArray object with given dims and dtype.
+
+    Args:
+        data: Data to be converted to the DataArray object.
+        dims: Dimensions of the DataArray object.
+        dtype: Data type of the DataArray object.
+        reference: DataArray or Dataset object as a reference of shape.
+
+    Returns:
+        DataArray object with given dims and dtype.
+
+    """
+    if isinstance(data, ArrayLike):
+        array = cast(np.ndarray, data)
+    else:
+        array = np.asarray(data)
 
     if dtype is not None:
-        data = data.astype(dtype, copy=True)
+        array = array.astype(dtype, copy=False)
 
-    if data.ndim == len(dims):
-        dataarray = xr.DataArray(data, dims=dims)
-    elif data.ndim == 0 and reference is not None:
-        dataarray = xr.DataArray(data)
+    if array.ndim == len(dims):
+        dataarray = xr.DataArray(array, dims=dims)
+    elif array.ndim == 0 and reference is not None:
+        dataarray = xr.DataArray(array)
     else:
-        raise ValueError(f"Could not convert {data} with {dims}.")
+        raise ValueError(
+            "Could not create a DataArray object from data. "
+            f"Mismatch between shape {array.shape} and dims {dims}."
+        )
 
     if reference is None:
         return dataarray
-    else:
-        diff_dims = set(reference.dims) - set(dims)
-        subspace = reference.isel({dim: 0 for dim in diff_dims})
-        return dataarray.broadcast_like(subspace)
+
+    diff_dims = set(reference.dims) - set(dims)
+    subspace = reference.isel({dim: 0 for dim in diff_dims})
+    return dataarray.broadcast_like(subspace)
