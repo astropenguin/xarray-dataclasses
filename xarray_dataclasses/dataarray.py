@@ -22,8 +22,8 @@ from .utils import copy_class
 P = ParamSpec("P")
 R = TypeVar("R", bound=xr.DataArray)
 Order = Literal["C", "F"]
-Shape = Union[Sequence[int], int]
 Reference = Union[xr.DataArray, xr.Dataset, None]
+Shape = Union[Sequence[int], int]
 
 
 class DataClass(Protocol[P]):
