@@ -29,4 +29,5 @@ from . import utils
 from .dataarray import *
 from .dataset import *
 from .deprecated import *
+from .parser import *
 from .typing import *
