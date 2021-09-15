@@ -30,33 +30,43 @@ from typing_extensions import (
 
 # constants
 class FieldType(Enum):
-    """Annotation for xarray-related fields."""
+    """Annotation for xarray-related field types."""
 
-    ATTR = auto()  #: Attribute field of DataArray or Dataset.
-    COORD = auto()  #: Coordinate field of DataArray or Dataset.
-    COORDOF = auto()  #: Coordinate field of DataArray or Dataset.
-    DATA = auto()  #: Data (variable) field of DataArray or Dataset.
-    DATAOF = auto()  #: Data (variable) field of DataArray or Dataset.
-    NAME = auto()  #: Name field of DataArray.
+    ATTR = auto()
+    """Annotation for an attribute field type."""
 
-    def annotates(self, type_: Any) -> bool:
-        """Check if type is annotated by the identifier."""
-        args = get_args(type_)
-        return len(args) > 1 and self in args[1:]
+    COORD = auto()
+    """Annotation for a coordinate field type."""
+
+    COORDOF = auto()
+    """Annotation for a coordinate field type."""
+
+    DATA = auto()
+    """Annotation for a data (variable) field type."""
+
+    DATAOF = auto()
+    """Annotation for a data (variable) field type."""
+
+    NAME = auto()
+    """Annotation for a name field type."""
+
+    def annotates(self, type: Any) -> bool:
+        """Check if a field type is annotated."""
+        return self in get_args(type)[1:]
 
 
 # type hints
-Dims = Tuple[str, ...]
-Dtype = Optional[str]
-NoneType = type(None)
 T = TypeVar("T")
 TDims = TypeVar("TDims", covariant=True)
 TDtype = TypeVar("TDtype", covariant=True)
+Dims = Tuple[str, ...]
+Dtype = Optional[str]
+NoneType = type(None)
 
 
 @runtime_checkable
 class ArrayLike(Protocol[TDims, TDtype]):
-    """Type hint for array-like objects."""
+    """Type hint for an array-like object."""
 
     astype: Callable[..., Any]
     ndim: Any
