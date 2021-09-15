@@ -1,17 +1,18 @@
 # standard library
 from dataclasses import dataclass, field, Field, InitVar, is_dataclass
-from typing import Any, Callable, Dict, Generic, List, TypeVar, Union
+from typing import Any, Callable, Generic, List, TypeVar, Union
 
 
 # third-party packages
 import numpy as np
 import xarray as xr
-from typing_extensions import get_args, Protocol, TypedDict
+from typing_extensions import get_args, TypedDict
 
 
 # submodules
 from .typing import (
     ArrayLike,
+    DataClass,
     Dims,
     Dtype,
     FieldType,
@@ -35,12 +36,6 @@ class DataArrayType(TypedDict):
 
     dims: Dims
     dtype: Dtype
-
-
-class DataClass(Protocol):
-    """Type hint for a dataclass or its object."""
-
-    __dataclass_fields__: Dict[str, Field[Any]]
 
 
 # field models

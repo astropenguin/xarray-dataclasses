@@ -62,11 +62,9 @@ class ArrayLike(Protocol[TDims, TDtype]):
     ndim: Any
 
 
-@runtime_checkable
 class DataClass(Protocol):
-    """Type hint for a dataclass object."""
+    """Type hint for a dataclass or its object."""
 
-    __init__: Callable[..., None]
     __dataclass_fields__: Dict[str, Field[Any]]
 
 
