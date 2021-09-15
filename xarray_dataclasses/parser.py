@@ -1,18 +1,17 @@
 # standard library
-from dataclasses import InitVar, dataclass, Field
-from typing import Any, Callable, List, Type, TypeVar, Union
+from dataclasses import dataclass, field, Field, InitVar, is_dataclass
+from typing import Any, Callable, Dict, Generic, List, TypeVar, Union
 
 
 # third-party packages
 import numpy as np
 import xarray as xr
-from typing_extensions import Protocol, TypedDict
+from typing_extensions import get_args, Protocol, TypedDict
 
 
 # submodules
 from .typing import (
     ArrayLike,
-    DataClass,
     Dims,
     Dtype,
     FieldType,
@@ -24,152 +23,169 @@ from .utils import resolve_class
 
 
 # type hints
-Reference = Union[xr.DataArray, xr.Dataset, None]
+R = TypeVar("R")
 RDataArray = TypeVar("RDataArray", bound=xr.DataArray)
 RDataset = TypeVar("RDataset", bound=xr.Dataset)
-Types = TypedDict("Types", dims=Dims, dtype=Dtype)
+Reference = Union[xr.DataArray, xr.Dataset, None]
+Factory = Callable[[Any, Reference], R]
 
 
-class DataArrayType(Protocol):
-    """Reperesentation for DataArray variables."""
+class DataArrayType(TypedDict):
+    """Type hint for a DataArray type."""
 
-    name: str  #: Name of a variable
-    type: Union[Types, str]  #: Type (full path or dict) of a variable.
-    value: Any  #: Value to be assigned to a variable.
+    dims: Dims
+    dtype: Dtype
+
+
+class DataClass(Protocol):
+    """Type hint for a dataclass or its object."""
+
+    __dataclass_fields__: Dict[str, Field[Any]]
+
+
+# field models
+def default_factory(value: R, reference: Reference) -> R:
+    """Default factory that just returns an input value."""
+    return value
+
+
+@dataclass
+class FieldModel(Generic[R]):
+    """Base model for the dataclass fields."""
+
+    name: str
+    """Name of the field."""
+
+    type: Any
+    """Type of the field."""
+
+    value: Any
+    """Value assigned to the field."""
+
+    factory: InitVar[Factory[R]] = default_factory
+    """Factory function to create an object."""
+
+    def __post_init__(self, factory: Factory[R]) -> None:
+        self.factory = factory
+
+    def __call__(self, reference: Reference = None) -> R:
+        return self.factory(self.value, reference)
+
+
+@dataclass
+class Data(FieldModel[xr.DataArray]):
+    """Model for the coord or data fields."""
+
+    type: DataArrayType
+    """Type of the field."""
 
     @classmethod
-    def from_field(cls, field: Field[Any], value: Any) -> "DataArrayType":
-        """Create an instance from a dataclass field."""
-        ...
+    def from_field(cls, field: Field[Any], value: Any) -> "Data":
+        """Create a field model from a dataclass field and a value."""
+        args = get_args(get_args(unannotate(field.type))[0])
 
-    def __call__(self, reference: Reference = None) -> xr.DataArray:
-        """Create a typed DataArray from the representation."""
+        dims = get_dims(args[0])
+        dtype = get_dtype(args[1])
+        type: DataArrayType = {"dims": dims, "dtype": dtype}
+
+        def factory(value: Any, reference: Reference) -> xr.DataArray:
+            return typedarray(value, dims, dtype, reference)
+
+        return cls(field.name, type, value, factory)
 
 
-# dataclasses
-@dataclass(frozen=True)
-class GeneralType:
-    """Representation for general-type variables."""
+@dataclass
+class Dataof(FieldModel[xr.DataArray]):
+    """Model for the coordof or dataof fields."""
 
-    name: str  #: Name of a variable.
-    type: str  #: Type (full path) of a variable.
-    value: Any  #: Value to be assigned to a vabiable.
+    type: str
+    """Type of the field."""
 
     @classmethod
-    def from_field(cls, field: Field[Any], value: Any) -> "GeneralType":
-        """Create an instance from a dataclass field."""
+    def from_field(cls, field: Field[Any], value: Any) -> "Dataof":
+        """Create a field model from a dataclass field and a value."""
+        dataclass = get_args(unannotate(field.type))[0]
+        type = resolve_class(dataclass)
+
+        def factory(value: Any, reference: Reference) -> xr.DataArray:
+            if not is_dataclass(value):
+                value = dataclass(value)
+
+            return DataModel.from_dataclass(value).to_dataarray(reference)
+
+        return cls(field.name, type, value, factory)
+
+
+@dataclass
+class General(FieldModel[Any]):
+    """Model for the attribute or name fields."""
+
+    type: str
+    """Type of the field."""
+
+    @classmethod
+    def from_field(cls, field: Field[Any], value: Any) -> "General":
+        """Create a field model from a dataclass field and a value."""
         type = resolve_class(unannotate(field.type))
         return cls(field.name, type, value)
 
 
-@dataclass(frozen=True)
-class DataType:
-    """Representation for DataArray variables with dims and dtypes."""
-
-    name: str  #: Name of a variable
-    type: Types  #: Type (dict) of a variable.
-    value: Any  #: Value to be assigned to a variable.
-
-    @classmethod
-    def from_field(cls, field: Field[Any], value: Any) -> "DataType":
-        """Create an instance from a dataclass field."""
-        type = unannotate(field.type).__args__[0]
-
-        types: Types = {
-            "dims": get_dims(type.__args__[0]),
-            "dtype": get_dtype(type.__args__[1]),
-        }
-
-        return cls(field.name, types, value)
-
-    def __call__(self, reference: Reference = None) -> xr.DataArray:
-        """Create a typed DataArray from the representation."""
-        dims, dtype = self.type["dims"], self.type["dtype"]
-        return typedarray(self.value, dims, dtype, reference)
-
-
-@dataclass(frozen=True)
-class ClassType:
-    """Representation for DataArray variables with dataclass."""
-
-    name: str  #: Name of a variable
-    type: str  #: Type (full path) of a variable.
-    value: Any  #: Value to be assigned to a variable.
-    dataclass: InitVar[Type[DataClass]]  #: Runtime dataclass of a variable.
-
-    def __post_init__(self, dataclass: Type[DataClass]) -> None:
-        super().__setattr__("dataclass", dataclass)
-
-    @classmethod
-    def from_field(cls, field: Field[Any], value: Any) -> "ClassType":
-        """Create an instance from a dataclass field."""
-        type = unannotate(field.type).__args__[0]
-        return cls(field.name, resolve_class(type), value, type)
-
-    def __call__(self, reference: Reference = None) -> xr.DataArray:
-        """Create a typed DataArray from the representation."""
-        if isinstance(self.value, self.dataclass):
-            dataclass = self.value
-        else:
-            dataclass = self.dataclass(self.value)
-
-        return DataModel.from_dataclass(dataclass).to_dataarray(reference)
-
-
+# data models
 @dataclass(frozen=True)
 class DataModel:
-    """Structure of a dataclass or its instance."""
+    """Model for dataclasses or their objects."""
 
-    attr: List[GeneralType]  #: Representations of attr-type variables.
-    coord: List[DataArrayType]  #: Representations of coord-type variables.
-    data: List[DataArrayType]  #: Representations of data-type variables.
-    name: List[GeneralType]  #: Representations of name-type variables.
+    attr: List[General] = field(default_factory=list)
+    """Model of the attribute fields."""
+
+    coord: List[Union[Data, Dataof]] = field(default_factory=list)
+    """Model of the coordinate fields."""
+
+    data: List[Union[Data, Dataof]] = field(default_factory=list)
+    """Model of the data fields."""
+
+    name: List[General] = field(default_factory=list)
+    """Model of the name fields."""
 
     @classmethod
-    def from_dataclass(
-        cls,
-        dataclass: Union[Type[DataClass], DataClass],
-    ) -> "DataModel":
-        """Create an instance from a dataclass or its instance."""
-        attr: List[GeneralType] = []
-        coord: List[DataArrayType] = []
-        data: List[DataArrayType] = []
-        name: List[GeneralType] = []
+    def from_dataclass(cls, dataclass: DataClass) -> "DataModel":
+        """Create a data model from a dataclass or its object."""
+        model = cls()
 
-        for field in dataclass.__dataclass_fields__.values():
-            value = getattr(dataclass, field.name, field.default)
+        for field_ in dataclass.__dataclass_fields__.values():
+            value = getattr(dataclass, field_.name, field_.default)
 
-            if FieldType.ATTR.annotates(field.type):
-                attr.append(GeneralType.from_field(field, value))
-            elif FieldType.COORD.annotates(field.type):
-                coord.append(DataType.from_field(field, value))
-            elif FieldType.COORDOF.annotates(field.type):
-                coord.append(ClassType.from_field(field, value))
-            elif FieldType.DATA.annotates(field.type):
-                data.append(DataType.from_field(field, value))
-            elif FieldType.DATAOF.annotates(field.type):
-                data.append(ClassType.from_field(field, value))
-            elif FieldType.NAME.annotates(field.type):
-                name.append(GeneralType.from_field(field, value))
+            if FieldType.ATTR.annotates(field_.type):
+                model.attr.append(General.from_field(field_, value))
+            elif FieldType.COORD.annotates(field_.type):
+                model.coord.append(Data.from_field(field_, value))
+            elif FieldType.COORDOF.annotates(field_.type):
+                model.coord.append(Dataof.from_field(field_, value))
+            elif FieldType.DATA.annotates(field_.type):
+                model.data.append(Data.from_field(field_, value))
+            elif FieldType.DATAOF.annotates(field_.type):
+                model.data.append(Dataof.from_field(field_, value))
+            elif FieldType.NAME.annotates(field_.type):
+                model.name.append(General.from_field(field_, value))
 
-        return cls(attr, coord, data, name)
+        return model
 
     def to_dataarray(
         self,
         reference: Reference = None,
         dataarray_factory: Callable[..., RDataArray] = xr.DataArray,
     ) -> RDataArray:
-        """Create a typed DataArray from the structure."""
+        """Create a DataArray object from the data model."""
         dataarray = dataarray_factory(self.data[0](reference))
 
         for coord in self.coord:
             dataarray.coords.update({coord.name: coord(dataarray)})
 
         for attr in self.attr:
-            dataarray.attrs.update({attr.name: attr.value})
+            dataarray.attrs.update({attr.name: attr()})
 
         for name in self.name:
-            dataarray.name = name.value
+            dataarray.name = name()
 
         return dataarray
 
@@ -178,7 +194,7 @@ class DataModel:
         reference: Reference = None,
         dataset_factory: Callable[..., RDataset] = xr.Dataset,
     ) -> RDataset:
-        """Create a typed Dataset from the structure."""
+        """Create a Dataset object from the data model."""
         dataset = dataset_factory()
 
         for data in self.data:
@@ -188,7 +204,7 @@ class DataModel:
             dataset.coords.update({coord.name: coord(dataset)})
 
         for attr in self.attr:
-            dataset.attrs.update({attr.name: attr.value})
+            dataset.attrs.update({attr.name: attr()})
 
         return dataset
 
@@ -200,7 +216,7 @@ def typedarray(
     dtype: Dtype,
     reference: Reference = None,
 ) -> xr.DataArray:
-    """Create a typed DataArray with given dims and dtype."""
+    """Create a DataArray object with given dims and dtype."""
     if not isinstance(data, ArrayLike):
         data = np.asarray(data)
 
