@@ -8,7 +8,7 @@ from types import MethodType
 from typing import Any, Callable, Dict, overload, Sequence, Type, TypeVar, Union
 
 
-# third-party packages
+# dependencies
 import numpy as np
 import xarray as xr
 from typing_extensions import Literal, ParamSpec, Protocol
@@ -16,6 +16,7 @@ from typing_extensions import Literal, ParamSpec, Protocol
 
 # submodules
 from .datamodel import DataModel
+from .typing import Reference
 from .utils import copy_function
 
 
@@ -23,7 +24,6 @@ from .utils import copy_function
 P = ParamSpec("P")
 R = TypeVar("R", bound=xr.DataArray)
 Order = Literal["C", "F"]
-Reference = Union[xr.DataArray, xr.Dataset, None]
 Shape = Union[Sequence[int], int]
 
 

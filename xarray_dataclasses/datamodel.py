@@ -1,9 +1,12 @@
+__all__ = ["DataModel"]
+
+
 # standard library
 from dataclasses import dataclass, field, Field, InitVar, is_dataclass
 from typing import Any, Callable, cast, Generic, List, TypeVar, Union
 
 
-# third-party packages
+# dependencies
 import numpy as np
 import xarray as xr
 from typing_extensions import get_args, TypedDict
@@ -18,6 +21,7 @@ from .typing import (
     FieldType,
     get_dims,
     get_dtype,
+    Reference,
     unannotate,
 )
 from .utils import resolve_class
@@ -25,7 +29,6 @@ from .utils import resolve_class
 
 # type hints
 R = TypeVar("R")
-Reference = Union[xr.DataArray, xr.Dataset, None]
 Factory = Callable[[Any, Reference], R]
 
 
@@ -59,9 +62,11 @@ class FieldModel(Generic[R]):
     """Factory function to create an object."""
 
     def __post_init__(self, factory: Factory[R]) -> None:
+        """Add a factory to the field model."""
         self.factory = factory
 
     def __call__(self, reference: Reference = None) -> R:
+        """Create an object from the value and a reference."""
         return self.factory(self.value, reference)
 
 

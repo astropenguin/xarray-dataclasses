@@ -16,7 +16,8 @@ from typing import (
 )
 
 
-# third-party packages
+# dependencies
+import xarray as xr
 from typing_extensions import (
     Annotated,
     get_args,
@@ -61,6 +62,7 @@ TDtype = TypeVar("TDtype", covariant=True)
 Dims = Tuple[str, ...]
 Dtype = Optional[str]
 NoneType = type(None)
+Reference = Union[xr.DataArray, xr.Dataset, None]
 
 
 @runtime_checkable
@@ -77,7 +79,7 @@ class ArrayLike(Protocol[TDims, TDtype]):
         ...
 
     @property
-    def shape(self) -> Union[Tuple[int, ...], int]:
+    def shape(self) -> Tuple[int, ...]:
         """Shape of the object."""
         ...
 
