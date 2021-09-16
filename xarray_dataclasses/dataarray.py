@@ -2,8 +2,9 @@ __all__ = ["asdataarray", "AsDataArray"]
 
 
 # standard library
-from dataclasses import dataclass, Field
+from dataclasses import Field
 from functools import wraps
+from types import MethodType
 from typing import Any, Callable, Dict, overload, Sequence, Type, TypeVar, Union
 
 
@@ -15,7 +16,7 @@ from typing_extensions import Literal, ParamSpec, Protocol
 
 # submodules
 from .datamodel import DataModel
-from .utils import copy_class
+from .utils import copy_function
 
 
 # type hints
@@ -33,7 +34,7 @@ class DataClass(Protocol[P]):
     __dataclass_fields__: Dict[str, Field[Any]]
 
 
-class DataClassWithFactory(Protocol[P, R]):
+class DataArrayClass(Protocol[P, R]):
     """Type hint for a dataclass object with a DataArray factory."""
 
     __init__: Callable[P, None]
@@ -44,7 +45,7 @@ class DataClassWithFactory(Protocol[P, R]):
 # runtime functions and classes
 @overload
 def asdataarray(
-    dataclass: DataClassWithFactory[Any, R],
+    dataclass: DataArrayClass[Any, R],
     reference: Reference = None,
     dataarray_factory: Any = xr.DataArray,
 ) -> R:
@@ -96,6 +97,20 @@ def asdataarray(
     return dataarray
 
 
+class classproperty:
+    """Class property only for AsDataArray.new()."""
+
+    def __init__(self, fget: Callable[..., Any]) -> None:
+        self.fget = fget
+
+    def __get__(
+        self,
+        obj: Any,
+        objtype: Type[DataArrayClass[P, R]],
+    ) -> Callable[P, R]:
+        return self.fget(objtype)
+
+
 class AsDataArray:
     """Mix-in class that provides shorthand methods."""
 
@@ -103,18 +118,26 @@ class AsDataArray:
         """Default DataArray factory (xarray.DataArray)."""
         return xr.DataArray(data)
 
-    @classmethod
-    def new(
-        cls: Type[DataClassWithFactory[P, R]],
-        *args: P.args,
-        **kwargs: P.kwargs,
-    ) -> R:
-        """Create a DataArray object."""
-        raise NotImplementedError
+    @classproperty
+    def new(cls: Type[DataArrayClass[P, R]]) -> Callable[P, R]:
+        """Create a DataArray object from dataclass parameters."""
+        init = copy_function(cls.__init__)  # type: ignore
+        init.__annotations__["return"] = R
+        init.__doc__ = cls.__doc__
+
+        @wraps(init)
+        def wrapper(
+            cls: Type[DataArrayClass[P, R]],
+            *args: P.args,
+            **kwargs: P.kwargs,
+        ) -> R:
+            return asdataarray(cls(*args, **kwargs))
+
+        return MethodType(wrapper, cls)
 
     @classmethod
     def empty(
-        cls: Type[DataClassWithFactory[P, R]],
+        cls: Type[DataArrayClass[P, R]],
         shape: Shape,
         order: Order = "C",
         **kwargs: Any,
@@ -137,7 +160,7 @@ class AsDataArray:
 
     @classmethod
     def zeros(
-        cls: Type[DataClassWithFactory[P, R]],
+        cls: Type[DataArrayClass[P, R]],
         shape: Shape,
         order: Order = "C",
         **kwargs: Any,
@@ -160,7 +183,7 @@ class AsDataArray:
 
     @classmethod
     def ones(
-        cls: Type[DataClassWithFactory[P, R]],
+        cls: Type[DataArrayClass[P, R]],
         shape: Shape,
         order: Order = "C",
         **kwargs: Any,
@@ -183,7 +206,7 @@ class AsDataArray:
 
     @classmethod
     def full(
-        cls: Type[DataClassWithFactory[P, R]],
+        cls: Type[DataArrayClass[P, R]],
         shape: Shape,
         fill_value: Any,
         order: Order = "C",
@@ -205,28 +228,3 @@ class AsDataArray:
         name = DataModel.from_dataclass(cls).data[0].name
         data = np.full(shape, fill_value, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
-
-    def __init_subclass__(cls, **kwargs: Any) -> None:
-        """Update new() based on the dataclass definition."""
-        super().__init_subclass__(**kwargs)
-
-        # temporary class only for getting dataclass __init__
-        try:
-            Temp = dataclass(copy_class(cls))
-        except RuntimeError:
-            return
-
-        init = Temp.__init__
-        init.__annotations__["return"] = R
-
-        # create a concrete new method and bind
-        @classmethod
-        @wraps(init)
-        def new(
-            cls: Type[DataClassWithFactory[P, R]],
-            *args: P.args,
-            **kwargs: P.kwargs,
-        ) -> R:
-            return asdataarray(cls(*args, **kwargs))
-
-        cls.new = new  # type: ignore

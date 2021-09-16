@@ -1,36 +1,52 @@
 # standard library
 import re
+from copy import copy, deepcopy
 from pprint import pformat
+from types import FunctionType
 from typing import Any, Pattern, Type, TypeVar
 
 
 # constants
-COPIED_CLASS: str = "__xrdc_copied_class__"
 CLASS_REPR: Pattern[str] = re.compile(r"^<class '(.+)'>$")
 
 
 # type hints
-T = TypeVar("T")
+T = TypeVar("T", bound=FunctionType)
 
 
 # runtime functions
-def copy_class(cls: Type[T]) -> Type[T]:
-    """Copy a class as a new one unless it is already copied."""
+def copy_function(function: T, deep: bool = False) -> T:
+    """Copy a function as a different object.
 
-    if hasattr(cls, COPIED_CLASS):
-        raise RuntimeError("Could not copy an already copied class.")
+    Args:
+        function: Function object to be copied.
+        deep: If True, mutable attributes are deep-copied.
 
-    if cls.__bases__ == (object,):
-        bases = ()
-    else:
-        bases = cls.__bases__
+    Returns:
+        Copied function.
 
-    namespace = {
-        **cls.__dict__.copy(),
-        **{COPIED_CLASS: True},
-    }
+    """
+    copied = type(function)(
+        function.__code__,
+        function.__globals__,
+        function.__name__,
+        function.__defaults__,
+        function.__closure__,
+    )
 
-    return type(cls.__name__, bases, namespace)
+    # mutable attributes are copied by the given method
+    copier = deepcopy if deep else copy
+    copied.__annotations__ = copier(function.__annotations__)
+    copied.__dict__ = copier(function.__dict__)
+    copied.__kwdefaults__ = copier(function.__kwdefaults__)
+
+    # immutable attributes are not copied
+    copied.__doc__ = function.__doc__
+    copied.__module__ = function.__module__
+    copied.__name__ = function.__name__
+    copied.__qualname__ = function.__qualname__
+
+    return copied
 
 
 def resolve_class(cls: Type[Any]) -> str:
