@@ -16,7 +16,7 @@ from typing import (
 )
 
 
-# third-party packages
+# dependencies
 import xarray as xr
 from typing_extensions import (
     Annotated,

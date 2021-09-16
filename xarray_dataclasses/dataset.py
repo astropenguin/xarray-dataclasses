@@ -8,7 +8,7 @@ from types import MethodType
 from typing import Any, Callable, Dict, overload, Type, TypeVar
 
 
-# third-party packages
+# dependencies
 import xarray as xr
 from typing_extensions import ParamSpec, Protocol
 
