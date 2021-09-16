@@ -79,7 +79,7 @@ class ArrayLike(Protocol[TDims, TDtype]):
         ...
 
     @property
-    def shape(self) -> Union[Tuple[int, ...], int]:
+    def shape(self) -> Tuple[int, ...]:
         """Shape of the object."""
         ...
 
