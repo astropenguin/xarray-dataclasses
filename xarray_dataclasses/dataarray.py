@@ -4,6 +4,7 @@ __all__ = ["asdataarray", "AsDataArray"]
 # standard library
 from dataclasses import Field
 from functools import wraps
+from types import MethodType
 from typing import Any, Callable, Dict, overload, Sequence, Type, TypeVar, Union
 
 
@@ -33,7 +34,7 @@ class DataClass(Protocol[P]):
     __dataclass_fields__: Dict[str, Field[Any]]
 
 
-class DataClassWithFactory(Protocol[P, R]):
+class DataArrayClass(Protocol[P, R]):
     """Type hint for a dataclass object with a DataArray factory."""
 
     __init__: Callable[P, None]
@@ -44,7 +45,7 @@ class DataClassWithFactory(Protocol[P, R]):
 # runtime functions and classes
 @overload
 def asdataarray(
-    dataclass: DataClassWithFactory[Any, R],
+    dataclass: DataArrayClass[Any, R],
     reference: Reference = None,
     dataarray_factory: Any = xr.DataArray,
 ) -> R:
@@ -96,11 +97,29 @@ def asdataarray(
     return dataarray
 
 
-class AsDataArrayMeta(type):
-    """Metaclass of the AsDataArray class."""
+class classproperty:
+    """Class property only for AsDataArray.new()."""
 
-    @property
-    def new(cls: Type[DataClassWithFactory[P, R]]) -> Callable[P, R]:
+    def __init__(self, fget: Callable[..., Any]) -> None:
+        self.fget = fget
+
+    def __get__(
+        self,
+        obj: Any,
+        objtype: Type[DataArrayClass[P, R]],
+    ) -> Callable[P, R]:
+        return self.fget(objtype)
+
+
+class AsDataArray:
+    """Mix-in class that provides shorthand methods."""
+
+    def __dataarray_factory__(self, data: Any) -> xr.DataArray:
+        """Default DataArray factory (xarray.DataArray)."""
+        return xr.DataArray(data)
+
+    @classproperty
+    def new(cls: Type[DataArrayClass[P, R]]) -> Callable[P, R]:
         """Create a DataArray object from dataclass parameters."""
         init = copy_function(cls.__init__)  # type: ignore
         init.__annotations__["return"] = R
@@ -108,25 +127,17 @@ class AsDataArrayMeta(type):
 
         @wraps(init)
         def wrapper(
-            cls: Type[DataClassWithFactory[P, R]],
+            cls: Type[DataArrayClass[P, R]],
             *args: P.args,
             **kwargs: P.kwargs,
         ) -> R:
             return asdataarray(cls(*args, **kwargs))
 
-        return wrapper.__get__(cls)  # type: ignore
-
-
-class AsDataArray(metaclass=AsDataArrayMeta):
-    """Mix-in class that provides shorthand methods."""
-
-    def __dataarray_factory__(self, data: Any) -> xr.DataArray:
-        """Default DataArray factory (xarray.DataArray)."""
-        return xr.DataArray(data)
+        return MethodType(wrapper, cls)
 
     @classmethod
     def empty(
-        cls: Type[DataClassWithFactory[P, R]],
+        cls: Type[DataArrayClass[P, R]],
         shape: Shape,
         order: Order = "C",
         **kwargs: Any,
@@ -149,7 +160,7 @@ class AsDataArray(metaclass=AsDataArrayMeta):
 
     @classmethod
     def zeros(
-        cls: Type[DataClassWithFactory[P, R]],
+        cls: Type[DataArrayClass[P, R]],
         shape: Shape,
         order: Order = "C",
         **kwargs: Any,
@@ -172,7 +183,7 @@ class AsDataArray(metaclass=AsDataArrayMeta):
 
     @classmethod
     def ones(
-        cls: Type[DataClassWithFactory[P, R]],
+        cls: Type[DataArrayClass[P, R]],
         shape: Shape,
         order: Order = "C",
         **kwargs: Any,
@@ -195,7 +206,7 @@ class AsDataArray(metaclass=AsDataArrayMeta):
 
     @classmethod
     def full(
-        cls: Type[DataClassWithFactory[P, R]],
+        cls: Type[DataArrayClass[P, R]],
         shape: Shape,
         fill_value: Any,
         order: Order = "C",

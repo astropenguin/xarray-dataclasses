@@ -4,6 +4,7 @@ __all__ = ["asdataset", "AsDataset"]
 # standard library
 from dataclasses import Field
 from functools import wraps
+from types import MethodType
 from typing import Any, Callable, Dict, overload, Type, TypeVar, Union
 
 
@@ -30,7 +31,7 @@ class DataClass(Protocol[P]):
     __dataclass_fields__: Dict[str, Field[Any]]
 
 
-class DataClassWithFactory(Protocol[P, R]):
+class DatasetClass(Protocol[P, R]):
     """Type hint for a dataclass object with a Dataset factory."""
 
     __init__: Callable[P, None]
@@ -41,7 +42,7 @@ class DataClassWithFactory(Protocol[P, R]):
 # runtime functions and classes
 @overload
 def asdataset(
-    dataclass: DataClassWithFactory[Any, R],
+    dataclass: DatasetClass[Any, R],
     reference: Reference = None,
     dataset_factory: Any = xr.Dataset,
 ) -> R:
@@ -93,11 +94,29 @@ def asdataset(
     return dataset
 
 
-class AsDatasetMeta(type):
-    """Metaclass of the AsDataset class."""
+class classproperty:
+    """Class property only for AsDataset.new()."""
 
-    @property
-    def new(cls: Type[DataClassWithFactory[P, R]]) -> Callable[P, R]:
+    def __init__(self, fget: Callable[..., Any]) -> None:
+        self.fget = fget
+
+    def __get__(
+        self,
+        obj: Any,
+        objtype: Type[DatasetClass[P, R]],
+    ) -> Callable[P, R]:
+        return self.fget(objtype)
+
+
+class AsDataset:
+    """Mix-in class that provides shorthand methods."""
+
+    def __dataset_factory__(self, data_vars: Any) -> xr.Dataset:
+        """Default Dataset factory (xarray.Dataset)."""
+        return xr.Dataset(data_vars)
+
+    @classproperty
+    def new(cls: Type[DatasetClass[P, R]]) -> Callable[P, R]:
         """Create a Dataset object from dataclass parameters."""
         init = copy_function(cls.__init__)  # type: ignore
         init.__annotations__["return"] = R
@@ -105,18 +124,10 @@ class AsDatasetMeta(type):
 
         @wraps(init)
         def wrapper(
-            cls: Type[DataClassWithFactory[P, R]],
+            cls: Type[DatasetClass[P, R]],
             *args: P.args,
             **kwargs: P.kwargs,
         ) -> R:
             return asdataset(cls(*args, **kwargs))
 
-        return wrapper.__get__(cls)  # type: ignore
-
-
-class AsDataset(metaclass=AsDatasetMeta):
-    """Mix-in class that provides shorthand methods."""
-
-    def __dataset_factory__(self, data_vars: Any) -> xr.Dataset:
-        """Default Dataset factory (xarray.Dataset)."""
-        return xr.Dataset(data_vars)
+        return MethodType(wrapper, cls)
