@@ -17,6 +17,7 @@ from typing import (
 
 
 # third-party packages
+import xarray as xr
 from typing_extensions import (
     Annotated,
     get_args,
@@ -61,6 +62,7 @@ TDtype = TypeVar("TDtype", covariant=True)
 Dims = Tuple[str, ...]
 Dtype = Optional[str]
 NoneType = type(None)
+Reference = Union[xr.DataArray, xr.Dataset, None]
 
 
 @runtime_checkable

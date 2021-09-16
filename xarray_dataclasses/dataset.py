@@ -5,7 +5,7 @@ __all__ = ["asdataset", "AsDataset"]
 from dataclasses import Field
 from functools import wraps
 from types import MethodType
-from typing import Any, Callable, Dict, overload, Type, TypeVar, Union
+from typing import Any, Callable, Dict, overload, Type, TypeVar
 
 
 # third-party packages
@@ -15,13 +15,13 @@ from typing_extensions import ParamSpec, Protocol
 
 # submodules
 from .datamodel import DataModel
+from .typing import Reference
 from .utils import copy_function
 
 
 # type hints
 P = ParamSpec("P")
 R = TypeVar("R", bound=xr.Dataset)
-Reference = Union[xr.DataArray, xr.Dataset, None]
 
 
 class DataClass(Protocol[P]):
