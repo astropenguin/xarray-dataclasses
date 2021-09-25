@@ -111,7 +111,7 @@ class classproperty:
 class AsDataset:
     """Mix-in class that provides shorthand methods."""
 
-    def __dataset_factory__(self, data_vars: Any) -> xr.Dataset:
+    def __dataset_factory__(self, data_vars: Any = None) -> xr.Dataset:
         """Default Dataset factory (xarray.Dataset)."""
         return xr.Dataset(data_vars)
 
