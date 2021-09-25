@@ -22,6 +22,7 @@ from typing_extensions import (
     Annotated,
     get_args,
     get_origin,
+    get_type_hints,
     Literal,
     Protocol,
     runtime_checkable,
@@ -335,22 +336,8 @@ def get_dtype(obj: Any) -> Dtype:
 
 def unannotate(obj: T) -> T:
     """Recursively remove Annotated types."""
-    import typing
 
-    args = get_args(obj)
-    origin = get_origin(obj)
+    class Temp:
+        __annotations__ = dict(type=obj)
 
-    if origin is None:
-        return obj
-
-    if origin is Annotated:
-        return unannotate(args[0])
-
-    args = map(unannotate, args)
-    args = tuple(filter(None, args))
-
-    try:
-        return origin[args]
-    except TypeError:
-        name = origin.__name__.capitalize()
-        return getattr(typing, name)[args]
+    return get_type_hints(Temp)["type"]
