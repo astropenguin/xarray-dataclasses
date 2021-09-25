@@ -102,24 +102,25 @@ TDataClass = TypeVar("TDataClass", bound=DataClass)
 
 
 Attr = Annotated[T, FieldType.ATTR]
-"""Type hint for an attribute member of DataArray or Dataset.
+"""Type hint to define attribute fields (``Attr[T]``).
 
-Examples:
+Example:
     ::
 
-        from dataclasses import dataclass
-        from typing import Literal
-        from xarray_dataclasses import Attr, Data
-
-
-        X = Literal["x"]
-        Y = Literal["y"]
-
-
         @dataclass
-        class Image:
+        class Image(AsDataArray):
             data: Data[tuple[X, Y], float]
+            long_name: Attr[str] = "luminance"
             units: Attr[str] = "cd / m^2"
+
+Hint:
+    The following field names are specially treated when plotting.
+
+    - ``long_name`` or ``standard_name``: Coordinate name.
+    - ``units``: Coordinate units.
+
+Reference:
+    https://xarray.pydata.org/en/stable/user-guide/plotting.html
 
 """
 
