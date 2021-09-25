@@ -9,7 +9,7 @@ from typing import Any, Callable, cast, Generic, List, TypeVar, Union
 # dependencies
 import numpy as np
 import xarray as xr
-from typing_extensions import get_args, TypedDict
+from typing_extensions import TypedDict
 
 
 # submodules
@@ -20,6 +20,7 @@ from .typing import (
     Dims,
     Dtype,
     FieldType,
+    get_class,
     get_dims,
     get_dtype,
     Reference,
@@ -81,10 +82,8 @@ class Data(FieldModel[xr.DataArray]):
     @classmethod
     def from_field(cls, field: Field[Any], value: Any) -> "Data":
         """Create a field model from a dataclass field and a value."""
-        args = get_args(get_args(unannotate(field.type))[0])
-
-        dims = get_dims(args[0])
-        dtype = get_dtype(args[1])
+        dims = get_dims(field.type)
+        dtype = get_dtype(field.type)
         type: DataArrayDict = {"dims": dims, "dtype": dtype}
 
         def factory(value: Any, reference: Reference) -> xr.DataArray:
@@ -103,7 +102,7 @@ class Dataof(FieldModel[xr.DataArray]):
     @classmethod
     def from_field(cls, field: Field[Any], value: Any) -> "Dataof":
         """Create a field model from a dataclass field and a value."""
-        dataclass = get_args(unannotate(field.type))[0]
+        dataclass = get_class(field.type)
         type = resolve_class(dataclass)
 
         def factory(value: Any, reference: Reference) -> xr.DataArray:
