@@ -1,3 +1,19 @@
+"""Submodule for type hints to define fields of dataclasses.
+
+Note:
+    The following codes are supposed in examples::
+
+        from dataclasses import dataclass
+        from typing import Literal
+        from xarray_dataclasses import AsDataArray, AsDataset
+        from xarray_dataclasses import Attr, Coord, Data, Name
+        from xarray_dataclasses import Coordof, Dataof
+
+
+        X = Literal["x"]
+        Y = Literal["y"]
+
+"""
 __all__ = ["Attr", "Coord", "Coordof", "Data", "Dataof", "Name"]
 
 
