@@ -4,16 +4,7 @@ __all__ = ["Attr", "Coord", "Coordof", "Data", "Dataof", "Name"]
 # standard library
 from dataclasses import Field
 from enum import auto, Enum
-from itertools import chain
-from typing import (
-    Any,
-    Dict,
-    ForwardRef,
-    Optional,
-    Tuple,
-    TypeVar,
-    Union,
-)
+from typing import Any, Dict, Optional, Tuple, TypeVar, Union
 
 
 # dependencies
@@ -22,6 +13,7 @@ from typing_extensions import (
     Annotated,
     get_args,
     get_origin,
+    get_type_hints,
     Literal,
     Protocol,
     runtime_checkable,
@@ -277,80 +269,71 @@ Examples:
 
 
 # runtime functions
-def get_dims(obj: Any) -> Dims:
-    """Parse an object to get dims."""
-    obj = unannotate(obj)
+def get_class(hint: Any) -> Any:
+    """Return a class parsed from a type hint."""
+    return get_first(unannotate(hint))
 
-    if obj == ():
+
+def get_dims(hint: Any) -> Dims:
+    """Return dims parsed from a type hint."""
+    t_dims = get_args(get_class(hint))[0]
+
+    if is_str_literal(t_dims):
+        return (get_first(t_dims),)
+
+    args = get_args(t_dims)
+
+    if args == () or args == ((),):
         return ()
 
-    if obj is NoneType:
-        return ()
+    if all(map(is_str_literal, args)):
+        return tuple(map(get_first, args))
 
-    if isinstance(obj, str):
-        return (obj,)
-
-    if isinstance(obj, ForwardRef):
-        return (obj.__forward_arg__,)
-
-    args = get_args(obj)
-    origin = get_origin(obj)
-
-    if origin is tuple:
-        return tuple(chain(*map(get_dims, args)))
-
-    if origin is Literal and len(args) == 1:
-        return (str(args[0]),)
-
-    raise ValueError(f"Could not parse {obj} as dims.")
+    raise ValueError(f"Could not parse dims from {hint!r}.")
 
 
-def get_dtype(obj: Any) -> Dtype:
-    """Parse an object to get dtype."""
-    obj = unannotate(obj)
+def get_dtype(hint: Any) -> Dtype:
+    """Return dtype parsed from a type hint."""
+    t_dtype = get_args(get_class(hint))[1]
 
-    if obj is Any:
+    if t_dtype is Any:
         return None
 
-    if obj is NoneType:
+    if t_dtype is NoneType:
         return None
 
-    if isinstance(obj, str):
-        return obj
+    if isinstance(t_dtype, type):
+        return t_dtype.__name__
 
-    if isinstance(obj, type):
-        return obj.__name__
+    if is_str_literal(t_dtype):
+        return get_first(t_dtype)
 
-    if isinstance(obj, ForwardRef):
-        return obj.__forward_arg__
-
-    args = get_args(obj)
-    origin = get_origin(obj)
-
-    if origin is Literal and len(args) == 1:
-        return str(args[0])
-
-    raise ValueError(f"Could not parse {obj} as dtype.")
+    raise ValueError(f"Could not parse dtype from {hint!r}.")
 
 
-def unannotate(obj: T) -> T:
-    """Recursively remove Annotated types."""
-    import typing
+def get_first(hint: Any) -> Any:
+    """Return the first argument in a type hint."""
+    return get_args(hint)[0]
 
-    args = get_args(obj)
-    origin = get_origin(obj)
 
-    if origin is None:
-        return obj
+def is_str_literal(hint: Any) -> bool:
+    """Check if a type hint is Literal[str]."""
+    args = get_args(hint)
+    origin = get_origin(hint)
 
-    if origin is Annotated:
-        return unannotate(args[0])
+    if origin is not Literal:
+        return False
 
-    args = map(unannotate, args)
-    args = tuple(filter(None, args))
+    if not len(args) == 1:
+        return False
 
-    try:
-        return origin[args]
-    except TypeError:
-        name = origin.__name__.capitalize()
-        return getattr(typing, name)[args]
+    return isinstance(args[0], str)
+
+
+def unannotate(hint: Any) -> Any:
+    """Recursively remove Annotated type hints."""
+
+    class Temp:
+        __annotations__ = dict(hint=hint)
+
+    return get_type_hints(Temp)["hint"]
