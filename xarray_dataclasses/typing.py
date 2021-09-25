@@ -125,25 +125,21 @@ Reference:
 """
 
 Coord = Annotated[Union[ArrayLike[TDims, TDtype], TDtype], FieldType.COORD]
-"""Type hint for a coordinate member of DataArray or Dataset.
+"""Type hint to define coordinate fields (``Coord[TDims, TDtype]``).
 
-Examples:
+Example:
     ::
 
-        from dataclasses import dataclass
-        from typing import Literal
-        from xarray_dataclasses import Coord, Data
-
-
-        X = Literal["x"]
-        Y = Literal["y"]
-
-
         @dataclass
-        class Image:
+        class Image(AsDataArray):
             data: Data[tuple[X, Y], float]
+            mask: Coord[tuple[X, Y], bool]
             x: Coord[X, int] = 0
             y: Coord[Y, int] = 0
+
+Hint:
+    A coordinate field whose name is the same as ``TDims``
+    (e.g. ``x: Coord[X, int]``) can define a dimension.
 
 """
 
