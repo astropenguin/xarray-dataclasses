@@ -114,7 +114,7 @@ class classproperty:
 class AsDataArray:
     """Mix-in class that provides shorthand methods."""
 
-    def __dataarray_factory__(self, data: Any) -> xr.DataArray:
+    def __dataarray_factory__(self, data: Any = None) -> xr.DataArray:
         """Default DataArray factory (xarray.DataArray)."""
         return xr.DataArray(data)
 
