@@ -13,6 +13,7 @@ from typing_extensions import get_args, TypedDict
 
 
 # submodules
+from .deprecated import get_type_hints
 from .typing import (
     ArrayLike,
     DataClass,
@@ -151,6 +152,7 @@ class DataModel:
     def from_dataclass(cls, dataclass: DataClass) -> "DataModel":
         """Create a data model from a dataclass or its object."""
         model = cls()
+        eval_field_types(dataclass)
 
         for field_ in dataclass.__dataclass_fields__.values():
             value = getattr(dataclass, field_.name, field_.default)
@@ -172,6 +174,15 @@ class DataModel:
 
 
 # runtime functions
+def eval_field_types(dataclass: DataClass) -> None:
+    """Evaluate field types of a dataclass or its object."""
+    hints = get_type_hints(dataclass, include_extras=True)  # type: ignore
+
+    for field_ in dataclass.__dataclass_fields__.values():
+        if isinstance(field_.type, str):
+            field_.type = hints[field_.name]
+
+
 def typedarray(
     data: Any,
     dims: Dims,
