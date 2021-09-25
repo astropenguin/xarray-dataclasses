@@ -144,37 +144,34 @@ Hint:
 """
 
 Coordof = Annotated[Union[TDataClass, Any], FieldType.COORDOF]
-"""Type hint for a coordinate member of DataArray or Dataset.
+"""Type hint to define coordinate fields (``Coordof[TDataClass]``).
 
 Unlike ``Coord``, it receives a dataclass that defines a DataArray class.
+This is useful when users want to add metadata to dimensions for plotting.
 
-Examples:
+Example:
     ::
-
-        from dataclasses import dataclass
-        from typing import Literal
-        from xarray_dataclasses import Data, Coordof
-
-
-        X = Literal["x"]
-        Y = Literal["y"]
-
 
         @dataclass
         class XAxis:
             data: Data[X, int]
+            long_name: Attr[str] = "x axis"
 
 
         @dataclass
         class YAxis:
             data: Data[Y, int]
+            long_name: Attr[str] = "y axis"
 
 
         @dataclass
-        class Image:
+        class Image(AsDataArray):
             data: Data[tuple[X, Y], float]
             x: Coordof[XAxis] = 0
             y: Coordof[YAxis] = 0
+
+Hint:
+    A class used in ``Coordof`` does not need to inherit ``AsDataArray``.
 
 """
 
