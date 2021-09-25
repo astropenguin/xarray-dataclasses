@@ -176,37 +176,20 @@ Hint:
 """
 
 Data = Annotated[Union[ArrayLike[TDims, TDtype], TDtype], FieldType.DATA]
-"""Type hint for data of DataArray or variable of Dataset.
+"""Type hint to define data fields (``Coordof[TDims, TDtype]``).
 
 Examples:
-    ::
-
-        from dataclasses import dataclass
-        from typing import Literal
-        from xarray_dataclasses import Data
-
-
-        X = Literal["x"]
-        Y = Literal["y"]
-
+    Exactly one data field is allowed in a DataArray class
+    (the second and subsequent data fields are just ignored)::
 
         @dataclass
-        class Image:
+        class Image(AsDataArray):
             data: Data[tuple[X, Y], float]
 
-    ::
-
-        from dataclasses import dataclass
-        from typing import Literal
-        from xarray_dataclasses import Data
-
-
-        X = Literal["x"]
-        Y = Literal["y"]
-
+    Multiple data fields are allowed in a Dataset class::
 
         @dataclass
-        class Image:
+        class ColorImage(AsDataset):
             red: Data[tuple[X, Y], float]
             green: Data[tuple[X, Y], float]
             blue: Data[tuple[X, Y], float]
