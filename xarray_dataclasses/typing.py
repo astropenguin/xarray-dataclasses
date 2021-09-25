@@ -197,44 +197,29 @@ Examples:
 """
 
 Dataof = Annotated[Union[TDataClass, Any], FieldType.DATAOF]
-"""Type hint for data of DataArray or variable of Dataset.
+"""Type hint to define data fields (``Coordof[TDataClass]``).
 
 Unlike ``Data``, it receives a dataclass that defines a DataArray class.
+This is useful when users want to reuse a dataclass in a Dataset class.
 
-Examples:
+Example:
     ::
-
-        from dataclasses import dataclass
-        from typing import Literal
-        from xarray_dataclasses import Coordof, Data, Dataof
-
-
-        X = Literal["x"]
-        Y = Literal["y"]
-
-
-        @dataclass
-        class XAxis:
-            data: Data[X, int]
-
-
-        @dataclass
-        class YAxis:
-            data: Data[Y, int]
-
 
         @dataclass
         class Image:
             data: Data[tuple[X, Y], float]
-            x: Coordof[XAxis] = 0
-            y: Coordof[YAxis] = 0
+            x: Coord[X, int] = 0
+            y: Coord[Y, int] = 0
 
 
         @dataclass
-        class ColorImage:
+        class ColorImage(AsDataset):
             red: Dataof[Image]
             green: Dataof[Image]
-            red: Dataof[Image]
+            blue: Dataof[Image]
+
+Hint:
+    A class used in ``Dataof`` does not need to inherit ``AsDataArray``.
 
 """
 
