@@ -75,10 +75,10 @@ Reference = Union[xr.DataArray, xr.Dataset, None]
 
 @runtime_checkable
 class ArrayLike(Protocol[TDims, TDtype]):
-    """Type hint for an array-like object."""
+    """Type hint of array-like objects."""
 
     def astype(self: T, dtype: Any) -> T:
-        """Method for converting data type of the object."""
+        """Method to convert data type of the object."""
         ...
 
     @property
