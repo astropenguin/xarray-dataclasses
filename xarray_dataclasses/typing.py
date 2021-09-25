@@ -38,29 +38,29 @@ from typing_extensions import (
 
 # constants
 class FieldType(Enum):
-    """Annotation for xarray-related field types."""
+    """Annotation of xarray-related field hints."""
 
     ATTR = auto()
-    """Annotation for an attribute field type."""
+    """Annotation of attribute field hints."""
 
     COORD = auto()
-    """Annotation for a coordinate field type."""
+    """Annotation of coordinate field hints."""
 
     COORDOF = auto()
-    """Annotation for a coordinate field type."""
+    """Annotation of coordinate field hints."""
 
     DATA = auto()
-    """Annotation for a data (variable) field type."""
+    """Annotation of data (variable) field hints."""
 
     DATAOF = auto()
-    """Annotation for a data (variable) field type."""
+    """Annotation of data (variable) field hints."""
 
     NAME = auto()
-    """Annotation for a name field type."""
+    """Annotation of name field hints."""
 
-    def annotates(self, type: Any) -> bool:
-        """Check if a field type is annotated."""
-        return self in get_args(type)[1:]
+    def annotates(self, hint: Any) -> bool:
+        """Check if a field hint is annotated."""
+        return self in get_args(hint)[1:]
 
 
 # type hints
@@ -93,7 +93,7 @@ class ArrayLike(Protocol[TDims, TDtype]):
 
 
 class DataClass(Protocol):
-    """Type hint for a dataclass or its object."""
+    """Type hint of dataclasses or their objects."""
 
     __dataclass_fields__: Dict[str, Field[Any]]
 
