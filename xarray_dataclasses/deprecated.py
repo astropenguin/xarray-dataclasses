@@ -3,6 +3,7 @@ __all__ = ["dataarrayclass", "datasetclass", "get_type_hints"]
 
 
 # standard library
+import re
 from dataclasses import dataclass, Field
 from typing import Any, Callable, Dict, ForwardRef, Optional, Type, TypeVar, Union
 from typing import _eval_type  # type: ignore
@@ -14,9 +15,8 @@ from typing_extensions import Literal, Protocol
 from typing_extensions import get_type_hints as _get_type_hints
 
 
-# submodules
-from .dataarray import AsDataArray
-from .dataset import AsDataset
+# constants
+GENERIC_NAME = re.compile(r"\[.+\]")
 
 
 # type hints
@@ -43,6 +43,7 @@ def dataarrayclass(
     shorthands: bool = True,
 ) -> Union[Type[DataClass], Callable[[type], Type[DataClass]]]:
     """Class decorator to create a DataArray class."""
+    from .dataarray import AsDataArray
 
     warn(
         "This decorator will be removed in v1.0.0. "
@@ -82,6 +83,7 @@ def datasetclass(
     shorthands: bool = True,
 ) -> Union[Type[DataClass], Callable[[type], Type[DataClass]]]:
     """Class decorator to create a Dataset class."""
+    from .dataset import AsDataset
 
     warn(
         "This decorator will be removed in v1.0.0. "
@@ -114,6 +116,9 @@ def eval_type(type: Any, *args: Any, **kwargs: Any) -> Any:
         return _eval_type(type, *args, **kwargs)
 
     name = type.__forward_arg__
+
+    if GENERIC_NAME.search(name):
+        return _eval_type(type, *args, **kwargs)
 
     warn(
         f"For backward compatibility, forward reference {name!r} "
