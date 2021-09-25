@@ -224,22 +224,13 @@ Hint:
 """
 
 Name = Annotated[T, FieldType.NAME]
-"""Type hint for a name of DataArray.
+"""Type hint to define name fields (``Name[T]``).
 
-Examples:
+Example:
     ::
 
-        from dataclasses import dataclass
-        from typing import Literal
-        from xarray_dataclasses import Data, Name
-
-
-        X = Literal["x"]
-        Y = Literal["y"]
-
-
         @dataclass
-        class Image:
+        class Image(AsDataArray):
             data: Data[tuple[X, Y], float]
             name: Name[str] = "image"
 
