@@ -1,3 +1,15 @@
+"""Submodule for type hints to define fields of dataclasses.
+
+Note:
+    The following imports are supposed in the examples below::
+
+        from dataclasses import dataclass
+        from typing import Literal
+        from xarray_dataclasses import AsDataArray, AsDataset
+        from xarray_dataclasses import Attr, Coord, Data, Name
+        from xarray_dataclasses import Coordof, Dataof
+
+"""
 __all__ = ["Attr", "Coord", "Coordof", "Data", "Dataof", "Name"]
 
 
@@ -22,29 +34,29 @@ from typing_extensions import (
 
 # constants
 class FieldType(Enum):
-    """Annotation for xarray-related field types."""
+    """Annotation of xarray-related field hints."""
 
     ATTR = auto()
-    """Annotation for an attribute field type."""
+    """Annotation of attribute field hints."""
 
     COORD = auto()
-    """Annotation for a coordinate field type."""
+    """Annotation of coordinate field hints."""
 
     COORDOF = auto()
-    """Annotation for a coordinate field type."""
+    """Annotation of coordinate field hints."""
 
     DATA = auto()
-    """Annotation for a data (variable) field type."""
+    """Annotation of data (variable) field hints."""
 
     DATAOF = auto()
-    """Annotation for a data (variable) field type."""
+    """Annotation of data (variable) field hints."""
 
     NAME = auto()
-    """Annotation for a name field type."""
+    """Annotation of name field hints."""
 
-    def annotates(self, type: Any) -> bool:
-        """Check if a field type is annotated."""
-        return self in get_args(type)[1:]
+    def annotates(self, hint: Any) -> bool:
+        """Check if a field hint is annotated."""
+        return self in get_args(hint)[1:]
 
 
 # type hints
@@ -59,10 +71,10 @@ Reference = Union[xr.DataArray, xr.Dataset, None]
 
 @runtime_checkable
 class ArrayLike(Protocol[TDims, TDtype]):
-    """Type hint for an array-like object."""
+    """Type hint of array-like objects."""
 
     def astype(self: T, dtype: Any) -> T:
-        """Method for converting data type of the object."""
+        """Method to convert data type of the object."""
         ...
 
     @property
@@ -77,7 +89,7 @@ class ArrayLike(Protocol[TDims, TDtype]):
 
 
 class DataClass(Protocol):
-    """Type hint for a dataclass or its object."""
+    """Type hint of dataclasses or their objects."""
 
     __dataclass_fields__: Dict[str, Field[Any]]
 
@@ -86,183 +98,136 @@ TDataClass = TypeVar("TDataClass", bound=DataClass)
 
 
 Attr = Annotated[T, FieldType.ATTR]
-"""Type hint for an attribute member of DataArray or Dataset.
+"""Type hint to define attribute fields (``Attr[T]``).
 
-Examples:
+Example:
     ::
 
-        from dataclasses import dataclass
-        from typing import Literal
-        from xarray_dataclasses import Attr, Data
-
-
-        X = Literal["x"]
-        Y = Literal["y"]
-
-
         @dataclass
-        class Image:
-            data: Data[tuple[X, Y], float]
+        class Image(AsDataArray):
+            data: Data[tuple[Literal["x"], Literal["y"]], float]
+            long_name: Attr[str] = "luminance"
             units: Attr[str] = "cd / m^2"
+
+Hint:
+    The following field names are specially treated when plotting.
+
+    - ``long_name`` or ``standard_name``: Coordinate name.
+    - ``units``: Coordinate units.
+
+Reference:
+    https://xarray.pydata.org/en/stable/user-guide/plotting.html
 
 """
 
 Coord = Annotated[Union[ArrayLike[TDims, TDtype], TDtype], FieldType.COORD]
-"""Type hint for a coordinate member of DataArray or Dataset.
+"""Type hint to define coordinate fields (``Coord[TDims, TDtype]``).
 
-Examples:
+Example:
     ::
 
-        from dataclasses import dataclass
-        from typing import Literal
-        from xarray_dataclasses import Coord, Data
-
-
-        X = Literal["x"]
-        Y = Literal["y"]
-
-
         @dataclass
-        class Image:
-            data: Data[tuple[X, Y], float]
-            x: Coord[X, int] = 0
-            y: Coord[Y, int] = 0
+        class Image(AsDataArray):
+            data: Data[tuple[Literal["x"], Literal["y"]], float]
+            mask: Coord[tuple[Literal["x"], Literal["y"]], bool]
+            x: Coord[Literal["x"], int] = 0
+            y: Coord[Literal["y"], int] = 0
+
+Hint:
+    A coordinate field whose name is the same as ``TDims``
+    (e.g. ``x: Coord[Literal["x"], int]``) can define a dimension.
 
 """
 
 Coordof = Annotated[Union[TDataClass, Any], FieldType.COORDOF]
-"""Type hint for a coordinate member of DataArray or Dataset.
+"""Type hint to define coordinate fields (``Coordof[TDataClass]``).
 
-Unlike ``Coord``, it receives a dataclass that defines a DataArray class.
+Unlike ``Coord``, it specifies a dataclass that defines a DataArray class.
+This is useful when users want to add metadata to dimensions for plotting.
 
-Examples:
+Example:
     ::
-
-        from dataclasses import dataclass
-        from typing import Literal
-        from xarray_dataclasses import Data, Coordof
-
-
-        X = Literal["x"]
-        Y = Literal["y"]
-
 
         @dataclass
         class XAxis:
-            data: Data[X, int]
+            data: Data[Literal["x"], int]
+            long_name: Attr[str] = "x axis"
 
 
         @dataclass
         class YAxis:
-            data: Data[Y, int]
+            data: Data[Literal["y"], int]
+            long_name: Attr[str] = "y axis"
 
 
         @dataclass
-        class Image:
-            data: Data[tuple[X, Y], float]
-            x: Coordof[XAxis] = 0
-            y: Coordof[YAxis] = 0
+        class Image(AsDataArray):
+            data: Data[tuple[Literal["x"], Literal["y"]], float]
+            x: Coordof[Literal["x"]Axis] = 0
+            y: Coordof[Literal["y"]Axis] = 0
+
+Hint:
+    A class used in ``Coordof`` does not need to inherit ``AsDataArray``.
 
 """
 
 Data = Annotated[Union[ArrayLike[TDims, TDtype], TDtype], FieldType.DATA]
-"""Type hint for data of DataArray or variable of Dataset.
+"""Type hint to define data fields (``Coordof[TDims, TDtype]``).
 
 Examples:
-    ::
-
-        from dataclasses import dataclass
-        from typing import Literal
-        from xarray_dataclasses import Data
-
-
-        X = Literal["x"]
-        Y = Literal["y"]
-
+    Exactly one data field is allowed in a DataArray class
+    (the second and subsequent data fields are just ignored)::
 
         @dataclass
-        class Image:
-            data: Data[tuple[X, Y], float]
+        class Image(AsDataArray):
+            data: Data[tuple[Literal["x"], Literal["y"]], float]
 
-    ::
-
-        from dataclasses import dataclass
-        from typing import Literal
-        from xarray_dataclasses import Data
-
-
-        X = Literal["x"]
-        Y = Literal["y"]
-
+    Multiple data fields are allowed in a Dataset class::
 
         @dataclass
-        class Image:
-            red: Data[tuple[X, Y], float]
-            green: Data[tuple[X, Y], float]
-            blue: Data[tuple[X, Y], float]
+        class ColorImage(AsDataset):
+            red: Data[tuple[Literal["x"], Literal["y"]], float]
+            green: Data[tuple[Literal["x"], Literal["y"]], float]
+            blue: Data[tuple[Literal["x"], Literal["y"]], float]
 
 """
 
 Dataof = Annotated[Union[TDataClass, Any], FieldType.DATAOF]
-"""Type hint for data of DataArray or variable of Dataset.
+"""Type hint to define data fields (``Coordof[TDataClass]``).
 
-Unlike ``Data``, it receives a dataclass that defines a DataArray class.
+Unlike ``Data``, it specifies a dataclass that defines a DataArray class.
+This is useful when users want to reuse a dataclass in a Dataset class.
 
-Examples:
+Example:
     ::
-
-        from dataclasses import dataclass
-        from typing import Literal
-        from xarray_dataclasses import Coordof, Data, Dataof
-
-
-        X = Literal["x"]
-        Y = Literal["y"]
-
-
-        @dataclass
-        class XAxis:
-            data: Data[X, int]
-
-
-        @dataclass
-        class YAxis:
-            data: Data[Y, int]
-
 
         @dataclass
         class Image:
-            data: Data[tuple[X, Y], float]
-            x: Coordof[XAxis] = 0
-            y: Coordof[YAxis] = 0
+            data: Data[tuple[Literal["x"], Literal["y"]], float]
+            x: Coord[Literal["x"], int] = 0
+            y: Coord[Literal["y"], int] = 0
 
 
         @dataclass
-        class ColorImage:
+        class ColorImage(AsDataset):
             red: Dataof[Image]
             green: Dataof[Image]
-            red: Dataof[Image]
+            blue: Dataof[Image]
+
+Hint:
+    A class used in ``Dataof`` does not need to inherit ``AsDataArray``.
 
 """
 
 Name = Annotated[T, FieldType.NAME]
-"""Type hint for a name of DataArray.
+"""Type hint to define name fields (``Name[T]``).
 
-Examples:
+Example:
     ::
 
-        from dataclasses import dataclass
-        from typing import Literal
-        from xarray_dataclasses import Data, Name
-
-
-        X = Literal["x"]
-        Y = Literal["y"]
-
-
         @dataclass
-        class Image:
-            data: Data[tuple[X, Y], float]
+        class Image(AsDataArray):
+            data: Data[tuple[Literal["x"], Literal["y"]], float]
             name: Name[str] = "image"
 
 """

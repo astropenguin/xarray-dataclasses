@@ -33,7 +33,7 @@ class YAxis:
 
 
 @dataclass
-class Matrix:
+class Image:
     data: Data[Tuple[X, Y], float]
     mask: Coord[Tuple[X, Y], bool] = False
     x: Coordof[XAxis] = 0
@@ -41,16 +41,16 @@ class Matrix:
 
 
 @dataclass
-class Image:
-    red: Dataof[Matrix]
-    green: Dataof[Matrix]
-    blue: Dataof[Matrix]
+class ColorImage:
+    red: Dataof[Image]
+    green: Dataof[Image]
+    blue: Dataof[Image]
 
 
 xaxis_model = DataModel.from_dataclass(XAxis)
 yaxis_model = DataModel.from_dataclass(YAxis)
-matrix_model = DataModel.from_dataclass(Matrix)
 image_model = DataModel.from_dataclass(Image)
+color_model = DataModel.from_dataclass(ColorImage)
 
 
 # test functions
@@ -89,23 +89,23 @@ def test_yaxis_name() -> None:
 
 
 def test_matrix_coord() -> None:
-    assert matrix_model.coord[0].name == "mask"
-    assert matrix_model.coord[0].type == {"dims": ("x", "y"), "dtype": "bool"}
-    assert matrix_model.coord[1].name == "x"
-    assert matrix_model.coord[1].type == "tests.test_datamodel.XAxis"
-    assert matrix_model.coord[2].name == "y"
-    assert matrix_model.coord[2].type == "tests.test_datamodel.YAxis"
+    assert image_model.coord[0].name == "mask"
+    assert image_model.coord[0].type == {"dims": ("x", "y"), "dtype": "bool"}
+    assert image_model.coord[1].name == "x"
+    assert image_model.coord[1].type == "tests.test_datamodel.XAxis"
+    assert image_model.coord[2].name == "y"
+    assert image_model.coord[2].type == "tests.test_datamodel.YAxis"
 
 
 def test_matrix_data() -> None:
-    assert matrix_model.data[0].name == "data"
-    assert matrix_model.data[0].type == {"dims": ("x", "y"), "dtype": "float"}
+    assert image_model.data[0].name == "data"
+    assert image_model.data[0].type == {"dims": ("x", "y"), "dtype": "float"}
 
 
 def test_image_data() -> None:
-    assert image_model.data[0].name == "red"
-    assert image_model.data[0].type == "tests.test_datamodel.Matrix"
-    assert image_model.data[1].name == "green"
-    assert image_model.data[1].type == "tests.test_datamodel.Matrix"
-    assert image_model.data[2].name == "blue"
-    assert image_model.data[2].type == "tests.test_datamodel.Matrix"
+    assert color_model.data[0].name == "red"
+    assert color_model.data[0].type == "tests.test_datamodel.Image"
+    assert color_model.data[1].name == "green"
+    assert color_model.data[1].type == "tests.test_datamodel.Image"
+    assert color_model.data[2].name == "blue"
+    assert color_model.data[2].type == "tests.test_datamodel.Image"

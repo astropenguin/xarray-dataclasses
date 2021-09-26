@@ -31,24 +31,28 @@ class Custom(xr.Dataset):
 
 @dataclass
 class Image(AsDataArray):
+    """Specifications of images."""
+
     data: Data[Tuple[X, Y], float]
 
 
 @dataclass
-class RGBImage(AsDataset):
+class ColorImage(AsDataset):
+    """Specifications of color images."""
+
     red: Data[Tuple[X, Y], float]
     green: Data[Tuple[X, Y], float]
     blue: Data[Tuple[X, Y], float]
     x: Coord[X, int] = 0
     y: Coord[Y, int] = 0
-    dpi: Attr[int] = 100
+    units: Attr[str] = "cd / m^2"
 
     def __dataset_factory__(self, data_vars: Any = None) -> Custom:
         return Custom(data_vars)
 
 
 # test datasets
-created = RGBImage.new(
+created = ColorImage.new(
     Image.ones(SHAPE),
     Image.ones(SHAPE),
     Image.ones(SHAPE),
@@ -63,7 +67,7 @@ expected = Custom(
         "x": xr.DataArray(np.zeros(SHAPE[0]), dims="x"),
         "y": xr.DataArray(np.zeros(SHAPE[1]), dims="y"),
     },
-    attrs={"dpi": 100},
+    attrs={"units": "cd / m^2"},
 )
 
 
