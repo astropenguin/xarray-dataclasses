@@ -9,36 +9,35 @@
 xarray extension for typed DataArray and Dataset creation
 
 
-## TL;DR
+## Overview
 
-xarray-dataclasses is a Python package for creating typed DataArray and Dataset objects of [xarray] using [the Python's dataclass].
-Here is an example code of what the package provides:
+xarray-dataclasses is a Python package that makes it easy to create typed DataArray and Dataset objects of [xarray] using [the Python's dataclass].
 
 ```python
 from dataclasses import dataclass
+from typing import Literal
 from xarray_dataclasses import AsDataArray, Coord, Data
 
 
 @dataclass
 class Image(AsDataArray):
-    """DataArray that represents a 2D image."""
+    """Specifications of images."""
 
-    data: Data[tuple['x', 'y'], float]
-    x: Coord['x', int] = 0
-    y: Coord['y', int] = 0
+    data: Data[tuple[Literal["x"], Literal["y"]], float]
+    x: Coord[Literal["x"], int] = 0
+    y: Coord[Literal["y"], int] = 0
 
 
-# create a DataArray object
+# create an image as DataArray
 image = Image.new([[0, 1], [2, 3]], x=[0, 1], y=[0, 1])
 
-
-# create a DataArray object filled with ones
+# create an image filled with ones
 ones = Image.ones((2, 2), x=[0, 1], y=[0, 1])
 ```
 
 ### Features
 
-- DataArray or Dataset objects with fixed dimensions, data type, and coordinates can easily be created.
+- DataArray and Dataset objects with fixed dimensions, data type, and coordinates can easily be created.
 - NumPy-like special functions such as ``ones()`` are provided as class methods.
 - Compatible with [the Python's dataclass].
 - Compatible with static type check by [Pyright].
@@ -50,52 +49,56 @@ $ pip install xarray-dataclasses
 ```
 
 
-## Introduction
+## Background
 
-[xarray] is useful for handling labeled multi-dimensional data, but it is a bit troublesome to create a DataArray or Dataset object with fixed dimensions, data type, or coordinates (referred to as typed DataArray or typed Dataset, hereafter).
-For example, let us think about the following specifications of DataArray objects:
+[xarray] is useful for handling labeled multi-dimensional data, but it is a bit troublesome to create DataArray and Dataset objects with fixed dimensions, data type, or coordinates (typed DataArray and typed Dataset).
+For example, let us think about the following specifications of images as DataArray.
 
-- Dimensions of data must be `('x', 'y')`.
+- Dimensions of data must be `("x", "y")`.
 - Data type of data must be `float`.
 - Data type of dimensions must be `int`.
 - Default value of dimensions must be `0`.
 
-Then a function to create a typed DataArray object is something like this:
+Then a function to create a typed DataArray object is something like this.
 
 ```python
 import numpy as np
 import xarray as xr
 
 
-def specs(data, x=None, y=None):
+def create_image(data, x=0, y=0):
+    """Specifications of images."""
     data = np.array(data)
 
-    if x is None:
-        x = np.zeros(data.shape[0])
+    if x == 0:
+        x = np.full(data.shape[0], x)
     else:
         x = np.array(x)
 
-    if y is None:
-        y = np.zeros(data.shape[1])
+    if y == 0:
+        y = np.full(data.shape[1], y)
     else:
         y = np.array(y)
 
     return xr.DataArray(
         data=data.astype(float),
-        dims=('x', 'y'),
+        dims=("x", "y"),
         coords={
-            'x': ('x', x.astype(int)),
-            'y': ('y', y.astype(int)),
+            "x": ("x", x.astype(int)),
+            "y": ("y", y.astype(int)),
         },
     )
 
 
-dataarray = specs([[0, 1], [2, 3]])
+image = create_image([[0, 1], [2, 3]])
 ```
 
-The issues are (1) it is not easy to figure out the specs from the code and (2) it is not easy to reuse the code, for example, to add a new coordinate to the original specs.
+The issues are
 
-[xarray-dataclasses](#xarray-dataclasses) resolves them by defining the specs as a dataclass with dedicated type hints:
+- It is not easy to figure out the specifications from the code.
+- It is not easy to reuse the code, for example, to add new coordinates.
+
+[xarray-dataclasses](#xarray-dataclasses) resolves them by defining the specifications as a dataclass.
 
 ```python
 from dataclasses import dataclass
@@ -103,103 +106,112 @@ from xarray_dataclasses import AsDataArray, Coord, Data
 
 
 @dataclass
-class Specs(AsDataArray):
-    data: Data[tuple['x', 'y'], float]
-    x: Coord['x', int] = 0
-    y: Coord['y', int] = 0
+class Image(AsDataArray):
+    """Specifications of 2D images."""
+
+    data: Data[tuple[Literal["x"], Literal["y"]], float]
+    x: Coord[Literal["x"], int] = 0
+    y: Coord[Literal["y"], int] = 0
 
 
-dataarray = Specs.new([[0, 1], [2, 3]])
+image = Image.new([[0, 1], [2, 3]])
 ```
 
-Now the specs become much easier to read:
-The type hints, `Data[TDims, TDtype]` and `Coord[TDims, TDtype]`, have complete information of DataArray creation.
-The default values are given as class variables.
+Now the specifications become much easier to read.
 
-`AsDataArray` is a mix-in class that provides class methods such as `new()`.
-The extension of the specs is then easy by class inheritance.
+- The type hints have complete information for DataArray creation.
+- The default values are given as class variables.
+- The mix-in class `AsDataArray` provides class methods such as `new()`.
+- The extension of the specifications is easy by class inheritance.
 
 ## Basic usage
 
-xarray-dataclasses uses [the Python's dataclass] (please learn how to use it before proceeding).
-Data (or data variables), coordinates, attribute members, and name of a DataArray or Dataset object are defined as dataclass fields with the following dedicated type hints.
-
-### `Data` type
-
-`Data[TDims, TDtype]` specifies the field whose value will become the data of a DataArray object or a member of the data variables of a Dataset object.
-It accepts two type variables, `TDims` and `TDtype`, for fixing dimensions and data type, respectively.
-For example:
-
-| Type hint | Inferred dims | Inferred dtype |
-| --- | --- | --- |
-| `Data['x', typing.Any]` | `('x',)` | `None` (no type casting) |
-| `Data['x', int]` | `('x',)` | `numpy.dtype('int64')` |
-| `Data['x', float]` | `('x',)` | `numpy.dtype('float64')` |
-| `Data[tuple['x', 'y'], float]` | `('x', 'y')` | `numpy.dtype('float64')` |
-
-Note: for Python 3.7 and 3.8, use `typing.Tuple` instead of `tuple`.
-
-### `Coord` type
-
-`Coord[TDims, TDtype]` specifies the field whose value will become a coordinate of a DataArray or Dataset object.
-Similar to `Data`, it accepts two type variables, `TDims` and `TDtype`, for fixing dimensions and data type, respectively.
-
-### `Attr` type
-
-`Attr[T]` specifies the field whose value will become a member of the attributes (attrs) of a DataArray or Dataset object.
-It accepts a type variable, `T`, for specifying the type of the value.
-Note that the value will not be cast to the type.
-
-### `Name` type
-
-`Name[T]` specifies the field whose value will become the name of a DataArray.
-It accepts a type variable, `T`, for specifying the type of the value.
-Note that the value will not be cast to the type.
-
-### DataArray class
-
-DataArray class is a dataclass that defines typed DataArray creation.
-For example:
+xarray-dataclasses uses [the Python's dataclass].
+Please learn how to use it before proceeding.
+Data (or data variables), coordinates, attributes, and a name of a DataArray or a Dataset object are defined as dataclass fields with the following type hints.
+Note that the following imports are supposed in the examples below.
 
 ```python
 from dataclasses import dataclass
-from xarray_dataclasses import AsDataArray, Attr, Coord, Data, Name
-
-
-@dataclass
-class Image(AsDataArray):
-    """DataArray that represents a 2D image."""
-
-    data: Data[tuple['x', 'y'], float]
-    x: Coord['x', int] = 0
-    y: Coord['y', int] = 0
-    units: Attr[str] = 'dimensionless'
-    name: Name[str] = 'default'
+from typing import Literal
+from xarray_dataclasses import AsDataArray, AsDataset
+from xarray_dataclasses import Attr, Coord, Data, Name
 ```
 
-where exactly one `Data`-type field is allowed.
-If more than two `Data`-type fields exist, the second and subsequent fields are ignored.
-A typed DataArray object is created by a shorthand method, `new()`:
+### Data field
+
+The data field is a field whose value will become the data of a DataArray object or a data variable of a Dataset object.
+The type hint `Data[TDims, TDtype]` fixes the dimensions and the data type of the object.
+Here are some examples of how to specify them.
+
+Type hint | Inferred dimensions
+--- | ---
+`Data[Literal[()], ...]` | `()`
+`Data[Literal["x"], ...]` | `("x",)`
+`Data[tuple[Literal["x"], Literal["y"]], ...]` | `("x", "y")`
+
+Type hint | Inferred data type
+--- | ---
+`Data[..., Any]` | `None`
+`Data[..., None]` | `None`
+`Data[..., float]` | `numpy.dtype("float64")`
+`Data[..., numpy.float128]` | `numpy.dtype("float128")`
+| `Data[..., Literal["datetime64[ns]"]]` | `numpy.dtype("<M8[ns]")`
+
+### Coordinate field
+
+The coordinate field is a field whose value will become a coordinate of a DataArray or a Dataset object.
+The type hint `Coord[TDims, TDtype]` fixes the dimensions and the data type of the object.
+
+### Attribute field
+
+The attribute field is a field whose value will become an attribute of a DataArray or a Dataset object.
+The type hint `Attr[T]` specifies the type of the value, which is used only for static type check.
+
+### Name field
+
+The name field is a field whose value will become the name of a DataArray object.
+The type hint `Name[T]` specifies the type of the value, which is used only for static type check.
+
+### DataArray class
+
+The DataArray class is a dataclass that defines typed DataArray specifications.
+Exactly one data field is allowed in a DataArray class.
+The second and subsequent data fields are just ignored in DataArray creation.
+
+```python
+@dataclass
+class Image(AsDataArray):
+    """Specifications of images."""
+
+    data: Data[tuple[Literal["x"], Literal["y"]], float]
+    x: Coord[Literal["x"], int] = 0
+    y: Coord[Literal["y"], int] = 0
+    units: Attr[str] = "cd / m^2"
+    name: Name[str] = "luminance"
+```
+
+A DataArray object is created by the shorthand method `new()`.
 
 ```python
 Image.new([[0, 1], [2, 3]], x=[0, 1], y=[0, 1])
 
-<xarray.DataArray 'default' (x: 2, y: 2)>
+<xarray.DataArray "luminance" (x: 2, y: 2)>
 array([[0., 1.],
        [2., 3.]])
 Coordinates:
   * x        (x) int64 0 1
   * y        (y) int64 0 1
 Attributes:
-    units:    dimensionless
+    units:    cd / m^2
 ```
 
-DataArray class has NumPy-like `empty()`, `zeros()`, `ones()`, `full()` methods:
+NumPy-like `empty()`, `zeros()`, `ones()`, `full()` methods are available.
 
 ```python
-Image.ones((3, 3), name='flat')
+Image.ones((3, 3))
 
-<xarray.DataArray 'flat' (x: 3, y: 3)>
+<xarray.DataArray "luminance" (x: 3, y: 3)>
 array([[1., 1., 1.],
        [1., 1., 1.],
        [1., 1., 1.]])
@@ -207,33 +219,28 @@ Coordinates:
   * x        (x) int64 0 0 0
   * y        (y) int64 0 0 0
 Attributes:
-    units:    dimensionless
+    units:    cd / m^2
 ```
 
 ### Dataset class
 
-Dataset class is a dataclass that defines typed Dataset creation.
-For example:
+The Dataset class is a dataclass that defines typed Dataset specifications.
+Multiple data fields are allowed to define the data variables of the object.
 
 ```python
-from dataclasses import dataclass
-from xarray_dataclasses import AsDataset, Attr, Coord, Data
-
-
 @dataclass
 class ColorImage(AsDataset):
-    """Dataset that represents a 2D color image."""
+    """Specifications of color images."""
 
-    red: Data[tuple['x', 'y'], float]
-    green: Data[tuple['x', 'y'], float]
-    blue: Data[tuple['x', 'y'], float]
-    x: Coord['x', int] = 0
-    y: Coord['y', int] = 0
-    units: Attr[str] = 'dimensionless'
+    red: Data[tuple[Literal["x"], Literal["y"]], float]
+    green: Data[tuple[Literal["x"], Literal["y"]], float]
+    blue: Data[tuple[Literal["x"], Literal["y"]], float]
+    x: Coord[Literal["x"], int] = 0
+    y: Coord[Literal["y"], int] = 0
+    units: Attr[str] = "cd / m^2"
 ```
 
-where multiple `Data`-type fields are allowed.
-A typed Dataset object is created by a shorthand method, `new()`:
+A Dataset object is created by the shorthand method `new()`.
 
 ```python
 ColorImage.new(
@@ -252,125 +259,97 @@ Data variables:
     green    (x, y) float64 1.0 1.0 1.0 1.0
     blue     (x, y) float64 2.0 2.0 2.0 2.0
 Attributes:
-    units:    dimensionless
+    units:    cd / m^2
 ```
 
 ## Advanced usage
 
-### `Dataof` and `Coordof` types
+### Coordof and Dataof type hints
 
-xarray-dataclasses provides advanced type hints, `Dataof[T]` and `Coordof[T]`.
-Unlike `Data` and `Coord`, they accept a dataclass that defines a DataArray class.
+[xarray-dataclasses] provides advanced type hints, `Coordof[T]` and `Dataof[T]`.
+Unlike `Data` and `Coord`, they specify a dataclass that defines a DataArray class.
 This is useful, for example, when users want to add metadata to dimensions for [plotting].
-For example:
 
 ```python
-from dataclasses import dataclass
-from xarray_dataclasses import AsDataset, Attr, Coordof, Data, Dataof
+from xarray_dataclasses import Coordof
 
 
 @dataclass
 class XAxis:
-    data: Data['x', int]
-    long_name: Attr[str] = 'x axis'
-    units: Attr[str] = 'pixel'
+    data: Data[Literal["x"], int]
+    long_name: Attr[str] = "x axis"
+    units: Attr[str] = "pixel"
 
 
 @dataclass
 class YAxis:
-    data: Data['y', int]
-    long_name: Attr[str] = 'y axis'
-    units: Attr[str] = 'pixel'
-
-
-@dataclass
-class Image:
-    data: Data[tuple['x', 'y'], float]
-    x: Coordof[XAxis] = 0
-    y: Coordof[YAxis] = 0
-
-
-@dataclass
-class ColorImage(AsDataset):
-    red: Dataof[Image]
-    green: Dataof[Image]
-    blue: Dataof[Image]
-```
-
-### Custom DataArray or Dataset factory
-
-Users can use a custom DataArray or Dataset factory by defining a special class attribute, `__dataarray_factory__`, or `__dataset_factory__`.
-For example:
-
-```python
-import xarray as xr
-from dataclasses import dataclass
-from xarray_dataclasses import AsDataArray, Coord, Data
-
-
-class Custom(xr.DataArray):
-    __slots__ = ()
-
-    def custom_method(self) -> None:
-        print('Custom method!')
+    data: Data[Literal["y"], int]
+    long_name: Attr[str] = "y axis"
+    units: Attr[str] = "pixel"
 
 
 @dataclass
 class Image(AsDataArray):
-    data: Data[tuple['x', 'y'], float]
-    x: Coord['x', int] = 0
-    y: Coord['y', int] = 0
+    """Specifications of images."""
+
+    data: Data[tuple[Literal["x"], Literal["y"]], float]
+    x: Coordof[XAxis] = 0
+    y: Coordof[YAxis] = 0
+```
+
+### Custom DataArray and Dataset factories
+
+For customization, users can use a function or a class to create an initial DataArray or Dataset object by specifying a special class attribute, `__dataarray_factory__` or `__dataset_factory__`, respectively.
+
+```python
+import xarray as xr
+
+
+class Custom(xr.DataArray):
+    """Custom DataArray."""
+
+    __slots__ = ()
+
+    def custom_method(self) -> None:
+        print("Custom method!")
+
+
+@dataclass
+class Image(AsDataArray):
+    """Specifications of images."""
+
+    data: Data[tuple[Literal["x"], Literal["y"]], float]
+    x: Coord[Literal["x"], int] = 0
+    y: Coord[Literal["y"], int] = 0
     __dataarray_factory__ = Custom
 
 
 image = Image.ones([3, 3])
+isinstance(image, Custom) # True
 image.custom_method() # Custom method!
 ```
 
-### DataArray or Dataset creation without shorthands
+### DataArray and Dataset creation without shorthands
 
-xarray-dataclasses provides functions, `asdataarray` and `asdataset`, for DataArray or Dataset creation without shorthand methods.
-This is useful, for example, users do not want to inherit the mix-in class (`AsDataArray` or `AsDataset`) in their codes.
-For example:
+[xarray-dataclasses] provides functions, `asdataarray` and `asdataset`.
+This is useful, for example, users do not want to inherit the mix-in class (`AsDataArray` or `AsDataset`) in a DataArray or Dataset dataclass.
 
 ```python
-from dataclasses import dataclass
-from xarray_dataclasses import asdataarray, Coord, Data
+from xarray_dataclasses import asdataarray
 
 
 @dataclass
 class Image:
-    data: Data[tuple['x', 'y'], float]
-    x: Coord['x', int] = 0
-    y: Coord['y', int] = 0
+    """Specifications of images."""
+
+    data: Data[tuple[Literal["x"], Literal["y"]], float]
+    x: Coord[Literal["x"], int] = 0
+    y: Coord[Literal["y"], int] = 0
 
 
 image = asdataarray(Image([[0, 1], [2, 3]], x=[0, 1], y=[0, 1]))
 ```
 
-### Static type check by [Pyright]
-
-If users want to make your code compatible with [Pyright], please use the literal type for defining dimensions.
-For example:
-
-```python
-from dataclasses import dataclass
-from typing import Literal
-from xarray_dataclasses import AsDataArray, Coord, Data
-
-
-X = Literal['x']
-Y = Literal['y']
-
-
-@dataclass
-class Image(AsDataArray):
-    data: Data[tuple[X, Y], float]
-    x: Coord[X, int] = 0
-    y: Coord[Y, int] = 0
-```
-
-Note: for Python 3.7, use `typing_extension.Literal` instead of `typing.Literal`.
 
 <!-- References -->
 [Pyright]: https://github.com/microsoft/pyright
