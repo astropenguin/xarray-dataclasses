@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "xarray-dataclasses"
-version = "0.5.1"
+version = "0.6.0"
 description = "xarray extension for typed DataArray and Dataset creation"
 authors = ["Akio Taniguchi <taniguchi@a.phys.nagoya-u.ac.jp>"]
 license = "MIT"
@@ -15,9 +15,9 @@ typing-extensions = "^3.10"
 xarray = ">=0.15, <1.0"
 
 [tool.poetry.dev-dependencies]
-black = "^21.8b"
+black = "^21.9b"
 flake8 = "^3.9"
-ipython = "^7.26"
+ipython = "^7.27"
 pydata-sphinx-theme = "^0.6"
 pytest = "^6.2"
 sphinx = "^4.1"
