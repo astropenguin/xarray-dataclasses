@@ -31,11 +31,13 @@ class Custom(xr.DataArray):
 
 @dataclass
 class Image(AsDataArray):
+    """Specifications of images."""
+
     data: Data[Tuple[X, Y], float]
     x: Coord[X, int] = 0
     y: Coord[Y, int] = 0
-    dpi: Attr[int] = 100
-    name: Name[str] = "image"
+    units: Attr[str] = "cd / m^2"
+    name: Name[str] = "luminance"
 
     def __dataarray_factory__(self, data: Any = None) -> Custom:
         return Custom(data)
@@ -50,8 +52,8 @@ expected = Custom(
         "x": xr.DataArray(np.zeros(SHAPE[0]), dims="x"),
         "y": xr.DataArray(np.zeros(SHAPE[1]), dims="y"),
     },
-    attrs={"dpi": 100},
-    name="image",
+    attrs={"units": "cd / m^2"},
+    name="luminance",
 )
 
 
