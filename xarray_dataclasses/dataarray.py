@@ -97,17 +97,18 @@ def asdataarray(
 
 
 class classproperty:
-    """Class property only for AsDataArray.new()."""
+    """Class property only for AsDataArray.new().
 
-    def __init__(self, fget: Callable[..., Any]) -> None:
-        self.fget = fget
+    As a classmethod and a property can be chained together since Python 3.9,
+    this class will be removed when the support for Python 3.7 and 3.8 ends.
 
-    def __get__(
-        self,
-        obj: Any,
-        objtype: Type[DataArrayClass[P, R]],
-    ) -> Callable[P, R]:
-        return self.fget(objtype)
+    """
+
+    def __init__(self, func: Callable[..., Callable[P, R]]) -> None:
+        self.__func__ = func
+
+    def __get__(self, obj: Any, cls: Type[DataArrayClass[P, R]]) -> Callable[P, R]:
+        return self.__func__(cls)
 
 
 class AsDataArray:

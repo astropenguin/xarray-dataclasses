@@ -94,17 +94,18 @@ def asdataset(
 
 
 class classproperty:
-    """Class property only for AsDataset.new()."""
+    """Class property only for AsDataset.new().
 
-    def __init__(self, fget: Callable[..., Any]) -> None:
-        self.fget = fget
+    As a classmethod and a property can be chained together since Python 3.9,
+    this class will be removed when the support for Python 3.7 and 3.8 ends.
 
-    def __get__(
-        self,
-        obj: Any,
-        objtype: Type[DatasetClass[P, R]],
-    ) -> Callable[P, R]:
-        return self.fget(objtype)
+    """
+
+    def __init__(self, func: Callable[..., Callable[P, R]]) -> None:
+        self.__func__ = func
+
+    def __get__(self, obj: Any, cls: Type[DatasetClass[P, R]]) -> Callable[P, R]:
+        return self.__func__(cls)
 
 
 class AsDataset:
