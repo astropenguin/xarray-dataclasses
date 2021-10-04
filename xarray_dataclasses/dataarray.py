@@ -2,7 +2,7 @@ __all__ = ["asdataarray", "AsDataArray"]
 
 
 # standard library
-from dataclasses import Field
+from dataclasses import dataclass, Field
 from functools import wraps
 from types import MethodType
 from typing import Any, Callable, Dict, overload, Sequence, Type, TypeVar, Union
@@ -17,7 +17,6 @@ from typing_extensions import Literal, ParamSpec, Protocol
 # submodules
 from .datamodel import DataModel
 from .typing import Reference
-from .utils import copy_function
 
 
 # type hints
@@ -98,17 +97,18 @@ def asdataarray(
 
 
 class classproperty:
-    """Class property only for AsDataArray.new()."""
+    """Class property only for AsDataArray.new().
 
-    def __init__(self, fget: Callable[..., Any]) -> None:
-        self.fget = fget
+    As a classmethod and a property can be chained together since Python 3.9,
+    this class will be removed when the support for Python 3.7 and 3.8 ends.
 
-    def __get__(
-        self,
-        obj: Any,
-        objtype: Type[DataArrayClass[P, R]],
-    ) -> Callable[P, R]:
-        return self.fget(objtype)
+    """
+
+    def __init__(self, func: Callable[..., Callable[P, R]]) -> None:
+        self.__func__ = func
+
+    def __get__(self, obj: Any, cls: Type[DataArrayClass[P, R]]) -> Callable[P, R]:
+        return self.__func__(cls)
 
 
 class AsDataArray:
@@ -121,19 +121,24 @@ class AsDataArray:
     @classproperty
     def new(cls: Type[DataArrayClass[P, R]]) -> Callable[P, R]:
         """Create a DataArray object from dataclass parameters."""
-        init = copy_function(cls.__init__)  # type: ignore
+
+        @dataclass
+        class Copied(cls):
+            pass
+
+        init = Copied.__init__
         init.__annotations__["return"] = R
-        init.__doc__ = cls.__doc__
+        init.__doc__ = cls.__init__.__doc__
 
         @wraps(init)
-        def wrapper(
+        def new(
             cls: Type[DataArrayClass[P, R]],
             *args: P.args,
             **kwargs: P.kwargs,
         ) -> R:
             return asdataarray(cls(*args, **kwargs))
 
-        return MethodType(wrapper, cls)
+        return MethodType(new, cls)
 
     @classmethod
     def empty(
