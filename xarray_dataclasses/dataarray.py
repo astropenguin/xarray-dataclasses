@@ -2,7 +2,7 @@ __all__ = ["asdataarray", "AsDataArray"]
 
 
 # standard library
-from dataclasses import Field
+from dataclasses import dataclass, Field
 from functools import wraps
 from types import MethodType
 from typing import Any, Callable, Dict, overload, Sequence, Type, TypeVar, Union
@@ -17,7 +17,6 @@ from typing_extensions import Literal, ParamSpec, Protocol
 # submodules
 from .datamodel import DataModel
 from .typing import Reference
-from .utils import copy_function
 
 
 # type hints
@@ -121,19 +120,24 @@ class AsDataArray:
     @classproperty
     def new(cls: Type[DataArrayClass[P, R]]) -> Callable[P, R]:
         """Create a DataArray object from dataclass parameters."""
-        init = copy_function(cls.__init__)  # type: ignore
+
+        @dataclass
+        class Copied(cls):
+            pass
+
+        init = Copied.__init__
         init.__annotations__["return"] = R
-        init.__doc__ = cls.__doc__
+        init.__doc__ = cls.__init__.__doc__
 
         @wraps(init)
-        def wrapper(
+        def new(
             cls: Type[DataArrayClass[P, R]],
             *args: P.args,
             **kwargs: P.kwargs,
         ) -> R:
             return asdataarray(cls(*args, **kwargs))
 
-        return MethodType(wrapper, cls)
+        return MethodType(new, cls)
 
     @classmethod
     def empty(

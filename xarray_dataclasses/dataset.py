@@ -2,7 +2,7 @@ __all__ = ["asdataset", "AsDataset"]
 
 
 # standard library
-from dataclasses import Field
+from dataclasses import dataclass, Field
 from functools import wraps
 from types import MethodType
 from typing import Any, Callable, Dict, overload, Type, TypeVar
@@ -16,7 +16,6 @@ from typing_extensions import ParamSpec, Protocol
 # submodules
 from .datamodel import DataModel
 from .typing import Reference
-from .utils import copy_function
 
 
 # type hints
@@ -118,16 +117,21 @@ class AsDataset:
     @classproperty
     def new(cls: Type[DatasetClass[P, R]]) -> Callable[P, R]:
         """Create a Dataset object from dataclass parameters."""
-        init = copy_function(cls.__init__)  # type: ignore
+
+        @dataclass
+        class Copied(cls):
+            pass
+
+        init = Copied.__init__
         init.__annotations__["return"] = R
-        init.__doc__ = cls.__doc__
+        init.__doc__ = cls.__init__.__doc__
 
         @wraps(init)
-        def wrapper(
+        def new(
             cls: Type[DatasetClass[P, R]],
             *args: P.args,
             **kwargs: P.kwargs,
         ) -> R:
             return asdataset(cls(*args, **kwargs))
 
-        return MethodType(wrapper, cls)
+        return MethodType(new, cls)
