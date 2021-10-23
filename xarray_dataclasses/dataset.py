@@ -2,7 +2,7 @@ __all__ = ["asdataset", "AsDataset"]
 
 
 # standard library
-from dataclasses import dataclass, Field
+from dataclasses import Field
 from functools import wraps
 from types import MethodType
 from typing import Any, Callable, Dict, overload, Type, TypeVar
@@ -10,6 +10,7 @@ from typing import Any, Callable, Dict, overload, Type, TypeVar
 
 # dependencies
 import xarray as xr
+from morecopy import copy
 from typing_extensions import ParamSpec, Protocol
 
 
@@ -119,11 +120,7 @@ class AsDataset:
     def new(cls: Type[DatasetClass[P, R]]) -> Callable[P, R]:
         """Create a Dataset object from dataclass parameters."""
 
-        @dataclass
-        class Copied(cls):
-            pass
-
-        init = Copied.__init__
+        init = copy(cls.__init__)
         init.__annotations__["return"] = R
         init.__doc__ = cls.__init__.__doc__
 
