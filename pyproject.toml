@@ -10,6 +10,7 @@ documentation = "https://astropenguin.github.io/xarray-dataclasses/"
 
 [tool.poetry.dependencies]
 python = ">=3.7, <3.10"
+morecopy = "^0.2"
 numpy = "^1.19"
 typing-extensions = "^3.10"
 xarray = ">=0.15, <1.0"
@@ -17,10 +18,10 @@ xarray = ">=0.15, <1.0"
 [tool.poetry.dev-dependencies]
 black = "^21.9b"
 flake8 = "^3.9"
-ipython = "^7.27"
-pydata-sphinx-theme = "^0.6"
+ipython = "^7.28"
+pydata-sphinx-theme = "^0.7"
 pytest = "^6.2"
-sphinx = "^4.1"
+sphinx = "^4.2"
 
 [build-system]
 requires = ["poetry>=1.0.0"]
