@@ -2,7 +2,7 @@ __all__ = ["asdataarray", "AsDataArray"]
 
 
 # standard library
-from dataclasses import dataclass, Field
+from dataclasses import Field
 from functools import wraps
 from types import MethodType
 from typing import Any, Callable, Dict, overload, Sequence, Type, TypeVar, Union
@@ -11,6 +11,7 @@ from typing import Any, Callable, Dict, overload, Sequence, Type, TypeVar, Union
 # dependencies
 import numpy as np
 import xarray as xr
+from morecopy import copy
 from typing_extensions import Literal, ParamSpec, Protocol
 
 
@@ -122,11 +123,7 @@ class AsDataArray:
     def new(cls: Type[DataArrayClass[P, R]]) -> Callable[P, R]:
         """Create a DataArray object from dataclass parameters."""
 
-        @dataclass
-        class Copied(cls):
-            pass
-
-        init = Copied.__init__
+        init = copy(cls.__init__)
         init.__annotations__["return"] = R
         init.__doc__ = cls.__init__.__doc__
 
