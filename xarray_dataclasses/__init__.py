@@ -1,7 +1,7 @@
 # flake8: noqa
 # type: ignore
 __author__ = "Akio Taniguchi"
-__version__ = "0.6.0"
+__version__ = "0.6.1"
 
 
 # for Python 3.7 - 3.8
