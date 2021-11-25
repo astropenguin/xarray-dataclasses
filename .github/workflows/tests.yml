@@ -27,12 +27,8 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 15
-      - name: Install dependencies
-        run: |
-          sudo apt install pandoc
-          pip install poetry
-          poetry install
-          npm install
+      - name: Install project dependencies
+        run: pip install poetry && poetry install && npm install
       - name: Test code format (Black)
         run: poetry run black --check ${TESTED_DIRS}
       - name: Test code typing (Pyright)

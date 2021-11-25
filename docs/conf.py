@@ -5,6 +5,7 @@ copyright = "2020-2021, Akio Taniguchi"
 
 # General configuration
 extensions = [
+    "myst_parser",
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
