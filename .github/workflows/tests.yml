@@ -10,30 +10,28 @@ on:
 
 jobs:
   job:
-    name: Test (Python ${{ matrix.python-version }})
+    name: Test (Python ${{ matrix.python }})
     runs-on: ubuntu-latest
+    env:
+      POETRY_VIRTUALENVS_CREATE: false
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
-    env:
-      TESTED_DIRS: docs tests xarray_dataclasses
+        python: ["3.7", "3.8", "3.9"]
     steps:
       - uses: actions/checkout@v2
-      - name: Setup Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+      - uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
+          python-version: ${{ matrix.python }}
+      - uses: actions/setup-node@v2
         with:
-          node-version: 15
+          node-version: "15"
       - name: Install project dependencies
-        run: pip install poetry && poetry install && npm install
-      - name: Test code format (Black)
-        run: poetry run black --check ${TESTED_DIRS}
-      - name: Test code typing (Pyright)
-        run: npm run pyright ${TESTED_DIRS}
-      - name: Test package (pytest)
-        run : poetry run pytest -v tests
-      - name: Test docs building (Sphinx)
-        run: poetry run docs/build
+        run: pip install poetry && poetry install && npm install -g
+      - name: Test code's formatting (Black)
+        run: black --check docs tests xarray_dataclasses
+      - name: Test code's typing (Pyright)
+        run: pyright docs tests xarray_dataclasses
+      - name: Test code's execution (pytest)
+        run: pytest -v tests
+      - name: Test docs' building (Sphinx)
+        run: docs/build
