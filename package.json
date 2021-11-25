@@ -1,8 +1,5 @@
 {
   "devDependencies": {
     "pyright": "~1.1"
-  },
-  "scripts": {
-    "pyright": "poetry run pyright"
   }
 }
