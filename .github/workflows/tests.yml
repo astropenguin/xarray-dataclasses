@@ -35,8 +35,6 @@ jobs:
           npm install
       - name: Test code format (Black)
         run: poetry run black --check ${TESTED_DIRS}
-      - name: Test code style (Flake8)
-        run: poetry run flake8 ${TESTED_DIRS}
       - name: Test code typing (Pyright)
         run: npm run pyright ${TESTED_DIRS}
       - name: Test package (pytest)
