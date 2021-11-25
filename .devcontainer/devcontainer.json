@@ -1,9 +1,10 @@
 {
-    "name": "Python 3.9",
+    "name": "xarray-dataclasses",
     "build": {
         "context": "..",
         "dockerfile": "Dockerfile",
     },
+    "postCreateCommand": "poetry install",
     "extensions": [
         "github.vscode-pull-request-github",
         "mhutchie.git-graph",
@@ -14,11 +15,9 @@
     "settings": {
         "files.insertFinalNewline": true,
         "files.trimTrailingWhitespace": true,
+        "python.analysis.typeCheckingMode": "strict",
         "python.formatting.provider": "black",
         "python.languageServer": "Pylance",
-        "python.linting.enabled": true,
-        "python.linting.lintOnSave": true,
-        "python.linting.flake8Enabled": true,
         "[python]": {
             "editor.formatOnSave": true,
             "editor.insertSpaces": true,
