@@ -191,7 +191,6 @@ instance/
 .scrapy
 
 # Sphinx documentation
-docs/readme.rst
 docs/_apidoc/
 docs/_build/
 

@@ -92,9 +92,9 @@ def test_matrix_coord() -> None:
     assert image_model.coord[0].name == "mask"
     assert image_model.coord[0].type == {"dims": ("x", "y"), "dtype": "bool"}
     assert image_model.coord[1].name == "x"
-    assert image_model.coord[1].type == "tests.test_datamodel.XAxis"
+    assert image_model.coord[1].type == "test_datamodel.XAxis"
     assert image_model.coord[2].name == "y"
-    assert image_model.coord[2].type == "tests.test_datamodel.YAxis"
+    assert image_model.coord[2].type == "test_datamodel.YAxis"
 
 
 def test_matrix_data() -> None:
@@ -104,8 +104,8 @@ def test_matrix_data() -> None:
 
 def test_image_data() -> None:
     assert color_model.data[0].name == "red"
-    assert color_model.data[0].type == "tests.test_datamodel.Image"
+    assert color_model.data[0].type == "test_datamodel.Image"
     assert color_model.data[1].name == "green"
-    assert color_model.data[1].type == "tests.test_datamodel.Image"
+    assert color_model.data[1].type == "test_datamodel.Image"
     assert color_model.data[2].name == "blue"
-    assert color_model.data[2].type == "tests.test_datamodel.Image"
+    assert color_model.data[2].type == "test_datamodel.Image"

@@ -1,7 +1,9 @@
-FROM mcr.microsoft.com/vscode/devcontainers/python:3.9
+FROM python:3.9-slim
+
 ENV POETRY_VIRTUALENVS_CREATE=false
 
-COPY poetry.lock pyproject.toml ./
-RUN apt update && apt install -y pandoc
-RUN pip install poetry
-RUN poetry install
+RUN apt-get update \
+    && apt-get install -y git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && pip install --no-cache-dir poetry
