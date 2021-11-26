@@ -20,8 +20,8 @@ SHAPE = 10, 10
 
 
 # type hints
-X = Literal[DIMS[0]]
-Y = Literal[DIMS[1]]
+X = Literal["x"]
+Y = Literal["y"]
 
 
 # dataclasses

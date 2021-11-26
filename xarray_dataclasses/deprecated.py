@@ -129,7 +129,7 @@ def eval_type(type: Any, *args: Any, **kwargs: Any) -> Any:
         category=FutureWarning,
     )
 
-    return Literal[name]
+    return Literal[name]  # type: ignore
 
 
 def extend_class(cls: Type[T], mixin: Type[Any]) -> Type[T]:
