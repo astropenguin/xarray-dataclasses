@@ -16,7 +16,7 @@ __all__ = ["Attr", "Coord", "Coordof", "Data", "Dataof", "Name"]
 # standard library
 from dataclasses import Field
 from enum import auto, Enum
-from typing import Any, Dict, Optional, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, Optional, Tuple, Type, TypeVar, Union
 
 
 # dependencies
@@ -88,10 +88,11 @@ class ArrayLike(Protocol[TDims, TDtype]):
 class DataClass(Protocol):
     """Type hint of dataclasses or their objects."""
 
+    __init__: Callable[..., None]
     __dataclass_fields__: Dict[str, Field[Any]]
 
 
-TDataClass = TypeVar("TDataClass", bound=DataClass)
+TDataClass = TypeVar("TDataClass", bound=Type[DataClass])
 
 
 Attr = Annotated[T, FieldType.ATTR]
