@@ -14,13 +14,13 @@ __all__ = ["Attr", "Coord", "Coordof", "Data", "Dataof", "Name"]
 
 
 # standard library
+import re
 from dataclasses import Field
 from enum import auto, Enum
-from typing import Any, Dict, Optional, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, Optional, Tuple, TypeVar, Union
 
 
 # dependencies
-import xarray as xr
 from typing_extensions import (
     Annotated,
     get_args,
@@ -65,8 +65,6 @@ TDims = TypeVar("TDims", covariant=True)
 TDtype = TypeVar("TDtype", covariant=True)
 Dims = Tuple[str, ...]
 Dtype = Optional[str]
-NoneType = type(None)
-Reference = Union[xr.DataArray, xr.Dataset, None]
 
 
 @runtime_checkable
@@ -91,6 +89,7 @@ class ArrayLike(Protocol[TDims, TDtype]):
 class DataClass(Protocol):
     """Type hint of dataclasses or their objects."""
 
+    __init__: Callable[..., None]
     __dataclass_fields__: Dict[str, Field[Any]]
 
 
@@ -234,14 +233,9 @@ Example:
 
 
 # runtime functions
-def get_class(hint: Any) -> Any:
-    """Return a class parsed from a type hint."""
-    return get_first(unannotate(hint))
-
-
 def get_dims(hint: Any) -> Dims:
     """Return dims parsed from a type hint."""
-    t_dims = get_args(get_class(hint))[0]
+    t_dims = get_args(get_first(hint))[0]
 
     if is_str_literal(t_dims):
         return (get_first(t_dims),)
@@ -259,12 +253,12 @@ def get_dims(hint: Any) -> Dims:
 
 def get_dtype(hint: Any) -> Dtype:
     """Return dtype parsed from a type hint."""
-    t_dtype = get_args(get_class(hint))[1]
+    t_dtype = get_args(get_first(hint))[1]
 
     if t_dtype is Any:
         return None
 
-    if t_dtype is NoneType:
+    if t_dtype is type(None):
         return None
 
     if isinstance(t_dtype, type):
@@ -278,7 +272,18 @@ def get_dtype(hint: Any) -> Dtype:
 
 def get_first(hint: Any) -> Any:
     """Return the first argument in a type hint."""
-    return get_args(hint)[0]
+    return get_args(unannotate(hint))[0]
+
+
+def get_repr(hint: Any) -> str:
+    """Return the representation of a type hint."""
+    hint_repr = repr(unannotate(hint))
+    match = re.search(r"^<class '(.+)'>$", hint_repr)
+
+    if match:
+        return match.group(1)
+    else:
+        return hint_repr
 
 
 def is_str_literal(hint: Any) -> bool:

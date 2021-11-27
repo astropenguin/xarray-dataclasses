@@ -22,7 +22,6 @@ from . import dataset
 from . import deprecated
 from . import datamodel
 from . import typing
-from . import utils
 
 
 # aliases
