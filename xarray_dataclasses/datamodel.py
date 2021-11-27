@@ -23,7 +23,6 @@ from .typing import (
     get_class,
     get_dims,
     get_dtype,
-    Reference,
     unannotate,
 )
 from .utils import resolve_class
@@ -31,6 +30,7 @@ from .utils import resolve_class
 
 # type hints
 R = TypeVar("R")
+Reference = Union[xr.DataArray, xr.Dataset, None]
 Factory = Callable[[Any, Reference], R]
 
 

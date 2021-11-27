@@ -15,8 +15,7 @@ from typing_extensions import ParamSpec, Protocol
 
 
 # submodules
-from .datamodel import DataModel
-from .typing import Reference
+from .datamodel import DataModel, Reference
 
 
 # type hints
