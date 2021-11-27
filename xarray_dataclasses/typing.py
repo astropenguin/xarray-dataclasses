@@ -64,7 +64,6 @@ TDims = TypeVar("TDims", covariant=True)
 TDtype = TypeVar("TDtype", covariant=True)
 Dims = Tuple[str, ...]
 Dtype = Optional[str]
-NoneType = type(None)
 
 
 @runtime_checkable
@@ -262,7 +261,7 @@ def get_dtype(hint: Any) -> Dtype:
     if t_dtype is Any:
         return None
 
-    if t_dtype is NoneType:
+    if t_dtype is type(None):
         return None
 
     if isinstance(t_dtype, type):
