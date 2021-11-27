@@ -3,7 +3,7 @@ __all__ = ["DataModel"]
 
 # standard library
 from dataclasses import Field, InitVar, dataclass, field, is_dataclass
-from typing import Any, List, Type, TypeVar, Union, cast
+from typing import Any, List, Type, Union, cast
 
 
 # dependencies
@@ -20,16 +20,14 @@ from .typing import (
     Dims,
     Dtype,
     FieldType,
-    get_class,
     get_dims,
     get_dtype,
-    unannotate,
+    get_first,
+    get_repr,
 )
-from .utils import resolve_class
 
 
 # type hints
-R = TypeVar("R")
 Reference = Union[xr.DataArray, xr.Dataset, None]
 DataTypes = TypedDict("DataTypes", dims=Dims, dtype=Dtype)
 
@@ -89,8 +87,8 @@ class Dataof:
     @classmethod
     def from_field(cls, field: Field[Any], value: Any) -> "Dataof":
         """Create a field model from a dataclass field and a value."""
-        dataclass = get_class(field.type)
-        return cls(field.name, resolve_class(dataclass), value, dataclass)
+        dataclass = get_first(field.type)
+        return cls(field.name, get_repr(dataclass), value, dataclass)
 
 
 @dataclass
@@ -108,7 +106,7 @@ class General:
     @classmethod
     def from_field(cls, field: Field[Any], value: Any) -> "General":
         """Create a field model from a dataclass field and a value."""
-        return cls(field.name, resolve_class(unannotate(field.type)), value)
+        return cls(field.name, get_repr(field.type), value)
 
 
 # data models
