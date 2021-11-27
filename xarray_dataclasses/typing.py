@@ -17,7 +17,7 @@ __all__ = ["Attr", "Coord", "Coordof", "Data", "Dataof", "Name"]
 import re
 from dataclasses import Field
 from enum import auto, Enum
-from typing import Any, Callable, Dict, Optional, Tuple, Type, TypeVar, Union
+from typing import Any, Callable, Dict, Optional, Tuple, TypeVar, Union
 
 
 # dependencies
@@ -93,7 +93,7 @@ class DataClass(Protocol):
     __dataclass_fields__: Dict[str, Field[Any]]
 
 
-TDataClass = TypeVar("TDataClass", bound=Type[DataClass])
+TDataClass = TypeVar("TDataClass", bound=DataClass)
 
 
 Attr = Annotated[T, FieldType.ATTR]
