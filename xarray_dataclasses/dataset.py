@@ -20,7 +20,8 @@ from .datamodel import DataModel, Reference
 
 # type hints
 P = ParamSpec("P")
-R = TypeVar("R", bound=xr.Dataset)
+TDataset = TypeVar("TDataset", bound=xr.Dataset)
+TDataset_ = TypeVar("TDataset_", bound=xr.Dataset, contravariant=True)
 
 
 class DataClass(Protocol[P]):
@@ -30,21 +31,41 @@ class DataClass(Protocol[P]):
     __dataclass_fields__: Dict[str, Field[Any]]
 
 
-class DatasetClass(Protocol[P, R]):
+class DatasetClass(Protocol[P, TDataset_]):
     """Type hint for a dataclass object with a Dataset factory."""
 
     __init__: Callable[P, None]
     __dataclass_fields__: Dict[str, Field[Any]]
-    __dataset_factory__: Callable[..., R]
+    __dataset_factory__: Callable[..., TDataset_]
 
 
-# runtime functions and classes
+# runtime classes
+class classproperty:
+    """Class property only for AsDataset.new().
+
+    As a classmethod and a property can be chained together since Python 3.9,
+    this class will be removed when the support for Python 3.7 and 3.8 ends.
+
+    """
+
+    def __init__(self, func: Callable[..., Callable[P, TDataset]]) -> None:
+        self.__func__ = func
+
+    def __get__(
+        self,
+        obj: Any,
+        cls: Type[DatasetClass[P, TDataset]],
+    ) -> Callable[P, TDataset]:
+        return self.__func__(cls)
+
+
+# runtime functions
 @overload
 def asdataset(
-    dataclass: DatasetClass[Any, R],
+    dataclass: DatasetClass[Any, TDataset],
     reference: Reference = None,
     dataset_factory: Any = xr.Dataset,
-) -> R:
+) -> TDataset:
     ...
 
 
@@ -52,8 +73,8 @@ def asdataset(
 def asdataset(
     dataclass: DataClass[Any],
     reference: Reference = None,
-    dataset_factory: Callable[..., R] = xr.Dataset,
-) -> R:
+    dataset_factory: Callable[..., TDataset] = xr.Dataset,
+) -> TDataset:
     ...
 
 
@@ -93,21 +114,6 @@ def asdataset(
     return dataset
 
 
-class classproperty:
-    """Class property only for AsDataset.new().
-
-    As a classmethod and a property can be chained together since Python 3.9,
-    this class will be removed when the support for Python 3.7 and 3.8 ends.
-
-    """
-
-    def __init__(self, func: Callable[..., Callable[P, R]]) -> None:
-        self.__func__ = func
-
-    def __get__(self, obj: Any, cls: Type[DatasetClass[P, R]]) -> Callable[P, R]:
-        return self.__func__(cls)
-
-
 class AsDataset:
     """Mix-in class that provides shorthand methods."""
 
@@ -116,19 +122,19 @@ class AsDataset:
         return xr.Dataset(data_vars)
 
     @classproperty
-    def new(cls: Type[DatasetClass[P, R]]) -> Callable[P, R]:
+    def new(cls: Type[DatasetClass[P, TDataset]]) -> Callable[P, TDataset]:
         """Create a Dataset object from dataclass parameters."""
 
         init = copy(cls.__init__)
-        init.__annotations__["return"] = R
+        init.__annotations__["return"] = TDataset
         init.__doc__ = cls.__init__.__doc__
 
         @wraps(init)
         def new(
-            cls: Type[DatasetClass[P, R]],
+            cls: Type[DatasetClass[P, TDataset]],
             *args: P.args,
             **kwargs: P.kwargs,
-        ) -> R:
+        ) -> TDataset:
             return asdataset(cls(*args, **kwargs))
 
         return MethodType(new, cls)
