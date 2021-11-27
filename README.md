@@ -98,7 +98,7 @@ The issues are
 - It is not easy to figure out the specifications from the code.
 - It is not easy to reuse the code, for example, to add new coordinates.
 
-[xarray-dataclasses](#xarray-dataclasses) resolves them by defining the specifications as a dataclass.
+xarray-dataclasses resolves them by defining the specifications as a dataclass.
 
 ```python
 from dataclasses import dataclass
@@ -266,7 +266,7 @@ Attributes:
 
 ### Coordof and Dataof type hints
 
-[xarray-dataclasses] provides advanced type hints, `Coordof[T]` and `Dataof[T]`.
+xarray-dataclasses provides advanced type hints, `Coordof[T]` and `Dataof[T]`.
 Unlike `Data` and `Coord`, they specify a dataclass that defines a DataArray class.
 This is useful, for example, when users want to add metadata to dimensions for [plotting].
 
@@ -331,7 +331,7 @@ image.custom_method() # Custom method!
 
 ### DataArray and Dataset creation without shorthands
 
-[xarray-dataclasses] provides functions, `asdataarray` and `asdataset`.
+xarray-dataclasses provides functions, `asdataarray` and `asdataset`.
 This is useful, for example, users do not want to inherit the mix-in class (`AsDataArray` or `AsDataset`) in a DataArray or Dataset dataclass.
 
 ```python
