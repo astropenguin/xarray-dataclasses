@@ -26,12 +26,14 @@ Y = Literal["y"]
 
 # dataclasses
 class Custom(xr.DataArray):
+    """Custom DataArray."""
+
     __slots__ = ()
 
 
 @dataclass
 class Image(AsDataArray):
-    """Specifications of images."""
+    """Specs for a monochromatic image."""
 
     data: Data[Tuple[X, Y], float]
     x: Coord[X, int] = 0

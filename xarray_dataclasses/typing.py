@@ -1,13 +1,17 @@
 """Submodule for type hints to define fields of dataclasses.
 
 Note:
-    The following imports are supposed in the examples below::
+    The following code is supposed in the examples below::
 
         from dataclasses import dataclass
         from typing import Literal
         from xarray_dataclasses import AsDataArray, AsDataset
         from xarray_dataclasses import Attr, Coord, Data, Name
         from xarray_dataclasses import Coordof, Dataof
+
+
+        X = Literal["x"]
+        Y = Literal["y"]
 
 """
 __all__ = ["Attr", "Coord", "Coordof", "Data", "Dataof", "Name"]
@@ -104,7 +108,7 @@ Example:
 
         @dataclass
         class Image(AsDataArray):
-            data: Data[tuple[Literal["x"], Literal["y"]], float]
+            data: Data[tuple[X, Y], float]
             long_name: Attr[str] = "luminance"
             units: Attr[str] = "cd / m^2"
 
@@ -127,14 +131,14 @@ Example:
 
         @dataclass
         class Image(AsDataArray):
-            data: Data[tuple[Literal["x"], Literal["y"]], float]
-            mask: Coord[tuple[Literal["x"], Literal["y"]], bool]
-            x: Coord[Literal["x"], int] = 0
-            y: Coord[Literal["y"], int] = 0
+            data: Data[tuple[X, Y], float]
+            mask: Coord[tuple[X, Y], bool]
+            x: Coord[X, int] = 0
+            y: Coord[Y, int] = 0
 
 Hint:
     A coordinate field whose name is the same as ``TDims``
-    (e.g. ``x: Coord[Literal["x"], int]``) can define a dimension.
+    (e.g. ``x: Coord[X, int]``) can define a dimension.
 
 """
 
@@ -149,19 +153,19 @@ Example:
 
         @dataclass
         class XAxis:
-            data: Data[Literal["x"], int]
+            data: Data[X, int]
             long_name: Attr[str] = "x axis"
 
 
         @dataclass
         class YAxis:
-            data: Data[Literal["y"], int]
+            data: Data[Y, int]
             long_name: Attr[str] = "y axis"
 
 
         @dataclass
         class Image(AsDataArray):
-            data: Data[tuple[Literal["x"], Literal["y"]], float]
+            data: Data[tuple[X, Y], float]
             x: Coordof[Literal["x"]Axis] = 0
             y: Coordof[Literal["y"]Axis] = 0
 
@@ -179,15 +183,15 @@ Examples:
 
         @dataclass
         class Image(AsDataArray):
-            data: Data[tuple[Literal["x"], Literal["y"]], float]
+            data: Data[tuple[X, Y], float]
 
     Multiple data fields are allowed in a Dataset class::
 
         @dataclass
         class ColorImage(AsDataset):
-            red: Data[tuple[Literal["x"], Literal["y"]], float]
-            green: Data[tuple[Literal["x"], Literal["y"]], float]
-            blue: Data[tuple[Literal["x"], Literal["y"]], float]
+            red: Data[tuple[X, Y], float]
+            green: Data[tuple[X, Y], float]
+            blue: Data[tuple[X, Y], float]
 
 """
 
@@ -202,9 +206,9 @@ Example:
 
         @dataclass
         class Image:
-            data: Data[tuple[Literal["x"], Literal["y"]], float]
-            x: Coord[Literal["x"], int] = 0
-            y: Coord[Literal["y"], int] = 0
+            data: Data[tuple[X, Y], float]
+            x: Coord[X, int] = 0
+            y: Coord[Y, int] = 0
 
 
         @dataclass
@@ -226,7 +230,7 @@ Example:
 
         @dataclass
         class Image(AsDataArray):
-            data: Data[tuple[Literal["x"], Literal["y"]], float]
+            data: Data[tuple[X, Y], float]
             name: Name[str] = "image"
 
 """
