@@ -1,11 +1,11 @@
-__all__ = ["asdataarray", "AsDataArray"]
+__all__ = ["AsDataArray", "asdataarray"]
 
 
 # standard library
 from dataclasses import Field
 from functools import wraps
 from types import MethodType
-from typing import Any, Callable, Dict, overload, Sequence, Type, TypeVar, Union
+from typing import Any, Callable, Dict, Sequence, Type, TypeVar, Union, overload
 
 
 # dependencies
@@ -42,7 +42,7 @@ class DataArrayClass(Protocol[P, TDataArray_]):
     __dataarray_factory__: Callable[..., TDataArray_]
 
 
-# runtime classes
+# custom classproperty
 class classproperty:
     """Class property only for AsDataArray.new().
 

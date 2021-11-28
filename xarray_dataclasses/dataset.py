@@ -1,11 +1,11 @@
-__all__ = ["asdataset", "AsDataset"]
+__all__ = ["AsDataset", "asdataset"]
 
 
 # standard library
 from dataclasses import Field
 from functools import wraps
 from types import MethodType
-from typing import Any, Callable, Dict, overload, Type, TypeVar
+from typing import Any, Callable, Dict, Type, TypeVar, overload
 
 
 # dependencies
@@ -39,7 +39,7 @@ class DatasetClass(Protocol[P, TDataset_]):
     __dataset_factory__: Callable[..., TDataset_]
 
 
-# runtime classes
+# custom classproperty
 class classproperty:
     """Class property only for AsDataset.new().
 
@@ -59,7 +59,7 @@ class classproperty:
         return self.__func__(cls)
 
 
-# runtime functions
+# runtime functions and classes
 @overload
 def asdataset(
     dataclass: DatasetClass[Any, TDataset],
