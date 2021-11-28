@@ -1,5 +1,5 @@
 """Submodule for functions that will be deprecated in v1.0.0."""
-__all__ = ["dataarrayclass", "datasetclass", "get_type_hints"]
+__all__ = ["dataarrayclass", "datasetclass"]
 
 
 # standard library
@@ -42,7 +42,7 @@ def dataarrayclass(
     frozen: bool = False,
     shorthands: bool = True,
 ) -> Union[Type[DataClass], Callable[[type], Type[DataClass]]]:
-    """Class decorator to create a DataArray class."""
+    """Class decorator to create a DataArray class (deprecated in v1.0.0)."""
     from .dataarray import AsDataArray
 
     warn(
@@ -82,7 +82,7 @@ def datasetclass(
     frozen: bool = False,
     shorthands: bool = True,
 ) -> Union[Type[DataClass], Callable[[type], Type[DataClass]]]:
-    """Class decorator to create a Dataset class."""
+    """Class decorator to create a Dataset class (deprecated in v1.0.0)."""
     from .dataset import AsDataset
 
     warn(
