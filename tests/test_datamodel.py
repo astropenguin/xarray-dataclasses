@@ -57,7 +57,7 @@ color_model = DataModel.from_dataclass(ColorImage)
 def test_xaxis_attr() -> None:
     assert xaxis_model.attr[0].name == "units"
     assert xaxis_model.attr[0].value == "pixel"
-    assert xaxis_model.attr[0].type is str
+    assert xaxis_model.attr[0].type == "builtins.str"
 
 
 def test_xaxis_data() -> None:
@@ -69,13 +69,13 @@ def test_xaxis_data() -> None:
 def test_xaxis_name() -> None:
     assert xaxis_model.name[0].name == "name"
     assert xaxis_model.name[0].value == "x axis"
-    assert xaxis_model.name[0].type is str
+    assert xaxis_model.name[0].type == "builtins.str"
 
 
 def test_yaxis_attr() -> None:
     assert yaxis_model.attr[0].name == "units"
     assert yaxis_model.attr[0].value == "pixel"
-    assert yaxis_model.attr[0].type is str
+    assert yaxis_model.attr[0].type == "builtins.str"
 
 
 def test_yaxis_data() -> None:
@@ -87,7 +87,7 @@ def test_yaxis_data() -> None:
 def test_yaxis_name() -> None:
     assert yaxis_model.name[0].name == "name"
     assert yaxis_model.name[0].value == "y axis"
-    assert yaxis_model.name[0].type is str
+    assert yaxis_model.name[0].type == "builtins.str"
 
 
 def test_matrix_coord() -> None:
