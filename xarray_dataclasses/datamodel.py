@@ -35,12 +35,19 @@ Reference = Union[xr.DataArray, xr.Dataset, None]
 # field models
 @dataclass
 class Data:
-    """Model for the coord or data fields."""
+    """Field model for data-related fields."""
 
     name: str
+    """Name of the field."""
+
     value: Any
+    """Value assigned to the field."""
+
     type: DataType
+    """Type (dims and dtype) of the field."""
+
     factory: Optional[Type[DataClass]] = None
+    """Factory dataclass to create a DataArray object."""
 
     def __call__(self, reference: Reference = None) -> xr.DataArray:
         """Create a DataArray object from the value and a reference."""
@@ -78,12 +85,19 @@ class Data:
 
 @dataclass
 class General:
-    """Model for the attribute or name fields."""
+    """Field model for general fields."""
 
     name: str
+    """Name of the field."""
+
     value: Any
+    """Value assigned to the field."""
+
     type: str
+    """Type of the field."""
+
     factory: Optional[Type[Any]] = None
+    """Factory function to create an object."""
 
     def __call__(self) -> Any:
         """Create an object from the value."""
