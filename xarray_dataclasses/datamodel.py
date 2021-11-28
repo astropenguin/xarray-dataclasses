@@ -2,7 +2,7 @@ __all__ = ["DataModel"]
 
 
 # standard library
-from dataclasses import Field, InitVar, dataclass, field, is_dataclass
+from dataclasses import Field, dataclass, field, is_dataclass
 from typing import Any, List, Type, Union, cast
 
 
@@ -22,14 +22,14 @@ from .typing import (
     FieldType,
     get_dims,
     get_dtype,
-    get_first,
-    get_repr,
+    get_inner,
+    unannotate,
 )
 
 
 # type hints
+DataType = TypedDict("DataType", dims=Dims, dtype=Dtype)
 Reference = Union[xr.DataArray, xr.Dataset, None]
-DataTypes = TypedDict("DataTypes", dims=Dims, dtype=Dtype)
 
 
 # field models
@@ -38,7 +38,7 @@ class Data:
     """Model for the coord or data fields."""
 
     name: str
-    type: DataTypes
+    type: DataType
     value: Any
 
     def __call__(self, reference: Reference = None) -> xr.DataArray:
@@ -68,12 +68,8 @@ class Dataof:
     """Model for the coordof or dataof fields."""
 
     name: str
-    type: str
+    type: Type[DataClass]
     value: Any
-    dataclass: InitVar[Type[DataClass]]
-
-    def __post_init__(self, dataclass: Type[DataClass]) -> None:
-        self._dataclass = dataclass
 
     def __call__(self, reference: Reference = None) -> xr.DataArray:
         """Create a DataArray object from the value and a reference."""
@@ -82,13 +78,12 @@ class Dataof:
         if is_dataclass(self.value):
             return asdataarray(self.value, reference)
         else:
-            return asdataarray(self._dataclass(self.value), reference)
+            return asdataarray(self.type(self.value), reference)
 
     @classmethod
     def from_field(cls, field: Field[Any], value: Any) -> "Dataof":
         """Create a field model from a dataclass field and a value."""
-        dataclass = get_first(field.type)
-        return cls(field.name, get_repr(dataclass), value, dataclass)
+        return cls(field.name, get_inner(unannotate(field.type), 0), value)
 
 
 @dataclass
@@ -96,7 +91,7 @@ class General:
     """Model for the attribute or name fields."""
 
     name: str
-    type: str
+    type: Any
     value: Any
 
     def __call__(self) -> Any:
@@ -106,7 +101,7 @@ class General:
     @classmethod
     def from_field(cls, field: Field[Any], value: Any) -> "General":
         """Create a field model from a dataclass field and a value."""
-        return cls(field.name, get_repr(field.type), value)
+        return cls(field.name, get_inner(unannotate(field.type)), value)
 
 
 # data models
