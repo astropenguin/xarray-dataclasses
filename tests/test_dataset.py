@@ -31,14 +31,14 @@ class Custom(xr.Dataset):
 
 @dataclass
 class Image(AsDataArray):
-    """Specifications of images."""
+    """Specs for a monochromatic image."""
 
     data: Data[Tuple[X, Y], float]
 
 
 @dataclass
 class ColorImage(AsDataset):
-    """Specifications of color images."""
+    """Specs for a color image."""
 
     red: Data[Tuple[X, Y], float]
     green: Data[Tuple[X, Y], float]

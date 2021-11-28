@@ -94,7 +94,7 @@ def asdataarray(
         dataset_factory: Factory function of DataArray.
 
     Returns:
-        Dataset object created from the dataclass object.
+        DataArray object created from the dataclass object.
 
     """
     try:

@@ -19,13 +19,17 @@ from typing import Literal
 from xarray_dataclasses import AsDataArray, Coord, Data
 
 
+X = Literal["x"]
+Y = Literal["y"]
+
+
 @dataclass
 class Image(AsDataArray):
-    """Specifications of images."""
+    """Specs for a monochromatic image."""
 
-    data: Data[tuple[Literal["x"], Literal["y"]], float]
-    x: Coord[Literal["x"], int] = 0
-    y: Coord[Literal["y"], int] = 0
+    data: Data[tuple[X, Y], float]
+    x: Coord[X, int] = 0
+    y: Coord[Y, int] = 0
 
 
 # create an image as DataArray
@@ -52,7 +56,7 @@ $ pip install xarray-dataclasses
 ## Background
 
 [xarray] is useful for handling labeled multi-dimensional data, but it is a bit troublesome to create DataArray and Dataset objects with fixed dimensions, data type, or coordinates (typed DataArray and typed Dataset).
-For example, let us think about the following specifications of images as DataArray.
+For example, let us think about the following DataArray specifications for a monochromatic image.
 
 - Dimensions of data must be `("x", "y")`.
 - Data type of data must be `float`.
@@ -67,7 +71,7 @@ import xarray as xr
 
 
 def create_image(data, x=0, y=0):
-    """Specifications of images."""
+    """Create a monochromatic image."""
     data = np.array(data)
 
     if x == 0:
@@ -98,26 +102,8 @@ The issues are
 - It is not easy to figure out the specifications from the code.
 - It is not easy to reuse the code, for example, to add new coordinates.
 
-[xarray-dataclasses](#xarray-dataclasses) resolves them by defining the specifications as a dataclass.
-
-```python
-from dataclasses import dataclass
-from xarray_dataclasses import AsDataArray, Coord, Data
-
-
-@dataclass
-class Image(AsDataArray):
-    """Specifications of 2D images."""
-
-    data: Data[tuple[Literal["x"], Literal["y"]], float]
-    x: Coord[Literal["x"], int] = 0
-    y: Coord[Literal["y"], int] = 0
-
-
-image = Image.new([[0, 1], [2, 3]])
-```
-
-Now the specifications become much easier to read.
+xarray-dataclasses resolves them by defining the specifications as a dataclass.
+As shown in the code in the overview, the specifications become much easier to read.
 
 - The type hints have complete information for DataArray creation.
 - The default values are given as class variables.
@@ -129,13 +115,17 @@ Now the specifications become much easier to read.
 xarray-dataclasses uses [the Python's dataclass].
 Please learn how to use it before proceeding.
 Data (or data variables), coordinates, attributes, and a name of a DataArray or a Dataset object are defined as dataclass fields with the following type hints.
-Note that the following imports are supposed in the examples below.
+Note that the following code is supposed in the examples below.
 
 ```python
 from dataclasses import dataclass
 from typing import Literal
 from xarray_dataclasses import AsDataArray, AsDataset
 from xarray_dataclasses import Attr, Coord, Data, Name
+
+
+X = Literal["x"]
+Y = Literal["y"]
 ```
 
 ### Data field
@@ -182,11 +172,11 @@ The second and subsequent data fields are just ignored in DataArray creation.
 ```python
 @dataclass
 class Image(AsDataArray):
-    """Specifications of images."""
+    """Specs for a monochromatic image."""
 
-    data: Data[tuple[Literal["x"], Literal["y"]], float]
-    x: Coord[Literal["x"], int] = 0
-    y: Coord[Literal["y"], int] = 0
+    data: Data[tuple[X, Y], float]
+    x: Coord[X, int] = 0
+    y: Coord[Y, int] = 0
     units: Attr[str] = "cd / m^2"
     name: Name[str] = "luminance"
 ```
@@ -230,13 +220,13 @@ Multiple data fields are allowed to define the data variables of the object.
 ```python
 @dataclass
 class ColorImage(AsDataset):
-    """Specifications of color images."""
+    """Specs for a color image."""
 
-    red: Data[tuple[Literal["x"], Literal["y"]], float]
-    green: Data[tuple[Literal["x"], Literal["y"]], float]
-    blue: Data[tuple[Literal["x"], Literal["y"]], float]
-    x: Coord[Literal["x"], int] = 0
-    y: Coord[Literal["y"], int] = 0
+    red: Data[tuple[X, Y], float]
+    green: Data[tuple[X, Y], float]
+    blue: Data[tuple[X, Y], float]
+    x: Coord[X, int] = 0
+    y: Coord[Y, int] = 0
     units: Attr[str] = "cd / m^2"
 ```
 
@@ -266,7 +256,7 @@ Attributes:
 
 ### Coordof and Dataof type hints
 
-[xarray-dataclasses] provides advanced type hints, `Coordof[T]` and `Dataof[T]`.
+xarray-dataclasses provides advanced type hints, `Coordof[T]` and `Dataof[T]`.
 Unlike `Data` and `Coord`, they specify a dataclass that defines a DataArray class.
 This is useful, for example, when users want to add metadata to dimensions for [plotting].
 
@@ -276,23 +266,27 @@ from xarray_dataclasses import Coordof
 
 @dataclass
 class XAxis:
-    data: Data[Literal["x"], int]
+    """Specs for the x axis."""
+
+    data: Data[X, int]
     long_name: Attr[str] = "x axis"
     units: Attr[str] = "pixel"
 
 
 @dataclass
 class YAxis:
-    data: Data[Literal["y"], int]
+    """Specs for the y axis."""
+
+    data: Data[Y, int]
     long_name: Attr[str] = "y axis"
     units: Attr[str] = "pixel"
 
 
 @dataclass
 class Image(AsDataArray):
-    """Specifications of images."""
+    """Specs for a monochromatic image."""
 
-    data: Data[tuple[Literal["x"], Literal["y"]], float]
+    data: Data[tuple[X, Y], float]
     x: Coordof[XAxis] = 0
     y: Coordof[YAxis] = 0
 ```
@@ -316,11 +310,11 @@ class Custom(xr.DataArray):
 
 @dataclass
 class Image(AsDataArray):
-    """Specifications of images."""
+    """Specs for a monochromatic image."""
 
-    data: Data[tuple[Literal["x"], Literal["y"]], float]
-    x: Coord[Literal["x"], int] = 0
-    y: Coord[Literal["y"], int] = 0
+    data: Data[tuple[X, Y], float]
+    x: Coord[X, int] = 0
+    y: Coord[Y, int] = 0
     __dataarray_factory__ = Custom
 
 
@@ -331,7 +325,7 @@ image.custom_method() # Custom method!
 
 ### DataArray and Dataset creation without shorthands
 
-[xarray-dataclasses] provides functions, `asdataarray` and `asdataset`.
+xarray-dataclasses provides functions, `asdataarray` and `asdataset`.
 This is useful, for example, users do not want to inherit the mix-in class (`AsDataArray` or `AsDataset`) in a DataArray or Dataset dataclass.
 
 ```python
@@ -342,9 +336,9 @@ from xarray_dataclasses import asdataarray
 class Image:
     """Specifications of images."""
 
-    data: Data[tuple[Literal["x"], Literal["y"]], float]
-    x: Coord[Literal["x"], int] = 0
-    y: Coord[Literal["y"], int] = 0
+    data: Data[tuple[X, Y], float]
+    x: Coord[X, int] = 0
+    y: Coord[Y, int] = 0
 
 
 image = asdataarray(Image([[0, 1], [2, 3]], x=[0, 1], y=[0, 1]))
