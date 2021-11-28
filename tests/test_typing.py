@@ -8,7 +8,7 @@ from typing_extensions import Literal
 
 
 # submodules
-from xarray_dataclasses.typing import Data, get_dims, get_dtype
+from xarray_dataclasses.typing import Data, get_dims, get_dtype, unannotate
 
 
 # type hints
@@ -36,9 +36,9 @@ testdata_dtype = [
 # test functions
 @mark.parametrize("hint, dims", testdata_dims)
 def test_get_dims(hint: Any, dims: Any) -> None:
-    assert get_dims(hint) == dims
+    assert get_dims(unannotate(hint)) == dims
 
 
 @mark.parametrize("hint, dtype", testdata_dtype)
 def test_get_dtype(hint: Any, dtype: Any) -> None:
-    assert get_dtype(hint) == dtype
+    assert get_dtype(unannotate(hint)) == dtype
