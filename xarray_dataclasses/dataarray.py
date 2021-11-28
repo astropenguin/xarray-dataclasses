@@ -24,7 +24,7 @@ P = ParamSpec("P")
 TDataArray = TypeVar("TDataArray", bound=xr.DataArray)
 TDataArray_ = TypeVar("TDataArray_", bound=xr.DataArray, contravariant=True)
 Order = Literal["C", "F"]
-Shape = Union[Sequence[int], int]
+Shape = Union[Dict[str, int], Sequence[int], int]
 
 
 class DataClass(Protocol[P]):
@@ -161,7 +161,13 @@ class AsDataArray:
             DataArray object filled without initializing data.
 
         """
-        name = DataModel.from_dataclass(cls).data[0].name
+        model = DataModel.from_dataclass(cls)
+        name = model.data[0].name
+        dims = model.data[0].type["dims"]
+
+        if isinstance(shape, dict):
+            shape = tuple(shape[dim] for dim in dims)
+
         data = np.empty(shape, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
 
@@ -184,7 +190,13 @@ class AsDataArray:
             DataArray object filled with zeros.
 
         """
-        name = DataModel.from_dataclass(cls).data[0].name
+        model = DataModel.from_dataclass(cls)
+        name = model.data[0].name
+        dims = model.data[0].type["dims"]
+
+        if isinstance(shape, dict):
+            shape = tuple(shape[dim] for dim in dims)
+
         data = np.zeros(shape, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
 
@@ -207,7 +219,13 @@ class AsDataArray:
             DataArray object filled with ones.
 
         """
-        name = DataModel.from_dataclass(cls).data[0].name
+        model = DataModel.from_dataclass(cls)
+        name = model.data[0].name
+        dims = model.data[0].type["dims"]
+
+        if isinstance(shape, dict):
+            shape = tuple(shape[dim] for dim in dims)
+
         data = np.ones(shape, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
 
@@ -232,6 +250,12 @@ class AsDataArray:
             DataArray object filled with given value.
 
         """
-        name = DataModel.from_dataclass(cls).data[0].name
+        model = DataModel.from_dataclass(cls)
+        name = model.data[0].name
+        dims = model.data[0].type["dims"]
+
+        if isinstance(shape, dict):
+            shape = tuple(shape[dim] for dim in dims)
+
         data = np.full(shape, fill_value, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
