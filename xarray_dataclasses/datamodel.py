@@ -33,7 +33,7 @@ Reference = Union[xr.DataArray, xr.Dataset, None]
 
 
 # field models
-@dataclass
+@dataclass(frozen=True)
 class Data:
     """Field model for data-related fields."""
 
@@ -83,7 +83,7 @@ class Data:
             )
 
 
-@dataclass
+@dataclass(frozen=True)
 class General:
     """Field model for general fields."""
 
