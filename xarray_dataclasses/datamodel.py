@@ -83,15 +83,24 @@ class General:
     name: str
     value: Any
     type: str
+    factory: Optional[Type[Any]] = None
 
     def __call__(self) -> Any:
-        """Just return the value."""
-        return self.value
+        """Create an object from the value."""
+        if self.factory is None:
+            return self.value
+        else:
+            return self.factory(self.value)
 
     @classmethod
     def from_field(cls, field: Field[Any], value: Any) -> "General":
         """Create a field model from a dataclass field and a value."""
-        return cls(field.name, value, get_inner(unannotate(field.type)))
+        hint = unannotate(field.type)
+
+        try:
+            return cls(field.name, value, f"{hint.__module__}.{hint.__qualname__}")
+        except AttributeError:
+            return cls(field.name, value, repr(hint))
 
 
 # data models
