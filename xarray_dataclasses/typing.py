@@ -166,8 +166,8 @@ Example:
         @dataclass
         class Image(AsDataArray):
             data: Data[tuple[X, Y], float]
-            x: Coordof[Literal["x"]Axis] = 0
-            y: Coordof[Literal["y"]Axis] = 0
+            x: Coordof[XAxis] = 0
+            y: Coordof[YAxis] = 0
 
 Hint:
     A class used in ``Coordof`` does not need to inherit ``AsDataArray``.
