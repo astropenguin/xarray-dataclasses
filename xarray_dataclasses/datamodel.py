@@ -3,7 +3,7 @@ __all__ = ["DataModel"]
 
 # standard library
 from dataclasses import Field, dataclass, field, is_dataclass
-from typing import Any, List, Type, Union, cast
+from typing import Any, List, Optional, Type, Union, cast
 
 
 # dependencies
@@ -38,52 +38,42 @@ class Data:
     """Model for the coord or data fields."""
 
     name: str
+    value: Any
     type: DataType
-    value: Any
-
-    def __call__(self, reference: Reference = None) -> xr.DataArray:
-        """Create a DataArray object from the value and a reference."""
-        return typedarray(
-            self.value,
-            self.type["dims"],
-            self.type["dtype"],
-            reference,
-        )
-
-    @classmethod
-    def from_field(cls, field: Field[Any], value: Any) -> "Data":
-        """Create a field model from a dataclass field and a value."""
-        return cls(
-            field.name,
-            {
-                "dims": get_dims(field.type),
-                "dtype": get_dtype(field.type),
-            },
-            value,
-        )
-
-
-@dataclass
-class Dataof:
-    """Model for the coordof or dataof fields."""
-
-    name: str
-    type: Type[DataClass]
-    value: Any
+    factory: Optional[Type[DataClass]] = None
 
     def __call__(self, reference: Reference = None) -> xr.DataArray:
         """Create a DataArray object from the value and a reference."""
         from .dataarray import asdataarray
 
+        if self.factory is None:
+            return typedarray(
+                self.value,
+                self.type["dims"],
+                self.type["dtype"],
+                reference,
+            )
+
         if is_dataclass(self.value):
             return asdataarray(self.value, reference)
         else:
-            return asdataarray(self.type(self.value), reference)
+            return asdataarray(self.factory(self.value), reference)
 
     @classmethod
-    def from_field(cls, field: Field[Any], value: Any) -> "Dataof":
+    def from_field(cls, field: Field[Any], value: Any, of: bool) -> "Data":
         """Create a field model from a dataclass field and a value."""
-        return cls(field.name, get_inner(unannotate(field.type), 0), value)
+        hint = unannotate(field.type)
+
+        if of:
+            dataclass = get_inner(hint, 0)
+            data = DataModel.from_dataclass(dataclass).data[0]
+            return cls(field.name, value, data.type, dataclass)
+        else:
+            return cls(
+                field.name,
+                value,
+                {"dims": get_dims(hint), "dtype": get_dtype(hint)},
+            )
 
 
 @dataclass
@@ -91,8 +81,8 @@ class General:
     """Model for the attribute or name fields."""
 
     name: str
-    type: Any
     value: Any
+    type: str
 
     def __call__(self) -> Any:
         """Just return the value."""
@@ -101,7 +91,7 @@ class General:
     @classmethod
     def from_field(cls, field: Field[Any], value: Any) -> "General":
         """Create a field model from a dataclass field and a value."""
-        return cls(field.name, get_inner(unannotate(field.type)), value)
+        return cls(field.name, value, get_inner(unannotate(field.type)))
 
 
 # data models
@@ -112,10 +102,10 @@ class DataModel:
     attr: List[General] = field(default_factory=list)
     """Model of the attribute fields."""
 
-    coord: List[Union[Data, Dataof]] = field(default_factory=list)
+    coord: List[Data] = field(default_factory=list)
     """Model of the coordinate fields."""
 
-    data: List[Union[Data, Dataof]] = field(default_factory=list)
+    data: List[Data] = field(default_factory=list)
     """Model of the data fields."""
 
     name: List[General] = field(default_factory=list)
@@ -133,13 +123,13 @@ class DataModel:
             if FieldType.ATTR.annotates(field_.type):
                 model.attr.append(General.from_field(field_, value))
             elif FieldType.COORD.annotates(field_.type):
-                model.coord.append(Data.from_field(field_, value))
+                model.coord.append(Data.from_field(field_, value, False))
             elif FieldType.COORDOF.annotates(field_.type):
-                model.coord.append(Dataof.from_field(field_, value))
+                model.coord.append(Data.from_field(field_, value, True))
             elif FieldType.DATA.annotates(field_.type):
-                model.data.append(Data.from_field(field_, value))
+                model.data.append(Data.from_field(field_, value, False))
             elif FieldType.DATAOF.annotates(field_.type):
-                model.data.append(Dataof.from_field(field_, value))
+                model.data.append(Data.from_field(field_, value, True))
             elif FieldType.NAME.annotates(field_.type):
                 model.name.append(General.from_field(field_, value))
 

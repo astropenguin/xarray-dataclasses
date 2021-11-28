@@ -234,7 +234,7 @@ Example:
 # runtime functions
 def get_dims(hint: Any) -> Dims:
     """Return dims parsed from a type hint."""
-    t_dims = get_inner(unannotate(hint), 0, 0)
+    t_dims = get_inner(hint, 0, 0)
 
     if is_str_literal(t_dims):
         return (get_inner(t_dims, 0),)
@@ -252,7 +252,7 @@ def get_dims(hint: Any) -> Dims:
 
 def get_dtype(hint: Any) -> Dtype:
     """Return dtype parsed from a type hint."""
-    t_dtype = get_inner(unannotate(hint), 0, 1)
+    t_dtype = get_inner(hint, 0, 1)
 
     if t_dtype is Any:
         return None
