@@ -5,26 +5,25 @@ __all__ = ["AsDataArray", "asdataarray"]
 from dataclasses import Field
 from functools import wraps
 from types import MethodType
-from typing import Any, Callable, Dict, Sequence, Type, TypeVar, Union, overload
+from typing import Any, Callable, Dict, Type, TypeVar, Union, overload
 
 
 # dependencies
 import numpy as np
 import xarray as xr
 from morecopy import copy
-from typing_extensions import Literal, ParamSpec, Protocol
+from typing_extensions import ParamSpec, Protocol
 
 
 # submodules
 from .datamodel import DataModel, Reference
+from .typing import Order, Shape, Sizes
 
 
 # type hints
 P = ParamSpec("P")
 TDataArray = TypeVar("TDataArray", bound=xr.DataArray)
 TDataArray_ = TypeVar("TDataArray_", bound=xr.DataArray, contravariant=True)
-Order = Literal["C", "F"]
-Shape = Union[Dict[str, int], Sequence[int], int]
 
 
 class DataClass(Protocol[P]):
@@ -145,14 +144,14 @@ class AsDataArray:
     @classmethod
     def empty(
         cls: Type[DataArrayClass[P, TDataArray]],
-        shape: Shape,
+        shape: Union[Shape, Sizes],
         order: Order = "C",
         **kwargs: Any,
     ) -> TDataArray:
         """Create a DataArray object without initializing data.
 
         Args:
-            shape: Shape of the new DataArray object.
+            shape: Shape or sizes of the new DataArray object.
             order: Whether to store data in row-major (C-style)
                 or column-major (Fortran-style) order in memory.
             kwargs: Args of the DataArray class except for data.
@@ -174,14 +173,14 @@ class AsDataArray:
     @classmethod
     def zeros(
         cls: Type[DataArrayClass[P, TDataArray]],
-        shape: Shape,
+        shape: Union[Shape, Sizes],
         order: Order = "C",
         **kwargs: Any,
     ) -> TDataArray:
         """Create a DataArray object filled with zeros.
 
         Args:
-            shape: Shape of the new DataArray object.
+            shape: Shape or sizes of the new DataArray object.
             order: Whether to store data in row-major (C-style)
                 or column-major (Fortran-style) order in memory.
             kwargs: Args of the DataArray class except for data.
@@ -203,14 +202,14 @@ class AsDataArray:
     @classmethod
     def ones(
         cls: Type[DataArrayClass[P, TDataArray]],
-        shape: Shape,
+        shape: Union[Shape, Sizes],
         order: Order = "C",
         **kwargs: Any,
     ) -> TDataArray:
         """Create a DataArray object filled with ones.
 
         Args:
-            shape: Shape of the new DataArray object.
+            shape: Shape or sizes of the new DataArray object.
             order: Whether to store data in row-major (C-style)
                 or column-major (Fortran-style) order in memory.
             kwargs: Args of the DataArray class except for data.
@@ -232,7 +231,7 @@ class AsDataArray:
     @classmethod
     def full(
         cls: Type[DataArrayClass[P, TDataArray]],
-        shape: Shape,
+        shape: Union[Shape, Sizes],
         fill_value: Any,
         order: Order = "C",
         **kwargs: Any,
@@ -240,7 +239,7 @@ class AsDataArray:
         """Create a DataArray object filled with given value.
 
         Args:
-            shape: Shape of the new DataArray object.
+            shape: Shape or sizes of the new DataArray object.
             fill_value: Value for the new DataArray object.
             order: Whether to store data in row-major (C-style)
                 or column-major (Fortran-style) order in memory.
