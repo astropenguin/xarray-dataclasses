@@ -9,6 +9,7 @@ from typing import Any, Callable, Dict, Type, TypeVar, overload
 
 
 # dependencies
+import numpy as np
 import xarray as xr
 from morecopy import copy
 from typing_extensions import ParamSpec, Protocol
@@ -16,6 +17,7 @@ from typing_extensions import ParamSpec, Protocol
 
 # submodules
 from .datamodel import DataModel, Reference
+from .typing import Order, Sizes
 
 
 # type hints
@@ -138,3 +140,117 @@ class AsDataset:
             return asdataset(cls(*args, **kwargs))
 
         return MethodType(new, cls)
+
+    @classmethod
+    def empty(
+        cls: Type[DatasetClass[P, TDataset]],
+        sizes: Sizes,
+        order: Order = "C",
+        **kwargs: Any,
+    ) -> TDataset:
+        """Create a Dataset object without initializing data vars.
+
+        Args:
+            sizes: Sizes of the new Dataset object.
+            order: Whether to store data in row-major (C-style)
+                or column-major (Fortran-style) order in memory.
+            kwargs: Args of the Dataset class except for data vars.
+
+        Returns:
+            Dataset object without initializing data vars.
+
+        """
+        model = DataModel.from_dataclass(cls)
+        data_vars: Dict[str, Any] = {}
+
+        for data in model.data:
+            shape = tuple(sizes[dim] for dim in data.type["dims"])
+            data_vars[data.name] = np.empty(shape, order=order)
+
+        return asdataset(cls(**data_vars, **kwargs))
+
+    @classmethod
+    def zeros(
+        cls: Type[DatasetClass[P, TDataset]],
+        sizes: Sizes,
+        order: Order = "C",
+        **kwargs: Any,
+    ) -> TDataset:
+        """Create a Dataset object whose data vars are filled with zeros.
+
+        Args:
+            sizes: Sizes of the new Dataset object.
+            order: Whether to store data in row-major (C-style)
+                or column-major (Fortran-style) order in memory.
+            kwargs: Args of the Dataset class except for data vars.
+
+        Returns:
+            Dataset object whose data vars are filled with zeros.
+
+        """
+        model = DataModel.from_dataclass(cls)
+        data_vars: Dict[str, Any] = {}
+
+        for data in model.data:
+            shape = tuple(sizes[dim] for dim in data.type["dims"])
+            data_vars[data.name] = np.zeros(shape, order=order)
+
+        return asdataset(cls(**data_vars, **kwargs))
+
+    @classmethod
+    def ones(
+        cls: Type[DatasetClass[P, TDataset]],
+        sizes: Sizes,
+        order: Order = "C",
+        **kwargs: Any,
+    ) -> TDataset:
+        """Create a Dataset object whose data vars are filled with ones.
+
+        Args:
+            sizes: Sizes of the new Dataset object.
+            order: Whether to store data in row-major (C-style)
+                or column-major (Fortran-style) order in memory.
+            kwargs: Args of the Dataset class except for data vars.
+
+        Returns:
+            Dataset object whose data vars are filled with ones.
+
+        """
+        model = DataModel.from_dataclass(cls)
+        data_vars: Dict[str, Any] = {}
+
+        for data in model.data:
+            shape = tuple(sizes[dim] for dim in data.type["dims"])
+            data_vars[data.name] = np.ones(shape, order=order)
+
+        return asdataset(cls(**data_vars, **kwargs))
+
+    @classmethod
+    def full(
+        cls: Type[DatasetClass[P, TDataset]],
+        sizes: Sizes,
+        fill_value: Any,
+        order: Order = "C",
+        **kwargs: Any,
+    ) -> TDataset:
+        """Create a Dataset object whose data vars are filled with given value.
+
+        Args:
+            sizes: Sizes of the new Dataset object.
+            fill_value: Value for data vars of the new Dataset object.
+            order: Whether to store data in row-major (C-style)
+                or column-major (Fortran-style) order in memory.
+            kwargs: Args of the Dataset class except for data vars.
+
+        Returns:
+            Dataset object whose data vars are filled with given value.
+
+        """
+        model = DataModel.from_dataclass(cls)
+        data_vars: Dict[str, Any] = {}
+
+        for data in model.data:
+            shape = tuple(sizes[dim] for dim in data.type["dims"])
+            data_vars[data.name] = np.full(shape, fill_value, order=order)
+
+        return asdataset(cls(**data_vars, **kwargs))
