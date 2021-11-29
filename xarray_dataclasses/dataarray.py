@@ -157,7 +157,7 @@ class AsDataArray:
             kwargs: Args of the DataArray class except for data.
 
         Returns:
-            DataArray object filled without initializing data.
+            DataArray object without initializing data.
 
         """
         model = DataModel.from_dataclass(cls)
