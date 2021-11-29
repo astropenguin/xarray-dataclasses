@@ -20,7 +20,16 @@ __all__ = ["Attr", "Coord", "Coordof", "Data", "Dataof", "Name"]
 # standard library
 from dataclasses import Field
 from enum import auto, Enum
-from typing import Any, Callable, Dict, Optional, Tuple, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Optional,
+    Sequence,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 
 # dependencies
@@ -63,11 +72,14 @@ class FieldType(Enum):
 
 
 # type hints
+Dims = Tuple[str, ...]
+Dtype = Optional[str]
+Order = Literal["C", "F"]
+Shape = Union[Sequence[int], int]
+Sizes = Dict[str, int]
 T = TypeVar("T")
 TDims = TypeVar("TDims", covariant=True)
 TDtype = TypeVar("TDtype", covariant=True)
-Dims = Tuple[str, ...]
-Dtype = Optional[str]
 
 
 @runtime_checkable
