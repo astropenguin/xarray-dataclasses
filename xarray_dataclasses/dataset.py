@@ -5,7 +5,7 @@ __all__ = ["AsDataset", "asdataset"]
 from dataclasses import Field
 from functools import wraps
 from types import MethodType
-from typing import Any, Callable, Dict, Type, TypeVar, overload
+from typing import Any, Callable, Dict, Optional, Type, TypeVar, overload
 
 
 # dependencies
@@ -16,8 +16,13 @@ from typing_extensions import ParamSpec, Protocol
 
 
 # submodules
-from .datamodel import DataModel, Reference
-from .typing import Order, Sizes
+from .datamodel import DataModel
+from .dataoptions import DataOptions
+from .typing import DataType, Order, Sizes
+
+
+# constants
+DEFAULT_OPTIONS = DataOptions(xr.Dataset)
 
 
 # type hints
@@ -38,7 +43,7 @@ class DatasetClass(Protocol[P, TDataset_]):
 
     __init__: Callable[P, None]
     __dataclass_fields__: Dict[str, Field[Any]]
-    __dataset_factory__: Callable[..., TDataset_]
+    __dataoptions__: DataOptions[TDataset_]
 
 
 # custom classproperty
@@ -65,8 +70,8 @@ class classproperty:
 @overload
 def asdataset(
     dataclass: DatasetClass[Any, TDataset],
-    reference: Reference = None,
-    dataset_factory: Any = xr.Dataset,
+    reference: Optional[DataType] = None,
+    dataoptions: Any = DEFAULT_OPTIONS,
 ) -> TDataset:
     ...
 
@@ -74,8 +79,8 @@ def asdataset(
 @overload
 def asdataset(
     dataclass: DataClass[Any],
-    reference: Reference = None,
-    dataset_factory: Callable[..., TDataset] = xr.Dataset,
+    reference: Optional[DataType] = None,
+    dataoptions: DataOptions[TDataset] = DEFAULT_OPTIONS,
 ) -> TDataset:
     ...
 
@@ -83,26 +88,32 @@ def asdataset(
 def asdataset(
     dataclass: Any,
     reference: Any = None,
-    dataset_factory: Any = xr.Dataset,
+    dataoptions: Any = DEFAULT_OPTIONS,
 ) -> Any:
     """Create a Dataset object from a dataclass object.
 
     Args:
         dataclass: Dataclass object that defines typed Dataset.
         reference: DataArray or Dataset object as a reference of shape.
-        dataset_factory: Factory function of Dataset.
+        dataoptions: Options for Dataset creation.
 
     Returns:
         Dataset object created from the dataclass object.
 
     """
     try:
-        dataset_factory = dataclass.__dataset_factory__
+        # for backward compatibility (deprecated in v1.0.0)
+        dataoptions = DataOptions(dataclass.__dataset_factory__)
+    except AttributeError:
+        pass
+
+    try:
+        dataoptions = dataclass.__dataoptions__
     except AttributeError:
         pass
 
     model = DataModel.from_dataclass(dataclass)
-    dataset = dataset_factory()
+    dataset = dataoptions.factory()
 
     for data in model.data:
         dataset.update({data.name: data(reference)})
@@ -119,9 +130,7 @@ def asdataset(
 class AsDataset:
     """Mix-in class that provides shorthand methods."""
 
-    def __dataset_factory__(self, data_vars: Any = None) -> xr.Dataset:
-        """Default Dataset factory (xarray.Dataset)."""
-        return xr.Dataset(data_vars)
+    __dataoptions__ = DEFAULT_OPTIONS
 
     @classproperty
     def new(cls: Type[DatasetClass[P, TDataset]]) -> Callable[P, TDataset]:

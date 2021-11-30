@@ -5,7 +5,7 @@ __all__ = ["AsDataArray", "asdataarray"]
 from dataclasses import Field
 from functools import wraps
 from types import MethodType
-from typing import Any, Callable, Dict, Type, TypeVar, Union, overload
+from typing import Any, Callable, Dict, Optional, Type, TypeVar, Union, overload
 
 
 # dependencies
@@ -16,8 +16,13 @@ from typing_extensions import ParamSpec, Protocol
 
 
 # submodules
-from .datamodel import DataModel, Reference
-from .typing import Order, Shape, Sizes
+from .datamodel import DataModel
+from .dataoptions import DataOptions
+from .typing import DataType, Order, Shape, Sizes
+
+
+# constants
+DEFAULT_OPTIONS = DataOptions(xr.DataArray)
 
 
 # type hints
@@ -38,7 +43,7 @@ class DataArrayClass(Protocol[P, TDataArray_]):
 
     __init__: Callable[P, None]
     __dataclass_fields__: Dict[str, Field[Any]]
-    __dataarray_factory__: Callable[..., TDataArray_]
+    __dataoptions__: DataOptions[TDataArray_]
 
 
 # custom classproperty
@@ -65,8 +70,8 @@ class classproperty:
 @overload
 def asdataarray(
     dataclass: DataArrayClass[Any, TDataArray],
-    reference: Reference = None,
-    dataarray_factory: Any = xr.DataArray,
+    reference: Optional[DataType] = None,
+    dataoptions: Any = DEFAULT_OPTIONS,
 ) -> TDataArray:
     ...
 
@@ -74,8 +79,8 @@ def asdataarray(
 @overload
 def asdataarray(
     dataclass: DataClass[Any],
-    reference: Reference = None,
-    dataarray_factory: Callable[..., TDataArray] = xr.DataArray,
+    reference: Optional[DataType] = None,
+    dataoptions: DataOptions[TDataArray] = DEFAULT_OPTIONS,
 ) -> TDataArray:
     ...
 
@@ -83,26 +88,32 @@ def asdataarray(
 def asdataarray(
     dataclass: Any,
     reference: Any = None,
-    dataarray_factory: Any = xr.DataArray,
+    dataoptions: Any = DEFAULT_OPTIONS,
 ) -> Any:
     """Create a DataArray object from a dataclass object.
 
     Args:
         dataclass: Dataclass object that defines typed DataArray.
         reference: DataArray or Dataset object as a reference of shape.
-        dataset_factory: Factory function of DataArray.
+        dataoptions: Options for DataArray creation.
 
     Returns:
         DataArray object created from the dataclass object.
 
     """
     try:
-        dataarray_factory = dataclass.__dataarray_factory__
+        # for backward compatibility (deprecated in v1.0.0)
+        dataoptions = DataOptions(dataclass.__dataarray_factory__)
+    except AttributeError:
+        pass
+
+    try:
+        dataoptions = dataclass.__dataoptions__
     except AttributeError:
         pass
 
     model = DataModel.from_dataclass(dataclass)
-    dataarray = dataarray_factory(model.data[0](reference))
+    dataarray = dataoptions.factory(model.data[0](reference))
 
     for coord in model.coord:
         dataarray.coords.update({coord.name: coord(dataarray)})
@@ -119,9 +130,7 @@ def asdataarray(
 class AsDataArray:
     """Mix-in class that provides shorthand methods."""
 
-    def __dataarray_factory__(self, data: Any = None) -> xr.DataArray:
-        """Default DataArray factory (xarray.DataArray)."""
-        return xr.DataArray(data)
+    __dataoptions__ = DEFAULT_OPTIONS
 
     @classproperty
     def new(cls: Type[DataArrayClass[P, TDataArray]]) -> Callable[P, TDataArray]:

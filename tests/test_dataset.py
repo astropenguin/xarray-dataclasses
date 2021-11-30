@@ -1,6 +1,6 @@
 # standard library
 from dataclasses import dataclass
-from typing import Any, Tuple
+from typing import Tuple
 
 
 # third-party packages
@@ -12,6 +12,7 @@ from typing_extensions import Literal
 # submodules
 from xarray_dataclasses.dataarray import AsDataArray
 from xarray_dataclasses.dataset import AsDataset
+from xarray_dataclasses.dataoptions import DataOptions
 from xarray_dataclasses.typing import Attr, Coord, Data
 
 # constants
@@ -29,6 +30,9 @@ class Custom(xr.Dataset):
     __slots__ = ()
 
 
+dataoptions = DataOptions(Custom)
+
+
 @dataclass
 class Image(AsDataArray):
     """Specs for a monochromatic image."""
@@ -40,15 +44,14 @@ class Image(AsDataArray):
 class ColorImage(AsDataset):
     """Specs for a color image."""
 
+    __dataoptions__ = dataoptions
+
     red: Data[Tuple[X, Y], float]
     green: Data[Tuple[X, Y], float]
     blue: Data[Tuple[X, Y], float]
     x: Coord[X, int] = 0
     y: Coord[Y, int] = 0
     units: Attr[str] = "cd / m^2"
-
-    def __dataset_factory__(self, data_vars: Any = None) -> Custom:
-        return Custom(data_vars)
 
 
 # test datasets

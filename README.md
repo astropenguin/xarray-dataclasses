@@ -291,12 +291,15 @@ class Image(AsDataArray):
     y: Coordof[YAxis] = 0
 ```
 
-### Custom DataArray and Dataset factories
+### Options for DataArray and Dataset creation
 
-For customization, users can use a function or a class to create an initial DataArray or Dataset object by specifying a special class attribute, `__dataarray_factory__` or `__dataset_factory__`, respectively.
+For customization, users can add a special class attribute, `__dataoptions__`, to a DataArray or Dataset class.
+A custom factory for DataArray or Dataset creation is only supported in the current implementation.
+
 
 ```python
 import xarray as xr
+from xarray_dataclasses import DataOptions
 
 
 class Custom(xr.DataArray):
@@ -308,19 +311,23 @@ class Custom(xr.DataArray):
         print("Custom method!")
 
 
+dataoptions = DataOptions(Custom)
+
+
 @dataclass
 class Image(AsDataArray):
     """Specs for a monochromatic image."""
 
+    __dataoptions__ = dataoptions
+
     data: Data[tuple[X, Y], float]
     x: Coord[X, int] = 0
     y: Coord[Y, int] = 0
-    __dataarray_factory__ = Custom
 
 
 image = Image.ones([3, 3])
-isinstance(image, Custom) # True
-image.custom_method() # Custom method!
+isinstance(image, Custom)  # True
+image.custom_method()  # Custom method!
 ```
 
 ### DataArray and Dataset creation without shorthands
