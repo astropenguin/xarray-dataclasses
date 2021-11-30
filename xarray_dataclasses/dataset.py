@@ -5,7 +5,7 @@ __all__ = ["AsDataset", "asdataset"]
 from dataclasses import Field
 from functools import wraps
 from types import MethodType
-from typing import Any, Callable, Dict, Type, TypeVar, overload
+from typing import Any, Callable, Dict, Optional, Type, TypeVar, overload
 
 
 # dependencies
@@ -16,8 +16,8 @@ from typing_extensions import ParamSpec, Protocol
 
 
 # submodules
-from .datamodel import DataModel, Reference
-from .typing import Order, Sizes
+from .datamodel import DataModel
+from .typing import DataType, Order, Sizes
 
 
 # type hints
@@ -65,7 +65,7 @@ class classproperty:
 @overload
 def asdataset(
     dataclass: DatasetClass[Any, TDataset],
-    reference: Reference = None,
+    reference: Optional[DataType] = None,
     dataset_factory: Any = xr.Dataset,
 ) -> TDataset:
     ...
@@ -74,7 +74,7 @@ def asdataset(
 @overload
 def asdataset(
     dataclass: DataClass[Any],
-    reference: Reference = None,
+    reference: Optional[DataType] = None,
     dataset_factory: Callable[..., TDataset] = xr.Dataset,
 ) -> TDataset:
     ...

@@ -33,6 +33,7 @@ from typing import (
 
 
 # dependencies
+import xarray as xr
 from typing_extensions import (
     Annotated,
     Literal,
@@ -72,6 +73,7 @@ class FieldType(Enum):
 
 
 # type hints
+DataType = Union[xr.DataArray, xr.Dataset]
 Dims = Tuple[str, ...]
 Dtype = Optional[str]
 Order = Literal["C", "F"]

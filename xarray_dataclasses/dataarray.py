@@ -5,7 +5,7 @@ __all__ = ["AsDataArray", "asdataarray"]
 from dataclasses import Field
 from functools import wraps
 from types import MethodType
-from typing import Any, Callable, Dict, Type, TypeVar, Union, overload
+from typing import Any, Callable, Dict, Optional, Type, TypeVar, Union, overload
 
 
 # dependencies
@@ -16,8 +16,8 @@ from typing_extensions import ParamSpec, Protocol
 
 
 # submodules
-from .datamodel import DataModel, Reference
-from .typing import Order, Shape, Sizes
+from .datamodel import DataModel
+from .typing import DataType, Order, Shape, Sizes
 
 
 # type hints
@@ -65,7 +65,7 @@ class classproperty:
 @overload
 def asdataarray(
     dataclass: DataArrayClass[Any, TDataArray],
-    reference: Reference = None,
+    reference: Optional[DataType] = None,
     dataarray_factory: Any = xr.DataArray,
 ) -> TDataArray:
     ...
@@ -74,7 +74,7 @@ def asdataarray(
 @overload
 def asdataarray(
     dataclass: DataClass[Any],
-    reference: Reference = None,
+    reference: Optional[DataType] = None,
     dataarray_factory: Callable[..., TDataArray] = xr.DataArray,
 ) -> TDataArray:
     ...

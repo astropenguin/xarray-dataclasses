@@ -3,7 +3,7 @@ __all__ = ["DataModel"]
 
 # standard library
 from dataclasses import Field, dataclass, field, is_dataclass
-from typing import Any, List, Optional, Type, Union, cast
+from typing import Any, List, Optional, Type, cast
 
 
 # dependencies
@@ -17,6 +17,7 @@ from .deprecated import get_type_hints
 from .typing import (
     ArrayLike,
     DataClass,
+    DataType,
     Dims,
     Dtype,
     FieldType,
@@ -28,8 +29,7 @@ from .typing import (
 
 
 # type hints
-DataType = TypedDict("DataType", dims=Dims, dtype=Dtype)
-Reference = Union[xr.DataArray, xr.Dataset, None]
+DimsDtype = TypedDict("DimsDtype", dims=Dims, dtype=Dtype)
 
 
 # field models
@@ -43,13 +43,13 @@ class Data:
     value: Any
     """Value assigned to the field."""
 
-    type: DataType
+    type: DimsDtype
     """Type (dims and dtype) of the field."""
 
     factory: Optional[Type[DataClass]] = None
     """Factory dataclass to create a DataArray object."""
 
-    def __call__(self, reference: Reference = None) -> xr.DataArray:
+    def __call__(self, reference: Optional[DataType] = None) -> xr.DataArray:
         """Create a DataArray object from the value and a reference."""
         from .dataarray import asdataarray
 
@@ -173,7 +173,7 @@ def typedarray(
     data: Any,
     dims: Dims,
     dtype: Dtype,
-    reference: Reference = None,
+    reference: Optional[DataType] = None,
 ) -> xr.DataArray:
     """Create a DataArray object with given dims and dtype.
 
