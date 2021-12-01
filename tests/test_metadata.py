@@ -8,4 +8,4 @@ def test_author():
 
 
 def test_version():
-    assert xarray_dataclasses.__version__ == "0.7.0"
+    assert xarray_dataclasses.__version__ == "0.8.0"
