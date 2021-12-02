@@ -3,7 +3,7 @@ __all__ = ["DataModel"]
 
 # standard library
 from dataclasses import Field, dataclass, field, is_dataclass
-from typing import Any, List, Optional, Type, cast
+from typing import Any, Hashable, List, Optional, Type, cast
 
 
 # dependencies
@@ -37,7 +37,7 @@ DimsDtype = TypedDict("DimsDtype", dims=Dims, dtype=Dtype)
 class Data:
     """Field model for data-related fields."""
 
-    name: str
+    name: Hashable
     """Name of the field."""
 
     value: Any
@@ -87,7 +87,7 @@ class Data:
 class General:
     """Field model for general fields."""
 
-    name: str
+    name: Hashable
     """Name of the field."""
 
     value: Any

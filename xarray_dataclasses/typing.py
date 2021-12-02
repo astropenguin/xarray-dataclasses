@@ -24,6 +24,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Hashable,
     Optional,
     Sequence,
     Tuple,
@@ -82,6 +83,7 @@ Sizes = Dict[str, int]
 T = TypeVar("T")
 TDims = TypeVar("TDims", covariant=True)
 TDtype = TypeVar("TDtype", covariant=True)
+TName = TypeVar("TName", bound=Hashable)
 
 
 @runtime_checkable
@@ -235,8 +237,8 @@ Hint:
 
 """
 
-Name = Annotated[T, FieldType.NAME]
-"""Type hint to define name fields (``Name[T]``).
+Name = Annotated[TName, FieldType.NAME]
+"""Type hint to define name fields (``Name[TName]``).
 
 Example:
     ::
