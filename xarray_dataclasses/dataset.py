@@ -119,7 +119,12 @@ def asdataset(
         dataset.update({data.name: data(reference)})
 
     for coord in model.coord:
-        dataset.coords.update({coord.name: coord(dataset)})
+        if coord.name in dataset.dims:
+            dataset.coords.update({coord.name: coord(dataset)})
+
+    for coord in model.coord:
+        if coord.name not in dataset.dims:
+            dataset.coords.update({coord.name: coord(dataset)})
 
     for attr in model.attr:
         dataset.attrs.update({attr.name: attr()})

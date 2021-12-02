@@ -116,7 +116,12 @@ def asdataarray(
     dataarray = dataoptions.factory(model.data[0](reference))
 
     for coord in model.coord:
-        dataarray.coords.update({coord.name: coord(dataarray)})
+        if coord.name in dataarray.dims:
+            dataarray.coords.update({coord.name: coord(dataarray)})
+
+    for coord in model.coord:
+        if coord.name not in dataarray.dims:
+            dataarray.coords.update({coord.name: coord(dataarray)})
 
     for attr in model.attr:
         dataarray.attrs.update({attr.name: attr()})
