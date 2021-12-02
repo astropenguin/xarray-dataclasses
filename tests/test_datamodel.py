@@ -9,7 +9,7 @@ from typing_extensions import Literal
 
 # submodules
 from xarray_dataclasses.datamodel import DataModel
-from xarray_dataclasses.typing import Attr, Coord, Coordof, Data, Dataof, Name
+from xarray_dataclasses.typing import Attr, Coord, Coordof, Data, Dataof
 
 
 # type hints
@@ -22,14 +22,12 @@ Y = Literal["y"]
 class XAxis:
     data: Data[X, int]
     units: Attr[str] = "pixel"
-    name: Name[str] = "x axis"
 
 
 @dataclass
 class YAxis:
     data: Data[Y, int]
     units: Attr[str] = "pixel"
-    name: Name[str] = "y axis"
 
 
 @dataclass
@@ -66,12 +64,6 @@ def test_xaxis_data() -> None:
     assert xaxis_model.data[0].factory is None
 
 
-def test_xaxis_name() -> None:
-    assert xaxis_model.name[0].name == "name"
-    assert xaxis_model.name[0].value == "x axis"
-    assert xaxis_model.name[0].type == "builtins.str"
-
-
 def test_yaxis_attr() -> None:
     assert yaxis_model.attr[0].name == "units"
     assert yaxis_model.attr[0].value == "pixel"
@@ -82,12 +74,6 @@ def test_yaxis_data() -> None:
     assert yaxis_model.data[0].name == "data"
     assert yaxis_model.data[0].type == {"dims": ("y",), "dtype": "int"}
     assert yaxis_model.data[0].factory is None
-
-
-def test_yaxis_name() -> None:
-    assert yaxis_model.name[0].name == "name"
-    assert yaxis_model.name[0].value == "y axis"
-    assert yaxis_model.name[0].type == "builtins.str"
 
 
 def test_matrix_coord() -> None:

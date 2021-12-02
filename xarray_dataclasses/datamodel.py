@@ -71,16 +71,17 @@ class Data:
         """Create a field model from a dataclass field and a value."""
         hint = unannotate(field.type)
 
-        if of:
-            dataclass = get_inner(hint, 0)
-            data = DataModel.from_dataclass(dataclass).data[0]
-            return cls(field.name, value, data.type, dataclass)
+        if not of:
+            type: DimsDtype = {"dims": get_dims(hint), "dtype": get_dtype(hint)}
+            return cls(field.name, value, type)
+
+        dataclass = get_inner(hint, 0)
+        model = DataModel.from_dataclass(dataclass)
+
+        if not model.name:
+            return cls(field.name, value, model.data[0].type, dataclass)
         else:
-            return cls(
-                field.name,
-                value,
-                {"dims": get_dims(hint), "dtype": get_dtype(hint)},
-            )
+            return cls(model.name[0].value, value, model.data[0].type, dataclass)
 
 
 @dataclass(frozen=True)
