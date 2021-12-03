@@ -115,19 +115,19 @@ def asdataset(
     model = DataModel.from_dataclass(dataclass)
     dataset = dataoptions.factory()
 
-    for data in model.data:
-        dataset.update({data.name: data(reference)})
+    for item in model.data.values():
+        dataset[item.key] = item(reference)
 
-    for coord in model.coord:
-        if coord.name in dataset.dims:
-            dataset.coords.update({coord.name: coord(dataset)})
+    for item in model.coord.values():
+        if item.key in dataset.dims:
+            dataset.coords[item.key] = item(dataset)
 
-    for coord in model.coord:
-        if coord.name not in dataset.dims:
-            dataset.coords.update({coord.name: coord(dataset)})
+    for item in model.coord.values():
+        if item.key not in dataset.dims:
+            dataset.coords[item.key] = item(dataset)
 
-    for attr in model.attr:
-        dataset.attrs.update({attr.name: attr()})
+    for item in model.attr.values():
+        dataset.attrs[item.key] = item()
 
     return dataset
 
@@ -177,9 +177,9 @@ class AsDataset:
         model = DataModel.from_dataclass(cls)
         data_vars: Dict[str, Any] = {}
 
-        for data in model.data:
-            shape = tuple(sizes[dim] for dim in data.type["dims"])
-            data_vars[data.name] = np.empty(shape, order=order)
+        for name, item in model.data.items():
+            shape = tuple(sizes[dim] for dim in item.type["dims"])
+            data_vars[name] = np.empty(shape, order=order)
 
         return asdataset(cls(**data_vars, **kwargs))
 
@@ -205,9 +205,9 @@ class AsDataset:
         model = DataModel.from_dataclass(cls)
         data_vars: Dict[str, Any] = {}
 
-        for data in model.data:
-            shape = tuple(sizes[dim] for dim in data.type["dims"])
-            data_vars[data.name] = np.zeros(shape, order=order)
+        for name, item in model.data.items():
+            shape = tuple(sizes[dim] for dim in item.type["dims"])
+            data_vars[name] = np.zeros(shape, order=order)
 
         return asdataset(cls(**data_vars, **kwargs))
 
@@ -233,9 +233,9 @@ class AsDataset:
         model = DataModel.from_dataclass(cls)
         data_vars: Dict[str, Any] = {}
 
-        for data in model.data:
-            shape = tuple(sizes[dim] for dim in data.type["dims"])
-            data_vars[data.name] = np.ones(shape, order=order)
+        for name, item in model.data.items():
+            shape = tuple(sizes[dim] for dim in item.type["dims"])
+            data_vars[name] = np.ones(shape, order=order)
 
         return asdataset(cls(**data_vars, **kwargs))
 
@@ -263,8 +263,8 @@ class AsDataset:
         model = DataModel.from_dataclass(cls)
         data_vars: Dict[str, Any] = {}
 
-        for data in model.data:
-            shape = tuple(sizes[dim] for dim in data.type["dims"])
-            data_vars[data.name] = np.full(shape, fill_value, order=order)
+        for name, item in model.data.items():
+            shape = tuple(sizes[dim] for dim in item.type["dims"])
+            data_vars[name] = np.full(shape, fill_value, order=order)
 
         return asdataset(cls(**data_vars, **kwargs))

@@ -113,21 +113,23 @@ def asdataarray(
         pass
 
     model = DataModel.from_dataclass(dataclass)
-    dataarray = dataoptions.factory(model.data[0](reference))
+    item = next(iter(model.data.values()))
+    dataarray = dataoptions.factory(item(reference))
 
-    for coord in model.coord:
-        if coord.name in dataarray.dims:
-            dataarray.coords.update({coord.name: coord(dataarray)})
+    for item in model.coord.values():
+        if item.key in dataarray.dims:
+            dataarray.coords[item.key] = item(dataarray)
 
-    for coord in model.coord:
-        if coord.name not in dataarray.dims:
-            dataarray.coords.update({coord.name: coord(dataarray)})
+    for item in model.coord.values():
+        if item.key not in dataarray.dims:
+            dataarray.coords[item.key] = item(dataarray)
 
-    for attr in model.attr:
-        dataarray.attrs.update({attr.name: attr()})
+    for item in model.attr.values():
+        dataarray.attrs[item.key] = item()
 
-    for name in model.name:
-        dataarray.name = name()
+    if model.name:
+        item = next(iter(model.name.values()))
+        dataarray.name = item()
 
     return dataarray
 
@@ -175,11 +177,10 @@ class AsDataArray:
 
         """
         model = DataModel.from_dataclass(cls)
-        name = model.data[0].name
-        dims = model.data[0].type["dims"]
+        name, item = next(iter(model.data.items()))
 
         if isinstance(shape, dict):
-            shape = tuple(shape[dim] for dim in dims)
+            shape = tuple(shape[dim] for dim in item.type["dims"])
 
         data = np.empty(shape, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
@@ -204,11 +205,10 @@ class AsDataArray:
 
         """
         model = DataModel.from_dataclass(cls)
-        name = model.data[0].name
-        dims = model.data[0].type["dims"]
+        name, item = next(iter(model.data.items()))
 
         if isinstance(shape, dict):
-            shape = tuple(shape[dim] for dim in dims)
+            shape = tuple(shape[dim] for dim in item.type["dims"])
 
         data = np.zeros(shape, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
@@ -233,11 +233,10 @@ class AsDataArray:
 
         """
         model = DataModel.from_dataclass(cls)
-        name = model.data[0].name
-        dims = model.data[0].type["dims"]
+        name, item = next(iter(model.data.items()))
 
         if isinstance(shape, dict):
-            shape = tuple(shape[dim] for dim in dims)
+            shape = tuple(shape[dim] for dim in item.type["dims"])
 
         data = np.ones(shape, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
@@ -264,11 +263,10 @@ class AsDataArray:
 
         """
         model = DataModel.from_dataclass(cls)
-        name = model.data[0].name
-        dims = model.data[0].type["dims"]
+        name, item = next(iter(model.data.items()))
 
         if isinstance(shape, dict):
-            shape = tuple(shape[dim] for dim in dims)
+            shape = tuple(shape[dim] for dim in item.type["dims"])
 
         data = np.full(shape, fill_value, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))

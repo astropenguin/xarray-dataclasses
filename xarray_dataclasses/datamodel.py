@@ -3,7 +3,7 @@ __all__ = ["DataModel"]
 
 # standard library
 from dataclasses import Field, dataclass, field, is_dataclass
-from typing import Any, Hashable, List, Optional, Type, cast
+from typing import Any, Dict, Hashable, Optional, Type, cast
 
 
 # dependencies
@@ -37,7 +37,7 @@ DimsDtype = TypedDict("DimsDtype", dims=Dims, dtype=Dtype)
 class Data:
     """Field model for data-related fields."""
 
-    name: Hashable
+    key: Hashable
     """Name of the field."""
 
     value: Any
@@ -77,18 +77,20 @@ class Data:
 
         dataclass = get_inner(hint, 0)
         model = DataModel.from_dataclass(dataclass)
+        data_item = next(iter(model.data.values()))
 
         if not model.name:
-            return cls(field.name, value, model.data[0].type, dataclass)
+            return cls(field.name, value, data_item.type, dataclass)
         else:
-            return cls(model.name[0].value, value, model.data[0].type, dataclass)
+            name_item = next(iter(model.name.values()))
+            return cls(name_item.value, value, data_item.type, dataclass)
 
 
 @dataclass(frozen=True)
 class General:
     """Field model for general fields."""
 
-    name: Hashable
+    key: Hashable
     """Name of the field."""
 
     value: Any
@@ -123,16 +125,16 @@ class General:
 class DataModel:
     """Model for dataclasses or their objects."""
 
-    attr: List[General] = field(default_factory=list)
+    attr: Dict[str, General] = field(default_factory=dict)
     """Model of the attribute fields."""
 
-    coord: List[Data] = field(default_factory=list)
+    coord: Dict[str, Data] = field(default_factory=dict)
     """Model of the coordinate fields."""
 
-    data: List[Data] = field(default_factory=list)
+    data: Dict[str, Data] = field(default_factory=dict)
     """Model of the data fields."""
 
-    name: List[General] = field(default_factory=list)
+    name: Dict[str, General] = field(default_factory=dict)
     """Model of the name fields."""
 
     @classmethod
@@ -141,21 +143,21 @@ class DataModel:
         model = cls()
         eval_field_types(dataclass)
 
-        for field_ in dataclass.__dataclass_fields__.values():
-            value = getattr(dataclass, field_.name, field_.default)
+        for field in dataclass.__dataclass_fields__.values():
+            value = getattr(dataclass, field.name, field.default)
 
-            if FieldType.ATTR.annotates(field_.type):
-                model.attr.append(General.from_field(field_, value))
-            elif FieldType.COORD.annotates(field_.type):
-                model.coord.append(Data.from_field(field_, value, False))
-            elif FieldType.COORDOF.annotates(field_.type):
-                model.coord.append(Data.from_field(field_, value, True))
-            elif FieldType.DATA.annotates(field_.type):
-                model.data.append(Data.from_field(field_, value, False))
-            elif FieldType.DATAOF.annotates(field_.type):
-                model.data.append(Data.from_field(field_, value, True))
-            elif FieldType.NAME.annotates(field_.type):
-                model.name.append(General.from_field(field_, value))
+            if FieldType.ATTR.annotates(field.type):
+                model.attr[field.name] = General.from_field(field, value)
+            elif FieldType.COORD.annotates(field.type):
+                model.coord[field.name] = Data.from_field(field, value, False)
+            elif FieldType.COORDOF.annotates(field.type):
+                model.coord[field.name] = Data.from_field(field, value, True)
+            elif FieldType.DATA.annotates(field.type):
+                model.data[field.name] = Data.from_field(field, value, False)
+            elif FieldType.DATAOF.annotates(field.type):
+                model.data[field.name] = Data.from_field(field, value, True)
+            elif FieldType.NAME.annotates(field.type):
+                model.name[field.name] = General.from_field(field, value)
 
         return model
 
@@ -165,9 +167,9 @@ def eval_field_types(dataclass: DataClass) -> None:
     """Evaluate field types of a dataclass or its object."""
     hints = get_type_hints(dataclass, include_extras=True)  # type: ignore
 
-    for field_ in dataclass.__dataclass_fields__.values():
-        if isinstance(field_.type, str):
-            field_.type = hints[field_.name]
+    for field in dataclass.__dataclass_fields__.values():
+        if isinstance(field.type, str):
+            field.type = hints[field.name]
 
 
 def typedarray(
