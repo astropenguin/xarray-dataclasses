@@ -116,18 +116,18 @@ def asdataset(
     dataset = dataoptions.factory()
 
     for item in model.data.values():
-        dataset[item.key] = item(reference)
+        dataset[item.name] = item(reference)
 
     for item in model.coord.values():
-        if item.key in dataset.dims:
-            dataset.coords[item.key] = item(dataset)
+        if item.name in dataset.dims:
+            dataset.coords[item.name] = item(dataset)
 
     for item in model.coord.values():
-        if item.key not in dataset.dims:
-            dataset.coords[item.key] = item(dataset)
+        if item.name not in dataset.dims:
+            dataset.coords[item.name] = item(dataset)
 
     for item in model.attr.values():
-        dataset.attrs[item.key] = item()
+        dataset.attrs[item.name] = item()
 
     return dataset
 

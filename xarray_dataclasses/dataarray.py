@@ -117,15 +117,15 @@ def asdataarray(
     dataarray = dataoptions.factory(item(reference))
 
     for item in model.coord.values():
-        if item.key in dataarray.dims:
-            dataarray.coords[item.key] = item(dataarray)
+        if item.name in dataarray.dims:
+            dataarray.coords[item.name] = item(dataarray)
 
     for item in model.coord.values():
-        if item.key not in dataarray.dims:
-            dataarray.coords[item.key] = item(dataarray)
+        if item.name not in dataarray.dims:
+            dataarray.coords[item.name] = item(dataarray)
 
     for item in model.attr.values():
-        dataarray.attrs[item.key] = item()
+        dataarray.attrs[item.name] = item()
 
     if model.name:
         item = next(iter(model.name.values()))

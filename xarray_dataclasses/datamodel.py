@@ -37,7 +37,7 @@ DimsDtype = TypedDict("DimsDtype", dims=Dims, dtype=Dtype)
 class Data:
     """Field model for data-related fields."""
 
-    key: Hashable
+    name: Hashable
     """Name of the field."""
 
     value: Any
@@ -90,7 +90,7 @@ class Data:
 class General:
     """Field model for general fields."""
 
-    key: Hashable
+    name: Hashable
     """Name of the field."""
 
     value: Any
