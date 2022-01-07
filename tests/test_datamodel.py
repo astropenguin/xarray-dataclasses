@@ -56,7 +56,7 @@ def test_xaxis_attr() -> None:
     item = next(iter(xaxis_model.attr.values()))
     assert item.name == "units"
     assert item.value == "pixel"
-    assert item.type == "builtins.str"
+    assert item.type == str
 
 
 def test_xaxis_data() -> None:
@@ -70,7 +70,7 @@ def test_yaxis_attr() -> None:
     item = next(iter(yaxis_model.attr.values()))
     assert item.name == "units"
     assert item.value == "pixel"
-    assert item.type == "builtins.str"
+    assert item.type == str
 
 
 def test_yaxis_data() -> None:

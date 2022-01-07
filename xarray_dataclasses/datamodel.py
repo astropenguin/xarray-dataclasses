@@ -77,25 +77,20 @@ class Data:
 
 @dataclass(frozen=True)
 class General:
+    """General-type item."""
+
     name: Hashable
     value: Any
-    type: str
-    factory: Optional[Type[Any]] = None
+    type: Any
 
-    def __call__(self) -> Any:
-        if self.factory is None:
-            return self.value
-        else:
-            return self.factory(self.value)
+    def __call__(self, cast: bool = False) -> Any:
+        """Convert the item into an object."""
+        return self.type(self.value) if cast else self.value
 
     @classmethod
     def from_field(cls, field: Field[Any], value: Any) -> "General":
-        hint = unannotate(field.type)
-
-        try:
-            return cls(field.name, value, f"{hint.__module__}.{hint.__qualname__}")
-        except AttributeError:
-            return cls(field.name, value, repr(hint))
+        """Create an item from a dataclass field and a value."""
+        return cls(field.name, value, unannotate(field.type))
 
 
 # data models
