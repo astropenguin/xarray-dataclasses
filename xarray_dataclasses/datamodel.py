@@ -35,22 +35,12 @@ DimsDtype = TypedDict("DimsDtype", dims=Dims, dtype=Dtype)
 # field models
 @dataclass(frozen=True)
 class Data:
-    """Field model for data-related fields."""
-
     name: Hashable
-    """Name of the field."""
-
     value: Any
-    """Value assigned to the field."""
-
     type: DimsDtype
-    """Type (dims and dtype) of the field."""
-
     factory: Optional[Type[DataClass]] = None
-    """Factory dataclass to create a DataArray object."""
 
     def __call__(self, reference: Optional[DataType] = None) -> xr.DataArray:
-        """Create a DataArray object from the value and a reference."""
         from .dataarray import asdataarray
 
         if self.factory is None:
@@ -68,7 +58,6 @@ class Data:
 
     @classmethod
     def from_field(cls, field: Field[Any], value: Any, of: bool) -> "Data":
-        """Create a field model from a dataclass field and a value."""
         hint = unannotate(field.type)
 
         if not of:
@@ -88,22 +77,12 @@ class Data:
 
 @dataclass(frozen=True)
 class General:
-    """Field model for general fields."""
-
     name: Hashable
-    """Name of the field."""
-
     value: Any
-    """Value assigned to the field."""
-
     type: str
-    """Type of the field."""
-
     factory: Optional[Type[Any]] = None
-    """Factory function to create an object."""
 
     def __call__(self) -> Any:
-        """Create an object from the value."""
         if self.factory is None:
             return self.value
         else:
@@ -111,7 +90,6 @@ class General:
 
     @classmethod
     def from_field(cls, field: Field[Any], value: Any) -> "General":
-        """Create a field model from a dataclass field and a value."""
         hint = unannotate(field.type)
 
         try:
@@ -123,23 +101,13 @@ class General:
 # data models
 @dataclass(frozen=True)
 class DataModel:
-    """Model for dataclasses or their objects."""
-
     attr: Dict[str, General] = field(default_factory=dict)
-    """Model of the attribute fields."""
-
     coord: Dict[str, Data] = field(default_factory=dict)
-    """Model of the coordinate fields."""
-
     data: Dict[str, Data] = field(default_factory=dict)
-    """Model of the data fields."""
-
     name: Dict[str, General] = field(default_factory=dict)
-    """Model of the name fields."""
 
     @classmethod
     def from_dataclass(cls, dataclass: DataClass) -> "DataModel":
-        """Create a data model from a dataclass or its object."""
         model = cls()
         eval_field_types(dataclass)
 
