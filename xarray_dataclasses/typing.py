@@ -259,7 +259,7 @@ def get_dims(hint: Any) -> Dims:
     if is_str_literal(t_dims):
         return (get_inner(t_dims, 0),)
 
-    args = get_args(t_dims)
+    args: Any = get_args(t_dims)
 
     if args == () or args == ((),):
         return ()
@@ -300,7 +300,7 @@ def get_inner(hint: Any, *indexes: int) -> Any:
 
 def is_str_literal(hint: Any) -> bool:
     """Check if a type hint is Literal[str]."""
-    args = get_args(hint)
+    args: Any = get_args(hint)
     origin = get_origin(hint)
 
     if origin is not Literal:
