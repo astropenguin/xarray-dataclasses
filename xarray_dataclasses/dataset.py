@@ -28,22 +28,25 @@ DEFAULT_OPTIONS = DataOptions(xr.Dataset)
 # type hints
 P = ParamSpec("P")
 TDataset = TypeVar("TDataset", bound=xr.Dataset)
-TDataset_ = TypeVar("TDataset_", bound=xr.Dataset, contravariant=True)
 
 
 class DataClass(Protocol[P]):
     """Type hint for a dataclass object."""
 
-    __init__: Callable[P, None]
+    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
+        ...
+
     __dataclass_fields__: Dict[str, Field[Any]]
 
 
-class DatasetClass(Protocol[P, TDataset_]):
+class DatasetClass(Protocol[P, TDataset]):
     """Type hint for a dataclass object with a Dataset factory."""
 
-    __init__: Callable[P, None]
+    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
+        ...
+
     __dataclass_fields__: Dict[str, Field[Any]]
-    __dataoptions__: DataOptions[TDataset_]
+    __dataoptions__: DataOptions[TDataset]
 
 
 # custom classproperty
@@ -55,7 +58,7 @@ class classproperty:
 
     """
 
-    def __init__(self, func: Callable[..., Callable[P, TDataset]]) -> None:
+    def __init__(self, func: Callable[..., Any]) -> None:
         self.__func__ = func
 
     def __get__(
@@ -141,9 +144,9 @@ class AsDataset:
     def new(cls: Type[DatasetClass[P, TDataset]]) -> Callable[P, TDataset]:
         """Create a Dataset object from dataclass parameters."""
 
-        init = copy(cls.__init__)
+        init = copy(cls.__init__)  # type: ignore
+        init.__doc__ = cls.__init__.__doc__  # type: ignore
         init.__annotations__["return"] = TDataset
-        init.__doc__ = cls.__init__.__doc__
 
         @wraps(init)
         def new(
