@@ -28,22 +28,25 @@ DEFAULT_OPTIONS = DataOptions(xr.DataArray)
 # type hints
 P = ParamSpec("P")
 TDataArray = TypeVar("TDataArray", bound=xr.DataArray)
-TDataArray_ = TypeVar("TDataArray_", bound=xr.DataArray, contravariant=True)
 
 
 class DataClass(Protocol[P]):
     """Type hint for a dataclass object."""
 
-    __init__: Callable[P, None]
+    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
+        ...
+
     __dataclass_fields__: Dict[str, Field[Any]]
 
 
-class DataArrayClass(Protocol[P, TDataArray_]):
+class DataArrayClass(Protocol[P, TDataArray]):
     """Type hint for a dataclass object with a DataArray factory."""
 
-    __init__: Callable[P, None]
+    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
+        ...
+
     __dataclass_fields__: Dict[str, Field[Any]]
-    __dataoptions__: DataOptions[TDataArray_]
+    __dataoptions__: DataOptions[TDataArray]
 
 
 # custom classproperty
@@ -55,7 +58,7 @@ class classproperty:
 
     """
 
-    def __init__(self, func: Callable[..., Callable[P, TDataArray]]) -> None:
+    def __init__(self, func: Callable[..., Any]) -> None:
         self.__func__ = func
 
     def __get__(
@@ -143,9 +146,9 @@ class AsDataArray:
     def new(cls: Type[DataArrayClass[P, TDataArray]]) -> Callable[P, TDataArray]:
         """Create a DataArray object from dataclass parameters."""
 
-        init = copy(cls.__init__)
+        init = copy(cls.__init__)  # type: ignore
+        init.__doc__ = cls.__init__.__doc__  # type: ignore
         init.__annotations__["return"] = TDataArray
-        init.__doc__ = cls.__init__.__doc__
 
         @wraps(init)
         def new(
