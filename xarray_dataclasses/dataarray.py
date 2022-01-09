@@ -85,12 +85,6 @@ def asdataarray(
 
     """
     try:
-        # for backward compatibility (deprecated in v1.0.0)
-        dataoptions = DataOptions(dataclass.__dataarray_factory__)
-    except AttributeError:
-        pass
-
-    try:
         dataoptions = dataclass.__dataoptions__
     except AttributeError:
         pass
