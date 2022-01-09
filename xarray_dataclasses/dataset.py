@@ -3,7 +3,7 @@ __all__ = ["AsDataset", "asdataset"]
 
 # standard library
 from dataclasses import Field
-from functools import wraps
+from functools import partial, wraps
 from types import MethodType
 from typing import Any, Callable, Dict, Optional, Type, TypeVar, overload
 
@@ -18,7 +18,7 @@ from typing_extensions import ParamSpec, Protocol
 # submodules
 from .datamodel import DataModel
 from .dataoptions import DataOptions
-from .typing import DataType, Order, Sizes
+from .typing import DataType, Order, Shape, Sizes
 
 
 # constants
@@ -166,6 +166,53 @@ class AsDataset:
 
     @overload
     @classmethod
+    def shaped(
+        cls: Type[DatasetClass[P, TDataset]],
+        func: Callable[[Shape], np.ndarray],
+        sizes: Sizes,
+        **kwargs: Any,
+    ) -> TDataset:
+        ...
+
+    @overload
+    @classmethod
+    def shaped(
+        cls: Type[DataClass[P]],
+        func: Callable[[Shape], np.ndarray],
+        sizes: Sizes,
+        **kwargs: Any,
+    ) -> xr.Dataset:
+        ...
+
+    @classmethod
+    def shaped(
+        cls: Any,
+        func: Callable[[Shape], np.ndarray],
+        sizes: Sizes,
+        **kwargs: Any,
+    ) -> Any:
+        """Create a Dataset object from a shaped function.
+
+        Args:
+            func: Function to create an array with given shape.
+            sizes: Sizes of the new Dataset object.
+            kwargs: Args of the Dataset class except for data vars.
+
+        Returns:
+            Dataset object created from the shaped function.
+
+        """
+        model = DataModel.from_dataclass(cls)
+        data_vars: Dict[str, Any] = {}
+
+        for name, item in model.data.items():
+            shape = tuple(sizes[dim] for dim in item.type["dims"])
+            data_vars[name] = func(shape)
+
+        return asdataset(cls(**data_vars, **kwargs))
+
+    @overload
+    @classmethod
     def empty(
         cls: Type[DatasetClass[P, TDataset]],
         sizes: Sizes,
@@ -203,14 +250,8 @@ class AsDataset:
             Dataset object without initializing data vars.
 
         """
-        model = DataModel.from_dataclass(cls)
-        data_vars: Dict[str, Any] = {}
-
-        for name, item in model.data.items():
-            shape = tuple(sizes[dim] for dim in item.type["dims"])
-            data_vars[name] = np.empty(shape, order=order)
-
-        return asdataset(cls(**data_vars, **kwargs))
+        func = partial(np.empty, order=order)
+        return cls.shaped(func, sizes, **kwargs)
 
     @overload
     @classmethod
@@ -251,14 +292,8 @@ class AsDataset:
             Dataset object whose data vars are filled with zeros.
 
         """
-        model = DataModel.from_dataclass(cls)
-        data_vars: Dict[str, Any] = {}
-
-        for name, item in model.data.items():
-            shape = tuple(sizes[dim] for dim in item.type["dims"])
-            data_vars[name] = np.zeros(shape, order=order)
-
-        return asdataset(cls(**data_vars, **kwargs))
+        func = partial(np.zeros, order=order)
+        return cls.shaped(func, sizes, **kwargs)
 
     @overload
     @classmethod
@@ -299,14 +334,8 @@ class AsDataset:
             Dataset object whose data vars are filled with ones.
 
         """
-        model = DataModel.from_dataclass(cls)
-        data_vars: Dict[str, Any] = {}
-
-        for name, item in model.data.items():
-            shape = tuple(sizes[dim] for dim in item.type["dims"])
-            data_vars[name] = np.ones(shape, order=order)
-
-        return asdataset(cls(**data_vars, **kwargs))
+        func = partial(np.ones, order=order)
+        return cls.shaped(func, sizes, **kwargs)
 
     @overload
     @classmethod
@@ -351,11 +380,5 @@ class AsDataset:
             Dataset object whose data vars are filled with given value.
 
         """
-        model = DataModel.from_dataclass(cls)
-        data_vars: Dict[str, Any] = {}
-
-        for name, item in model.data.items():
-            shape = tuple(sizes[dim] for dim in item.type["dims"])
-            data_vars[name] = np.full(shape, fill_value, order=order)
-
-        return asdataset(cls(**data_vars, **kwargs))
+        func = partial(np.full, fill_value=fill_value, order=order)
+        return cls.shaped(func, sizes, **kwargs)
