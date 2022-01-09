@@ -9,11 +9,10 @@ from typing import Any, Dict, Hashable, Optional, Type, cast
 # dependencies
 import numpy as np
 import xarray as xr
-from typing_extensions import TypedDict
+from typing_extensions import TypedDict, get_type_hints
 
 
 # submodules
-from .deprecated import get_type_hints
 from .typing import (
     ArrayLike,
     DataClass,

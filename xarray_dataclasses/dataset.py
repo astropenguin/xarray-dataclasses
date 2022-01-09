@@ -85,12 +85,6 @@ def asdataset(
 
     """
     try:
-        # for backward compatibility (deprecated in v1.0.0)
-        dataoptions = DataOptions(dataclass.__dataset_factory__)
-    except AttributeError:
-        pass
-
-    try:
         dataoptions = dataclass.__dataoptions__
     except AttributeError:
         pass
