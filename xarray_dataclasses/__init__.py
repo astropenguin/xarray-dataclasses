@@ -1,6 +1,6 @@
 # type: ignore
 __author__ = "Akio Taniguchi"
-__version__ = "0.8.0"
+__version__ = "0.9.0"
 
 
 # for Python 3.7 and 3.8
