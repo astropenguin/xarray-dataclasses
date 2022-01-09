@@ -28,50 +28,33 @@ DEFAULT_OPTIONS = DataOptions(xr.DataArray)
 # type hints
 P = ParamSpec("P")
 TDataArray = TypeVar("TDataArray", bound=xr.DataArray)
-TDataArray_ = TypeVar("TDataArray_", bound=xr.DataArray, contravariant=True)
 
 
 class DataClass(Protocol[P]):
     """Type hint for a dataclass object."""
 
-    __init__: Callable[P, None]
+    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
+        ...
+
     __dataclass_fields__: Dict[str, Field[Any]]
 
 
-class DataArrayClass(Protocol[P, TDataArray_]):
+class DataArrayClass(Protocol[P, TDataArray]):
     """Type hint for a dataclass object with a DataArray factory."""
 
-    __init__: Callable[P, None]
+    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
+        ...
+
     __dataclass_fields__: Dict[str, Field[Any]]
-    __dataoptions__: DataOptions[TDataArray_]
+    __dataoptions__: DataOptions[TDataArray]
 
 
-# custom classproperty
-class classproperty:
-    """Class property only for AsDataArray.new().
-
-    As a classmethod and a property can be chained together since Python 3.9,
-    this class will be removed when the support for Python 3.7 and 3.8 ends.
-
-    """
-
-    def __init__(self, func: Callable[..., Callable[P, TDataArray]]) -> None:
-        self.__func__ = func
-
-    def __get__(
-        self,
-        obj: Any,
-        cls: Type[DataArrayClass[P, TDataArray]],
-    ) -> Callable[P, TDataArray]:
-        return self.__func__(cls)
-
-
-# runtime functions and classes
+# runtime functions
 @overload
 def asdataarray(
     dataclass: DataArrayClass[Any, TDataArray],
     reference: Optional[DataType] = None,
-    dataoptions: Any = DEFAULT_OPTIONS,
+    dataoptions: DataOptions[Any] = DEFAULT_OPTIONS,
 ) -> TDataArray:
     ...
 
@@ -87,8 +70,8 @@ def asdataarray(
 
 def asdataarray(
     dataclass: Any,
-    reference: Any = None,
-    dataoptions: Any = DEFAULT_OPTIONS,
+    reference: Optional[DataType] = None,
+    dataoptions: DataOptions[Any] = DEFAULT_OPTIONS,
 ) -> Any:
     """Create a DataArray object from a dataclass object.
 
@@ -134,29 +117,56 @@ def asdataarray(
     return dataarray
 
 
+# runtime classes
+class classproperty:
+    """Class property only for AsDataArray.new().
+
+    As a classmethod and a property can be chained together since Python 3.9,
+    this class will be removed when the support for Python 3.7 and 3.8 ends.
+
+    """
+
+    def __init__(self, func: Any) -> None:
+        self.__func__ = func
+
+    @overload
+    def __get__(
+        self,
+        obj: Any,
+        cls: Type[DataArrayClass[P, TDataArray]],
+    ) -> Callable[P, TDataArray]:
+        ...
+
+    @overload
+    def __get__(
+        self,
+        obj: Any,
+        cls: Type[DataClass[P]],
+    ) -> Callable[P, xr.DataArray]:
+        ...
+
+    def __get__(self, obj: Any, cls: Any) -> Any:
+        return self.__func__(cls)
+
+
 class AsDataArray:
     """Mix-in class that provides shorthand methods."""
 
-    __dataoptions__ = DEFAULT_OPTIONS
-
     @classproperty
-    def new(cls: Type[DataArrayClass[P, TDataArray]]) -> Callable[P, TDataArray]:
+    def new(cls: Any) -> Any:
         """Create a DataArray object from dataclass parameters."""
 
         init = copy(cls.__init__)
-        init.__annotations__["return"] = TDataArray
         init.__doc__ = cls.__init__.__doc__
+        init.__annotations__["return"] = TDataArray
 
         @wraps(init)
-        def new(
-            cls: Type[DataArrayClass[P, TDataArray]],
-            *args: P.args,
-            **kwargs: P.kwargs,
-        ) -> TDataArray:
+        def new(cls: Any, *args: Any, **kwargs: Any) -> Any:
             return asdataarray(cls(*args, **kwargs))
 
         return MethodType(new, cls)
 
+    @overload
     @classmethod
     def empty(
         cls: Type[DataArrayClass[P, TDataArray]],
@@ -164,6 +174,25 @@ class AsDataArray:
         order: Order = "C",
         **kwargs: Any,
     ) -> TDataArray:
+        ...
+
+    @overload
+    @classmethod
+    def empty(
+        cls: Type[DataClass[P]],
+        shape: Union[Shape, Sizes],
+        order: Order = "C",
+        **kwargs: Any,
+    ) -> xr.DataArray:
+        ...
+
+    @classmethod
+    def empty(
+        cls: Any,
+        shape: Union[Shape, Sizes],
+        order: Order = "C",
+        **kwargs: Any,
+    ) -> Any:
         """Create a DataArray object without initializing data.
 
         Args:
@@ -185,6 +214,7 @@ class AsDataArray:
         data = np.empty(shape, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
 
+    @overload
     @classmethod
     def zeros(
         cls: Type[DataArrayClass[P, TDataArray]],
@@ -192,6 +222,25 @@ class AsDataArray:
         order: Order = "C",
         **kwargs: Any,
     ) -> TDataArray:
+        ...
+
+    @overload
+    @classmethod
+    def zeros(
+        cls: Type[DataClass[P]],
+        shape: Union[Shape, Sizes],
+        order: Order = "C",
+        **kwargs: Any,
+    ) -> xr.DataArray:
+        ...
+
+    @classmethod
+    def zeros(
+        cls: Any,
+        shape: Union[Shape, Sizes],
+        order: Order = "C",
+        **kwargs: Any,
+    ) -> Any:
         """Create a DataArray object filled with zeros.
 
         Args:
@@ -213,6 +262,7 @@ class AsDataArray:
         data = np.zeros(shape, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
 
+    @overload
     @classmethod
     def ones(
         cls: Type[DataArrayClass[P, TDataArray]],
@@ -220,6 +270,25 @@ class AsDataArray:
         order: Order = "C",
         **kwargs: Any,
     ) -> TDataArray:
+        ...
+
+    @overload
+    @classmethod
+    def ones(
+        cls: Type[DataClass[P]],
+        shape: Union[Shape, Sizes],
+        order: Order = "C",
+        **kwargs: Any,
+    ) -> xr.DataArray:
+        ...
+
+    @classmethod
+    def ones(
+        cls: Any,
+        shape: Union[Shape, Sizes],
+        order: Order = "C",
+        **kwargs: Any,
+    ) -> Any:
         """Create a DataArray object filled with ones.
 
         Args:
@@ -241,6 +310,7 @@ class AsDataArray:
         data = np.ones(shape, order=order)
         return asdataarray(cls(**{name: data}, **kwargs))
 
+    @overload
     @classmethod
     def full(
         cls: Type[DataArrayClass[P, TDataArray]],
@@ -249,6 +319,27 @@ class AsDataArray:
         order: Order = "C",
         **kwargs: Any,
     ) -> TDataArray:
+        ...
+
+    @overload
+    @classmethod
+    def full(
+        cls: Type[DataClass[P]],
+        shape: Union[Shape, Sizes],
+        fill_value: Any,
+        order: Order = "C",
+        **kwargs: Any,
+    ) -> xr.DataArray:
+        ...
+
+    @classmethod
+    def full(
+        cls: Any,
+        shape: Union[Shape, Sizes],
+        fill_value: Any,
+        order: Order = "C",
+        **kwargs: Any,
+    ) -> Any:
         """Create a DataArray object filled with given value.
 
         Args:
