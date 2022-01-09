@@ -3,7 +3,7 @@ __all__ = ["AsDataArray", "asdataarray"]
 
 # standard library
 from dataclasses import Field
-from functools import wraps
+from functools import partial, wraps
 from types import MethodType
 from typing import Any, Callable, Dict, Optional, Type, TypeVar, Union, overload
 
@@ -168,6 +168,52 @@ class AsDataArray:
 
     @overload
     @classmethod
+    def shaped(
+        cls: Type[DataArrayClass[P, TDataArray]],
+        func: Callable[[Shape], np.ndarray],
+        shape: Union[Shape, Sizes],
+        **kwargs: Any,
+    ) -> TDataArray:
+        ...
+
+    @overload
+    @classmethod
+    def shaped(
+        cls: Type[DataClass[P]],
+        func: Callable[[Shape], np.ndarray],
+        shape: Union[Shape, Sizes],
+        **kwargs: Any,
+    ) -> xr.DataArray:
+        ...
+
+    @classmethod
+    def shaped(
+        cls: Any,
+        func: Callable[[Shape], np.ndarray],
+        shape: Union[Shape, Sizes],
+        **kwargs: Any,
+    ) -> Any:
+        """Create a DataArray object from a shaped function.
+
+        Args:
+            func: Function to create an array with given shape.
+            shape: Shape or sizes of the new DataArray object.
+            kwargs: Args of the DataArray class except for data.
+
+        Returns:
+            DataArray object created from the shaped function.
+
+        """
+        model = DataModel.from_dataclass(cls)
+        name, item = next(iter(model.data.items()))
+
+        if isinstance(shape, dict):
+            shape = tuple(shape[dim] for dim in item.type["dims"])
+
+        return asdataarray(cls(**{name: func(shape)}, **kwargs))
+
+    @overload
+    @classmethod
     def empty(
         cls: Type[DataArrayClass[P, TDataArray]],
         shape: Union[Shape, Sizes],
@@ -205,14 +251,8 @@ class AsDataArray:
             DataArray object without initializing data.
 
         """
-        model = DataModel.from_dataclass(cls)
-        name, item = next(iter(model.data.items()))
-
-        if isinstance(shape, dict):
-            shape = tuple(shape[dim] for dim in item.type["dims"])
-
-        data = np.empty(shape, order=order)
-        return asdataarray(cls(**{name: data}, **kwargs))
+        func = partial(np.empty, order=order)
+        return cls.shaped(func, shape, **kwargs)
 
     @overload
     @classmethod
@@ -253,14 +293,8 @@ class AsDataArray:
             DataArray object filled with zeros.
 
         """
-        model = DataModel.from_dataclass(cls)
-        name, item = next(iter(model.data.items()))
-
-        if isinstance(shape, dict):
-            shape = tuple(shape[dim] for dim in item.type["dims"])
-
-        data = np.zeros(shape, order=order)
-        return asdataarray(cls(**{name: data}, **kwargs))
+        func = partial(np.zeros, order=order)
+        return cls.shaped(func, shape, **kwargs)
 
     @overload
     @classmethod
@@ -301,14 +335,8 @@ class AsDataArray:
             DataArray object filled with ones.
 
         """
-        model = DataModel.from_dataclass(cls)
-        name, item = next(iter(model.data.items()))
-
-        if isinstance(shape, dict):
-            shape = tuple(shape[dim] for dim in item.type["dims"])
-
-        data = np.ones(shape, order=order)
-        return asdataarray(cls(**{name: data}, **kwargs))
+        func = partial(np.ones, order=order)
+        return cls.shaped(func, shape, **kwargs)
 
     @overload
     @classmethod
@@ -353,11 +381,5 @@ class AsDataArray:
             DataArray object filled with given value.
 
         """
-        model = DataModel.from_dataclass(cls)
-        name, item = next(iter(model.data.items()))
-
-        if isinstance(shape, dict):
-            shape = tuple(shape[dim] for dim in item.type["dims"])
-
-        data = np.full(shape, fill_value, order=order)
-        return asdataarray(cls(**{name: data}, **kwargs))
+        func = partial(np.full, fill_value=fill_value, order=order)
+        return cls.shaped(func, shape, **kwargs)
