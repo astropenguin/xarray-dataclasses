@@ -20,17 +20,7 @@ __all__ = ["Attr", "Coord", "Coordof", "Data", "Dataof", "Name"]
 # standard library
 from dataclasses import Field
 from enum import auto, Enum
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Hashable,
-    Optional,
-    Sequence,
-    Tuple,
-    TypeVar,
-    Union,
-)
+from typing import Any, Dict, Hashable, Optional, Sequence, Tuple, TypeVar, Union
 
 
 # dependencies
@@ -38,6 +28,7 @@ import xarray as xr
 from typing_extensions import (
     Annotated,
     Literal,
+    ParamSpec,
     Protocol,
     get_args,
     get_origin,
@@ -80,6 +71,7 @@ Dtype = Optional[str]
 Order = Literal["C", "F"]
 Shape = Union[Sequence[int], int]
 Sizes = Dict[str, int]
+P = ParamSpec("P")
 T = TypeVar("T")
 TDims = TypeVar("TDims", covariant=True)
 TDtype = TypeVar("TDtype", covariant=True)
@@ -105,14 +97,16 @@ class ArrayLike(Protocol[TDims, TDtype]):
         ...
 
 
-class DataClass(Protocol):
-    """Type hint of dataclasses or their objects."""
+class DataClass(Protocol[P]):
+    """Type hint of dataclass objects."""
 
-    __init__: Callable[..., None]
+    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
+        ...
+
     __dataclass_fields__: Dict[str, Field[Any]]
 
 
-TDataClass = TypeVar("TDataClass", bound=DataClass)
+TDataClass = TypeVar("TDataClass", bound=DataClass[Any])
 
 
 Attr = Annotated[T, FieldType.ATTR]
