@@ -15,7 +15,6 @@ from typing_extensions import TypedDict, get_type_hints
 # submodules
 from .typing import (
     ArrayLike,
-    DataClass,
     DataType,
     Dims,
     Dtype,
@@ -45,7 +44,7 @@ class Data:
     type: DimsDtype
     """Type (dims and dtype) of the field."""
 
-    factory: Optional[Type[DataClass]] = None
+    factory: Any = None
     """Factory dataclass to create a DataArray object."""
 
     def __call__(self, reference: Optional[DataType] = None) -> xr.DataArray:
@@ -137,7 +136,7 @@ class DataModel:
     """Model of the name fields."""
 
     @classmethod
-    def from_dataclass(cls, dataclass: DataClass) -> "DataModel":
+    def from_dataclass(cls, dataclass: Any) -> "DataModel":
         """Create a data model from a dataclass or its object."""
         model = cls()
         eval_field_types(dataclass)
@@ -162,7 +161,7 @@ class DataModel:
 
 
 # runtime functions
-def eval_field_types(dataclass: DataClass) -> None:
+def eval_field_types(dataclass: Any) -> None:
     """Evaluate field types of a dataclass or its object."""
     hints = get_type_hints(dataclass, include_extras=True)  # type: ignore
 
