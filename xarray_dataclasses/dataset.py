@@ -83,19 +83,19 @@ def asdataset(
     model = DataModel.from_dataclass(dataclass)
     dataset = dataoptions.factory()
 
-    for item in model.data.values():
-        dataset[item.name] = item(reference)
+    for entry in model.data_vars:
+        dataset[entry.name] = entry(reference)
 
-    for item in model.coord.values():
-        if item.name in dataset.dims:
-            dataset.coords[item.name] = item(dataset)
+    for entry in model.coords:
+        if entry.name in dataset.dims:
+            dataset.coords[entry.name] = entry(dataset)
 
-    for item in model.coord.values():
-        if item.name not in dataset.dims:
-            dataset.coords[item.name] = item(dataset)
+    for entry in model.coords:
+        if entry.name not in dataset.dims:
+            dataset.coords[entry.name] = entry(dataset)
 
-    for item in model.attr.values():
-        dataset.attrs[item.name] = item()
+    for entry in model.attrs:
+        dataset.attrs[entry.name] = entry()
 
     return dataset
 
@@ -188,10 +188,10 @@ class AsDataset:
 
         """
         model = DataModel.from_dataclass(cls)
-        data_vars: Dict[str, Any] = {}
+        data_vars: Dict[str, np.ndarray] = {}
 
-        for name, item in model.data.items():
-            shape = tuple(sizes[dim] for dim in item.type["dims"])
+        for name, entry in model.data_vars_items:
+            shape = tuple(sizes[dim] for dim in entry.dims)
             data_vars[name] = func(shape)
 
         return asdataset(cls(**data_vars, **kwargs))

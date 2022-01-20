@@ -81,23 +81,21 @@ def asdataarray(
         pass
 
     model = DataModel.from_dataclass(dataclass)
-    item = next(iter(model.data.values()))
-    dataarray = dataoptions.factory(item(reference))
+    dataarray = dataoptions.factory(model.data_vars[0](reference))
 
-    for item in model.coord.values():
-        if item.name in dataarray.dims:
-            dataarray.coords[item.name] = item(dataarray)
+    for entry in model.coords:
+        if entry.name in dataarray.dims:
+            dataarray.coords[entry.name] = entry(dataarray)
 
-    for item in model.coord.values():
-        if item.name not in dataarray.dims:
-            dataarray.coords[item.name] = item(dataarray)
+    for entry in model.coords:
+        if entry.name not in dataarray.dims:
+            dataarray.coords[entry.name] = entry(dataarray)
 
-    for item in model.attr.values():
-        dataarray.attrs[item.name] = item()
+    for entry in model.attrs:
+        dataarray.attrs[entry.name] = entry()
 
-    if model.name:
-        item = next(iter(model.name.values()))
-        dataarray.name = item()
+    if model.names:
+        dataarray.name = model.names[0]()
 
     return dataarray
 
@@ -190,10 +188,10 @@ class AsDataArray:
 
         """
         model = DataModel.from_dataclass(cls)
-        name, item = next(iter(model.data.items()))
+        name, entry = model.data_vars_items[0]
 
         if isinstance(shape, dict):
-            shape = tuple(shape[dim] for dim in item.type["dims"])
+            shape = tuple(shape[dim] for dim in entry.dims)
 
         return asdataarray(cls(**{name: func(shape)}, **kwargs))
 
