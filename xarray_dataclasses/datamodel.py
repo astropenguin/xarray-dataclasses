@@ -3,6 +3,7 @@ __all__ = ["DataModel"]
 
 # standard library
 from dataclasses import dataclass
+from enum import Enum, auto
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 
@@ -13,19 +14,34 @@ from typing_extensions import Literal
 
 
 # submodules
-from .typing import ArrayLike, DataType, Dims, Dtype
+from .typing import ArrayLike, DataType, FieldType, Dims, Dtype
+
+
+# constants
+class EntryType(Enum):
+    """Type labels for datamodel entries."""
+
+    ATTR = auto()
+    """Type label for attribute entries."""
+
+    COORD = auto()
+    """Type label for coordinate entries."""
+
+    DATA = auto()
+    """Type label for data entries."""
+
+    NAME = auto()
+    """Type label for name entries."""
 
 
 # type hints
-AttrEntryType = Literal["attr", "name"]
-DataEntryType = Literal["coord", "data"]
 Reference = Optional[DataType]
 
 
 # dataclasses
 @dataclass(frozen=True)
 class AttrEntry:
-    type: AttrEntryType
+    type: Literal[EntryType.ATTR, EntryType.NAME]
     name: Any = None
     default: Any = None
 
@@ -35,7 +51,7 @@ class AttrEntry:
 
 @dataclass(frozen=True)
 class DataEntry:
-    type: DataEntryType
+    type: Literal[EntryType.COORD, EntryType.DATA]
     dims: Any = None
     dtype: Any = None
     base: Any = None
@@ -77,6 +93,29 @@ class DataModel:
 
 
 # runtime functions
+def get_entry_type(type: Any) -> EntryType:
+    """Parse a type and return a corresponding entry type."""
+    if FieldType.ATTR.annotates(type):
+        return EntryType.ATTR
+
+    if FieldType.COORD.annotates(type):
+        return EntryType.COORD
+
+    if FieldType.COORDOF.annotates(type):
+        return EntryType.COORD
+
+    if FieldType.DATA.annotates(type):
+        return EntryType.DATA
+
+    if FieldType.DATAOF.annotates(type):
+        return EntryType.DATA
+
+    if FieldType.NAME.annotates(type):
+        return EntryType.NAME
+
+    raise TypeError("Could not find any FieldType annotation.")
+
+
 def typedarray(
     data: Any,
     dims: Dims,

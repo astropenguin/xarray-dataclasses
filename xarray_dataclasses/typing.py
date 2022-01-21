@@ -19,7 +19,7 @@ __all__ = ["Attr", "Coord", "Coordof", "Data", "Dataof", "Name"]
 
 # standard library
 from dataclasses import Field
-from enum import auto, Enum
+from enum import Enum, auto
 from typing import Any, Dict, Hashable, Optional, Sequence, Tuple, TypeVar, Union
 
 
@@ -39,29 +39,29 @@ from typing_extensions import (
 
 # constants
 class FieldType(Enum):
-    """Annotation of xarray-related field hints."""
+    """Annotations for xarray-related field types."""
 
     ATTR = auto()
-    """Annotation of attribute field hints."""
+    """Annotation for attribute field types."""
 
     COORD = auto()
-    """Annotation of coordinate field hints."""
+    """Annotation for coordinate field types."""
 
     COORDOF = auto()
-    """Annotation of coordinate field hints."""
+    """Annotation for coordinate field types."""
 
     DATA = auto()
-    """Annotation of data (variable) field hints."""
+    """Annotation for data (variable) field types."""
 
     DATAOF = auto()
-    """Annotation of data (variable) field hints."""
+    """Annotation for data (variable) field types."""
 
     NAME = auto()
-    """Annotation of name field hints."""
+    """Annotation for name field types."""
 
-    def annotates(self, hint: Any) -> bool:
-        """Check if a field hint is annotated."""
-        return self in get_args(hint)[1:]
+    def annotates(self, type: Any) -> bool:
+        """Check if a type is annotated by FieldType."""
+        return self in get_args(type)[1:]
 
 
 # type hints
