@@ -20,7 +20,17 @@ __all__ = ["Attr", "Coord", "Coordof", "Data", "Dataof", "Name"]
 # standard library
 from dataclasses import Field
 from enum import Enum, auto
-from typing import Any, Dict, Hashable, Optional, Sequence, Tuple, TypeVar, Union
+from typing import (
+    Any,
+    ClassVar,
+    Dict,
+    Hashable,
+    Optional,
+    Sequence,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 
 # dependencies
@@ -65,6 +75,7 @@ class FieldType(Enum):
 
 
 # type hints
+DataClassFields = Dict[str, Field[Any]]
 DataType = Union[xr.DataArray, xr.Dataset]
 Dims = Tuple[str, ...]
 Dtype = Optional[str]
@@ -103,7 +114,7 @@ class DataClass(Protocol[P]):
     def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
         ...
 
-    __dataclass_fields__: Dict[str, Field[Any]]
+    __dataclass_fields__: ClassVar[DataClassFields]
 
 
 TDataClass = TypeVar("TDataClass", bound=DataClass[Any])

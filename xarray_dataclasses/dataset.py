@@ -2,10 +2,9 @@ __all__ = ["AsDataset", "asdataset"]
 
 
 # standard library
-from dataclasses import Field
 from functools import partial, wraps
 from types import MethodType
-from typing import Any, Callable, Dict, Optional, Type, TypeVar, overload
+from typing import Any, Callable, ClassVar, Dict, Optional, Type, TypeVar, overload
 
 
 # dependencies
@@ -18,7 +17,7 @@ from typing_extensions import ParamSpec, Protocol
 # submodules
 from .datamodel import DataModel
 from .dataoptions import DataOptions
-from .typing import DataClass, DataType, Order, Shape, Sizes
+from .typing import DataClass, DataClassFields, DataType, Order, Shape, Sizes
 
 
 # constants
@@ -36,7 +35,7 @@ class OptionedClass(Protocol[P, TDataset]):
     def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
         ...
 
-    __dataclass_fields__: Dict[str, Field[Any]]
+    __dataclass_fields__: ClassVar[DataClassFields]
     __dataoptions__: DataOptions[TDataset]
 
 
