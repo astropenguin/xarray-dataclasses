@@ -41,8 +41,6 @@ from typing_extensions import (
     ParamSpec,
     Protocol,
     get_args,
-    get_origin,
-    get_type_hints,
     runtime_checkable,
 )
 
@@ -74,7 +72,14 @@ class FieldType(Enum):
         return self in get_args(type)[1:]
 
 
-# type hints
+# type hints (private)
+P = ParamSpec("P")
+T = TypeVar("T")
+TDataClass = TypeVar("TDataClass", bound="DataClass[Any]")
+TDims = TypeVar("TDims", covariant=True)
+TDtype = TypeVar("TDtype", covariant=True)
+TName = TypeVar("TName", bound=Hashable)
+
 DataClassFields = Dict[str, Field[Any]]
 DataType = Union[xr.DataArray, xr.Dataset]
 Dims = Tuple[str, ...]
@@ -82,11 +87,6 @@ Dtype = Optional[str]
 Order = Literal["C", "F"]
 Shape = Union[Sequence[int], int]
 Sizes = Dict[str, int]
-P = ParamSpec("P")
-T = TypeVar("T")
-TDims = TypeVar("TDims", covariant=True)
-TDtype = TypeVar("TDtype", covariant=True)
-TName = TypeVar("TName", bound=Hashable)
 
 
 @runtime_checkable
@@ -117,9 +117,7 @@ class DataClass(Protocol[P]):
     __dataclass_fields__: ClassVar[DataClassFields]
 
 
-TDataClass = TypeVar("TDataClass", bound=DataClass[Any])
-
-
+# type hints (public)
 Attr = Annotated[T, FieldType.ATTR]
 """Type hint to define attribute fields (``Attr[T]``).
 
@@ -254,73 +252,3 @@ Example:
             name: Name[str] = "image"
 
 """
-
-
-# runtime functions
-def get_dims(hint: Any) -> Dims:
-    """Return dims parsed from a type hint."""
-    t_dims = get_inner(hint, 0, 0)
-
-    if is_str_literal(t_dims):
-        return (get_inner(t_dims, 0),)
-
-    args: Any = get_args(t_dims)
-
-    if args == () or args == ((),):
-        return ()
-
-    if all(map(is_str_literal, args)):
-        return tuple(map(get_inner, args, [0] * len(args)))
-
-    raise ValueError(f"Could not parse dims from {hint!r}.")
-
-
-def get_dtype(hint: Any) -> Dtype:
-    """Return dtype parsed from a type hint."""
-    t_dtype = get_inner(hint, 0, 1)
-
-    if t_dtype is Any:
-        return None
-
-    if t_dtype is type(None):
-        return None
-
-    if isinstance(t_dtype, type):
-        return t_dtype.__name__
-
-    if is_str_literal(t_dtype):
-        return get_inner(t_dtype, 0)
-
-    raise ValueError(f"Could not parse dtype from {hint!r}.")
-
-
-def get_inner(hint: Any, *indexes: int) -> Any:
-    """Return an inner type hint by indexes."""
-    if not indexes:
-        return hint
-
-    index, indexes = indexes[0], indexes[1:]
-    return get_inner(get_args(hint)[index], *indexes)
-
-
-def is_str_literal(hint: Any) -> bool:
-    """Check if a type hint is Literal[str]."""
-    args: Any = get_args(hint)
-    origin = get_origin(hint)
-
-    if origin is not Literal:
-        return False
-
-    if not len(args) == 1:
-        return False
-
-    return isinstance(args[0], str)
-
-
-def unannotate(hint: Any) -> Any:
-    """Recursively remove Annotated type hints."""
-
-    class Temp:
-        __annotations__ = dict(hint=hint)
-
-    return get_type_hints(Temp)["hint"]

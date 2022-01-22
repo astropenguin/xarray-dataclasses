@@ -10,7 +10,13 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union, cast
 # dependencies
 import numpy as np
 import xarray as xr
-from typing_extensions import Literal, ParamSpec, get_args, get_type_hints
+from typing_extensions import (
+    Literal,
+    ParamSpec,
+    get_args,
+    get_origin,
+    get_type_hints,
+)
 
 
 # submodules
@@ -21,8 +27,6 @@ from .typing import (
     FieldType,
     Dims,
     Dtype,
-    get_dims,
-    get_dtype,
 )
 
 
@@ -126,6 +130,37 @@ def eval_dataclass(dataclass: DataClassLike[P]) -> None:
         field.type = types[field.name]
 
 
+def get_dims(type_: Any) -> Dims:
+    """Parse a type and return dims."""
+    args = get_args(type_)
+    origin = get_origin(type_)
+
+    if origin not in (tuple, Tuple, Literal):
+        raise ValueError(f"Could not convert {type_!r} to dims.")
+
+    if args == () or args == ((),):
+        return ()
+
+    if origin is Literal:
+        return (args[0],)
+
+    return tuple(get_dims(arg)[0] for arg in args)
+
+
+def get_dtype(type_: Any) -> Dtype:
+    """Parse a type and return dtype."""
+    if type_ is Any or type_ is type(None):
+        return None
+
+    if isinstance(type_, type):
+        return type_.__name__
+
+    if get_origin(type_) is Literal:
+        return get_args(type_)[0]
+
+    raise ValueError(f"Could not convert {type_!r} to dtype.")
+
+
 def get_entries(dataclass: DataClassLike[P]) -> Entries:
     """Parse a dataclass and return entries."""
     entries: Entries = {}
@@ -151,8 +186,8 @@ def get_entries(dataclass: DataClassLike[P]) -> Entries:
         else:
             entries[field.name] = DataEntry(
                 type=etype,
-                dims=get_dims(rtype),
-                dtype=get_dtype(rtype),
+                dims=get_dims(get_args(rtype)[0]),
+                dtype=get_dtype(get_args(rtype)[1]),
                 name=field.name,
                 default=default,
             )
@@ -160,34 +195,34 @@ def get_entries(dataclass: DataClassLike[P]) -> Entries:
     return entries
 
 
-def get_entry_type(type: Any) -> EntryType:
+def get_entry_type(type_: Any) -> EntryType:
     """Parse a type and return a corresponding entry type."""
-    if FieldType.ATTR.annotates(type):
+    if FieldType.ATTR.annotates(type_):
         return EntryType.ATTR
 
-    if FieldType.COORD.annotates(type):
+    if FieldType.COORD.annotates(type_):
         return EntryType.COORD
 
-    if FieldType.COORDOF.annotates(type):
+    if FieldType.COORDOF.annotates(type_):
         return EntryType.COORD
 
-    if FieldType.DATA.annotates(type):
+    if FieldType.DATA.annotates(type_):
         return EntryType.DATA
 
-    if FieldType.DATAOF.annotates(type):
+    if FieldType.DATAOF.annotates(type_):
         return EntryType.DATA
 
-    if FieldType.NAME.annotates(type):
+    if FieldType.NAME.annotates(type_):
         return EntryType.NAME
 
-    raise TypeError("Could not find any FieldType annotation.")
+    raise TypeError("Could not find any FieldType annotations.")
 
 
-def get_repr_type(type: Any) -> Any:
+def get_repr_type(type_: Any) -> Any:
     """Parse a type and return an representative type."""
 
     class Temporary:
-        __annotations__ = dict(type=type)
+        __annotations__ = dict(type=type_)
 
     unannotated = get_type_hints(Temporary)["type"]
     inner_types = get_args(unannotated)
