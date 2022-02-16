@@ -3,13 +3,13 @@ __all__ = ["DataModel"]
 
 # standard library
 from dataclasses import Field, dataclass, field, is_dataclass
-from typing import Any, Dict, Hashable, Optional, Type, cast
+from typing import Any, Dict, Hashable, Optional, Type, Union, cast
 
 
 # dependencies
 import numpy as np
 import xarray as xr
-from typing_extensions import TypedDict, get_type_hints
+from typing_extensions import ParamSpec, TypedDict, get_type_hints
 
 
 # submodules
@@ -28,6 +28,8 @@ from .typing import (
 
 
 # type hints
+P = ParamSpec("P")
+AnyDataClass = Union[Type[DataClass[P]], DataClass[P]]
 DimsDtype = TypedDict("DimsDtype", dims=Dims, dtype=Dtype)
 
 
@@ -45,7 +47,7 @@ class Data:
     type: DimsDtype
     """Type (dims and dtype) of the field."""
 
-    factory: Optional[Type[DataClass]] = None
+    factory: Any = None
     """Factory dataclass to create a DataArray object."""
 
     def __call__(self, reference: Optional[DataType] = None) -> xr.DataArray:
@@ -137,7 +139,7 @@ class DataModel:
     """Model of the name fields."""
 
     @classmethod
-    def from_dataclass(cls, dataclass: DataClass) -> "DataModel":
+    def from_dataclass(cls, dataclass: AnyDataClass[P]) -> "DataModel":
         """Create a data model from a dataclass or its object."""
         model = cls()
         eval_field_types(dataclass)
@@ -162,7 +164,7 @@ class DataModel:
 
 
 # runtime functions
-def eval_field_types(dataclass: DataClass) -> None:
+def eval_field_types(dataclass: AnyDataClass[P]) -> None:
     """Evaluate field types of a dataclass or its object."""
     hints = get_type_hints(dataclass, include_extras=True)  # type: ignore
 
