@@ -145,7 +145,7 @@ class DataModel:
     def from_dataclass(cls, dataclass: AnyDataClass[P]) -> "DataModel":
         """Create a data model from a dataclass or its object."""
         model = cls()
-        eval_field_types(dataclass)
+        eval_dataclass(dataclass)
 
         for field in dataclass.__dataclass_fields__.values():
             value = getattr(dataclass, field.name, field.default)
@@ -167,13 +167,25 @@ class DataModel:
 
 
 # runtime functions
-def eval_field_types(dataclass: AnyDataClass[P]) -> None:
-    """Evaluate field types of a dataclass or its object."""
-    hints = get_type_hints(dataclass, include_extras=True)  # type: ignore
+def eval_dataclass(dataclass: AnyDataClass[P]) -> None:
+    """Evaluate field types of a dataclass."""
+    if not is_dataclass(dataclass):
+        raise TypeError("Not a dataclass or its object.")
 
-    for field in dataclass.__dataclass_fields__.values():
-        if isinstance(field.type, str):
-            field.type = hints[field.name]
+    fields = dataclass.__dataclass_fields__.values()
+
+    # do nothing if field types are already evaluated
+    if not any(isinstance(field.type, str) for field in fields):
+        return
+
+    # otherwise, replace field types with evaluated types
+    if not isinstance(dataclass, type):
+        dataclass = type(dataclass)
+
+    types = get_type_hints(dataclass, include_extras=True)
+
+    for field in fields:
+        field.type = types[field.name]
 
 
 def typedarray(
