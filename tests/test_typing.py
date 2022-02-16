@@ -8,7 +8,16 @@ from typing_extensions import Literal
 
 
 # submodules
-from xarray_dataclasses.typing import ArrayLike, get_dims, get_dtype
+from xarray_dataclasses.typing import (
+    ArrayLike,
+    Attr,
+    Coord,
+    Data,
+    Name,
+    get_dims,
+    get_dtype,
+    get_field_type,
+)
 
 
 # type hints
@@ -41,6 +50,13 @@ testdata_dtype = [
     (ArrayLike[Any, int], "int"),
 ]
 
+testdata_field_type = [
+    (Attr[Any], "attr"),
+    (Coord[Any, Any], "coord"),
+    (Data[Any, Any], "data"),
+    (Name[Any], "name"),
+]
+
 
 # test functions
 @mark.parametrize("type_, dims", testdata_dims)
@@ -51,3 +67,8 @@ def test_get_dims(type_: Any, dims: Any) -> None:
 @mark.parametrize("type_, dtype", testdata_dtype)
 def test_get_dtype(type_: Any, dtype: Any) -> None:
     assert get_dtype(type_) == dtype
+
+
+@mark.parametrize("type_, field_type", testdata_field_type)
+def test_get_field_type(type_: Any, field_type: Any) -> None:
+    assert get_field_type(type_).value == field_type

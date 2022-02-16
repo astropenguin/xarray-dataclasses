@@ -19,7 +19,7 @@ __all__ = ["Attr", "Coord", "Coordof", "Data", "Dataof", "Name"]
 
 # standard library
 from dataclasses import Field
-from enum import auto, Enum
+from enum import Enum
 from typing import (
     Any,
     ClassVar,
@@ -52,22 +52,22 @@ from typing_extensions import (
 class FieldType(Enum):
     """Annotation of xarray-related field hints."""
 
-    ATTR = auto()
+    ATTR = "attr"
     """Annotation of attribute field hints."""
 
-    COORD = auto()
+    COORD = "coord"
     """Annotation of coordinate field hints."""
 
-    COORDOF = auto()
+    COORDOF = "coordof"
     """Annotation of coordinate field hints."""
 
-    DATA = auto()
+    DATA = "data"
     """Annotation of data (variable) field hints."""
 
-    DATAOF = auto()
+    DATAOF = "dataof"
     """Annotation of data (variable) field hints."""
 
-    NAME = auto()
+    NAME = "name"
     """Annotation of name field hints."""
 
     def annotates(self, hint: Any) -> bool:
@@ -316,6 +316,23 @@ def get_dtype(type_: Any) -> Dtype:
         return type_.__name__
 
     raise ValueError(f"Could not convert {type_!r} to dtype.")
+
+
+def get_field_type(type_: Any) -> FieldType:
+    """Parse a type and return a field type if it exists."""
+    if FieldType.ATTR.annotates(type_):
+        return FieldType.ATTR
+
+    if FieldType.COORD.annotates(type_):
+        return FieldType.COORD
+
+    if FieldType.DATA.annotates(type_):
+        return FieldType.DATA
+
+    if FieldType.NAME.annotates(type_):
+        return FieldType.NAME
+
+    raise TypeError(f"Could not find any field type in {type_!r}.")
 
 
 def get_inner(hint: Any, *indexes: int) -> Any:
