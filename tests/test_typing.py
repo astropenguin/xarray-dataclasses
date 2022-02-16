@@ -8,37 +8,46 @@ from typing_extensions import Literal
 
 
 # submodules
-from xarray_dataclasses.typing import Data, get_dims, get_dtype, unannotate
+from xarray_dataclasses.typing import ArrayLike, get_dims, get_dtype
 
 
 # type hints
-Int = Literal["int"]
+Int64 = Literal["int64"]
+NoneType = type(None)
 X = Literal["x"]
 Y = Literal["y"]
 
 
 # test datasets
 testdata_dims = [
-    (Data[X, Any], ("x",)),
-    (Data[Tuple[()], Any], ()),
-    (Data[Tuple[X], Any], ("x",)),
-    (Data[Tuple[X, Y], Any], ("x", "y")),
+    (X, ("x",)),
+    (Tuple[()], ()),
+    (Tuple[X], ("x",)),
+    (Tuple[X, Y], ("x", "y")),
+    (ArrayLike[X, Any], ("x",)),
+    (ArrayLike[Tuple[()], Any], ()),
+    (ArrayLike[Tuple[X], Any], ("x",)),
+    (ArrayLike[Tuple[X, Y], Any], ("x", "y")),
 ]
 
 testdata_dtype = [
-    (Data[X, Any], None),
-    (Data[X, None], None),
-    (Data[X, int], "int"),
-    (Data[X, Int], "int"),
+    (Any, None),
+    (NoneType, None),
+    (Int64, "int64"),
+    (int, "int"),
+    (ArrayLike[Any, Any], None),
+    (ArrayLike[Any, NoneType], None),
+    (ArrayLike[Any, Int64], "int64"),
+    (ArrayLike[Any, int], "int"),
 ]
 
 
 # test functions
-@mark.parametrize("hint, dims", testdata_dims)
-def test_get_dims(hint: Any, dims: Any) -> None:
-    assert get_dims(unannotate(hint)) == dims
+@mark.parametrize("type_, dims", testdata_dims)
+def test_get_dims(type_: Any, dims: Any) -> None:
+    assert get_dims(type_) == dims
 
 
-@mark.parametrize("hint, dtype", testdata_dtype)
-def test_get_dtype(hint: Any, dtype: Any) -> None:
-    assert get_dtype(unannotate(hint)) == dtype
+@mark.parametrize("type_, dtype", testdata_dtype)
+def test_get_dtype(type_: Any, dtype: Any) -> None:
+    assert get_dtype(type_) == dtype

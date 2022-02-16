@@ -35,6 +35,7 @@ from typing import (
 
 # dependencies
 import xarray as xr
+from more_itertools import collapse
 from typing_extensions import (
     Annotated,
     Literal,
@@ -256,41 +257,65 @@ Example:
 
 
 # runtime functions
-def get_dims(hint: Any) -> Dims:
-    """Return dims parsed from a type hint."""
-    t_dims = get_inner(hint, 0, 0)
+def get_dims(type_: Any) -> Dims:
+    """Parse a type and return dims.
 
-    if is_str_literal(t_dims):
-        return (get_inner(t_dims, 0),)
+    Example:
+        All of the following expressions will be ``True``::
 
-    args: Any = get_args(t_dims)
+            get_dims(tuple[()]) == ()
+            get_dims(Literal[A]) == (A,)
+            get_dims(tuple[Literal[A], Literal[B]]) == (A, B)
+            get_dims(ArrayLike[A, ...]) == get_dims(A)
 
-    if args == () or args == ((),):
+    """
+    args = get_args(type_)
+    origin = get_origin(type_)
+
+    if origin is ArrayLike:
+        return get_dims(args[0])
+
+    if origin is tuple or origin is Tuple:
+        return tuple(collapse(map(get_dims, args)))
+
+    if origin is Literal:
+        return (args[0],)
+
+    if type_ == () or type_ == ((),):
         return ()
 
-    if all(map(is_str_literal, args)):
-        return tuple(map(get_inner, args, [0] * len(args)))
-
-    raise ValueError(f"Could not parse dims from {hint!r}.")
+    raise ValueError(f"Could not convert {type_!r} to dims.")
 
 
-def get_dtype(hint: Any) -> Dtype:
-    """Return dtype parsed from a type hint."""
-    t_dtype = get_inner(hint, 0, 1)
+def get_dtype(type_: Any) -> Dtype:
+    """Parse a type and return dtype.
 
-    if t_dtype is Any:
+    Example:
+        All of the following expressions will be ``True``::
+
+            get_dtype(Any) == None
+            get_dtype(NoneType) == None
+            get_dtype(A) == A.__name__
+            get_dtype(Literal[A]) == A
+            get_dtype(ArrayLike[..., A]) == get_dtype(A)
+
+    """
+    args = get_args(type_)
+    origin = get_origin(type_)
+
+    if origin is ArrayLike:
+        return get_dtype(args[1])
+
+    if origin is Literal:
+        return args[0]
+
+    if type_ is Any or type_ is type(None):
         return None
 
-    if t_dtype is type(None):
-        return None
+    if isinstance(type_, type):
+        return type_.__name__
 
-    if isinstance(t_dtype, type):
-        return t_dtype.__name__
-
-    if is_str_literal(t_dtype):
-        return get_inner(t_dtype, 0)
-
-    raise ValueError(f"Could not parse dtype from {hint!r}.")
+    raise ValueError(f"Could not convert {type_!r} to dtype.")
 
 
 def get_inner(hint: Any, *indexes: int) -> Any:

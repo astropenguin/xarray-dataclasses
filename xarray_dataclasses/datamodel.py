@@ -9,7 +9,7 @@ from typing import Any, Dict, Hashable, Optional, Type, Union, cast
 # dependencies
 import numpy as np
 import xarray as xr
-from typing_extensions import ParamSpec, TypedDict, get_type_hints
+from typing_extensions import ParamSpec, TypedDict, get_args, get_type_hints
 
 
 # submodules
@@ -73,7 +73,10 @@ class Data:
         hint = unannotate(field.type)
 
         if not of:
-            type: DimsDtype = {"dims": get_dims(hint), "dtype": get_dtype(hint)}
+            type: DimsDtype = {
+                "dims": get_dims(get_args(hint)[0]),
+                "dtype": get_dtype(get_args(hint)[0]),
+            }
             return cls(field.name, value, type)
 
         dataclass = get_inner(hint, 0)
