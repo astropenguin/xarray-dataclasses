@@ -29,10 +29,6 @@ from .dataoptions import DataOptions
 from .typing import DataClass, DataClassFields, DataType, Order, Shape, Sizes
 
 
-# constants
-DEFAULT_OPTIONS = DataOptions(xr.DataArray)
-
-
 # type hints
 P = ParamSpec("P")
 TDataArray = TypeVar("TDataArray", bound=xr.DataArray)
@@ -53,7 +49,7 @@ class OptionedClass(Protocol[P, TDataArray]):
 def asdataarray(
     dataclass: OptionedClass[P, TDataArray],
     reference: Optional[DataType] = None,
-    dataoptions: DataOptions[Any] = DEFAULT_OPTIONS,
+    dataoptions: None = None,
 ) -> TDataArray:
     ...
 
@@ -62,7 +58,25 @@ def asdataarray(
 def asdataarray(
     dataclass: DataClass[P],
     reference: Optional[DataType] = None,
-    dataoptions: DataOptions[TDataArray] = DEFAULT_OPTIONS,
+    dataoptions: None = None,
+) -> xr.DataArray:
+    ...
+
+
+@overload
+def asdataarray(
+    dataclass: OptionedClass[P, Any],
+    reference: Optional[DataType] = None,
+    dataoptions: Optional[DataOptions[TDataArray]] = None,
+) -> TDataArray:
+    ...
+
+
+@overload
+def asdataarray(
+    dataclass: DataClass[P],
+    reference: Optional[DataType] = None,
+    dataoptions: Optional[DataOptions[TDataArray]] = None,
 ) -> TDataArray:
     ...
 
@@ -70,7 +84,7 @@ def asdataarray(
 def asdataarray(
     dataclass: Any,
     reference: Optional[DataType] = None,
-    dataoptions: DataOptions[Any] = DEFAULT_OPTIONS,
+    dataoptions: Any = None,
 ) -> Any:
     """Create a DataArray object from a dataclass object.
 
@@ -83,10 +97,11 @@ def asdataarray(
         DataArray object created from the dataclass object.
 
     """
-    try:
-        dataoptions = dataclass.__dataoptions__
-    except AttributeError:
-        pass
+    if dataoptions is None:
+        try:
+            dataoptions = dataclass.__dataoptions__
+        except AttributeError:
+            dataoptions = DataOptions(xr.DataArray)
 
     model = DataModel.from_dataclass(dataclass)
     item = next(iter(model.data.values()))

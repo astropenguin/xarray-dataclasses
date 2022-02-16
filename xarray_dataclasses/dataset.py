@@ -20,10 +20,6 @@ from .dataoptions import DataOptions
 from .typing import DataClass, DataClassFields, DataType, Order, Shape, Sizes
 
 
-# constants
-DEFAULT_OPTIONS = DataOptions(xr.Dataset)
-
-
 # type hints
 P = ParamSpec("P")
 TDataset = TypeVar("TDataset", bound=xr.Dataset)
@@ -44,7 +40,7 @@ class OptionedClass(Protocol[P, TDataset]):
 def asdataset(
     dataclass: OptionedClass[P, TDataset],
     reference: Optional[DataType] = None,
-    dataoptions: DataOptions[Any] = DEFAULT_OPTIONS,
+    dataoptions: None = None,
 ) -> TDataset:
     ...
 
@@ -53,7 +49,25 @@ def asdataset(
 def asdataset(
     dataclass: DataClass[P],
     reference: Optional[DataType] = None,
-    dataoptions: DataOptions[TDataset] = DEFAULT_OPTIONS,
+    dataoptions: None = None,
+) -> xr.Dataset:
+    ...
+
+
+@overload
+def asdataset(
+    dataclass: OptionedClass[P, Any],
+    reference: Optional[DataType] = None,
+    dataoptions: Optional[DataOptions[TDataset]] = None,
+) -> TDataset:
+    ...
+
+
+@overload
+def asdataset(
+    dataclass: DataClass[P],
+    reference: Optional[DataType] = None,
+    dataoptions: Optional[DataOptions[TDataset]] = None,
 ) -> TDataset:
     ...
 
@@ -61,7 +75,7 @@ def asdataset(
 def asdataset(
     dataclass: Any,
     reference: Optional[DataType] = None,
-    dataoptions: DataOptions[Any] = DEFAULT_OPTIONS,
+    dataoptions: Any = None,
 ) -> Any:
     """Create a Dataset object from a dataclass object.
 
@@ -74,10 +88,11 @@ def asdataset(
         Dataset object created from the dataclass object.
 
     """
-    try:
-        dataoptions = dataclass.__dataoptions__
-    except AttributeError:
-        pass
+    if dataoptions is None:
+        try:
+            dataoptions = dataclass.__dataoptions__
+        except AttributeError:
+            dataoptions = DataOptions(xr.Dataset)
 
     model = DataModel.from_dataclass(dataclass)
     dataset = dataoptions.factory()
