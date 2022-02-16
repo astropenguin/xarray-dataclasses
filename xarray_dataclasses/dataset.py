@@ -2,10 +2,9 @@ __all__ = ["AsDataset", "asdataset"]
 
 
 # standard library
-from dataclasses import Field
 from functools import partial, wraps
 from types import MethodType
-from typing import Any, Callable, Dict, Optional, Type, TypeVar, overload
+from typing import Any, Callable, ClassVar, Dict, Optional, Type, TypeVar, overload
 
 
 # dependencies
@@ -18,11 +17,7 @@ from typing_extensions import ParamSpec, Protocol
 # submodules
 from .datamodel import DataModel
 from .dataoptions import DataOptions
-from .typing import DataType, Order, Shape, Sizes
-
-
-# constants
-DEFAULT_OPTIONS = DataOptions(xr.Dataset)
+from .typing import DataClass, DataClassFields, DataType, Order, Shape, Sizes
 
 
 # type hints
@@ -30,40 +25,49 @@ P = ParamSpec("P")
 TDataset = TypeVar("TDataset", bound=xr.Dataset)
 
 
-class DataClass(Protocol[P]):
-    """Type hint for a dataclass object."""
+class OptionedClass(Protocol[P, TDataset]):
+    """Type hint for dataclass objects with options."""
 
     def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
         ...
 
-    __dataclass_fields__: Dict[str, Field[Any]]
-
-
-class DatasetClass(Protocol[P, TDataset]):
-    """Type hint for a dataclass object with a Dataset factory."""
-
-    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
-        ...
-
-    __dataclass_fields__: Dict[str, Field[Any]]
+    __dataclass_fields__: ClassVar[DataClassFields]
     __dataoptions__: DataOptions[TDataset]
 
 
 # runtime functions and classes
 @overload
 def asdataset(
-    dataclass: DatasetClass[Any, TDataset],
+    dataclass: OptionedClass[P, TDataset],
     reference: Optional[DataType] = None,
-    dataoptions: DataOptions[Any] = DEFAULT_OPTIONS,
+    dataoptions: None = None,
 ) -> TDataset:
     ...
 
 
 @overload
 def asdataset(
-    dataclass: DataClass[Any],
+    dataclass: DataClass[P],
     reference: Optional[DataType] = None,
-    dataoptions: DataOptions[TDataset] = DEFAULT_OPTIONS,
+    dataoptions: None = None,
+) -> xr.Dataset:
+    ...
+
+
+@overload
+def asdataset(
+    dataclass: OptionedClass[P, Any],
+    reference: Optional[DataType] = None,
+    dataoptions: Optional[DataOptions[TDataset]] = None,
+) -> TDataset:
+    ...
+
+
+@overload
+def asdataset(
+    dataclass: DataClass[P],
+    reference: Optional[DataType] = None,
+    dataoptions: Optional[DataOptions[TDataset]] = None,
 ) -> TDataset:
     ...
 
@@ -71,7 +75,7 @@ def asdataset(
 def asdataset(
     dataclass: Any,
     reference: Optional[DataType] = None,
-    dataoptions: DataOptions[Any] = DEFAULT_OPTIONS,
+    dataoptions: Any = None,
 ) -> Any:
     """Create a Dataset object from a dataclass object.
 
@@ -84,10 +88,11 @@ def asdataset(
         Dataset object created from the dataclass object.
 
     """
-    try:
-        dataoptions = dataclass.__dataoptions__
-    except AttributeError:
-        pass
+    if dataoptions is None:
+        try:
+            dataoptions = dataclass.__dataoptions__
+        except AttributeError:
+            dataoptions = DataOptions(xr.Dataset)
 
     model = DataModel.from_dataclass(dataclass)
     dataset = dataoptions.factory()
@@ -125,7 +130,7 @@ class classproperty:
     def __get__(
         self,
         obj: Any,
-        cls: Type[DatasetClass[P, TDataset]],
+        cls: Type[OptionedClass[P, TDataset]],
     ) -> Callable[P, TDataset]:
         ...
 
@@ -161,7 +166,7 @@ class AsDataset:
     @overload
     @classmethod
     def shaped(
-        cls: Type[DatasetClass[P, TDataset]],
+        cls: Type[OptionedClass[P, TDataset]],
         func: Callable[[Shape], np.ndarray],
         sizes: Sizes,
         **kwargs: Any,
@@ -208,7 +213,7 @@ class AsDataset:
     @overload
     @classmethod
     def empty(
-        cls: Type[DatasetClass[P, TDataset]],
+        cls: Type[OptionedClass[P, TDataset]],
         sizes: Sizes,
         order: Order = "C",
         **kwargs: Any,
@@ -250,7 +255,7 @@ class AsDataset:
     @overload
     @classmethod
     def zeros(
-        cls: Type[DatasetClass[P, TDataset]],
+        cls: Type[OptionedClass[P, TDataset]],
         sizes: Sizes,
         order: Order = "C",
         **kwargs: Any,
@@ -292,7 +297,7 @@ class AsDataset:
     @overload
     @classmethod
     def ones(
-        cls: Type[DatasetClass[P, TDataset]],
+        cls: Type[OptionedClass[P, TDataset]],
         sizes: Sizes,
         order: Order = "C",
         **kwargs: Any,
@@ -334,7 +339,7 @@ class AsDataset:
     @overload
     @classmethod
     def full(
-        cls: Type[DatasetClass[P, TDataset]],
+        cls: Type[OptionedClass[P, TDataset]],
         sizes: Sizes,
         fill_value: Any,
         order: Order = "C",

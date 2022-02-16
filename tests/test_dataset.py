@@ -30,9 +30,6 @@ class Custom(xr.Dataset):
     __slots__ = ()
 
 
-dataoptions = DataOptions(Custom)
-
-
 @dataclass
 class Image(AsDataArray):
     """Specs for a monochromatic image."""
@@ -44,7 +41,7 @@ class Image(AsDataArray):
 class ColorImage(AsDataset):
     """Specs for a color image."""
 
-    __dataoptions__ = dataoptions
+    __dataoptions__ = DataOptions(Custom)
 
     red: Data[Tuple[X, Y], float]
     green: Data[Tuple[X, Y], float]

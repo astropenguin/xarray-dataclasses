@@ -22,7 +22,7 @@ from dataclasses import Field
 from enum import auto, Enum
 from typing import (
     Any,
-    Callable,
+    ClassVar,
     Dict,
     Hashable,
     Optional,
@@ -38,6 +38,7 @@ import xarray as xr
 from typing_extensions import (
     Annotated,
     Literal,
+    ParamSpec,
     Protocol,
     get_args,
     get_origin,
@@ -74,21 +75,25 @@ class FieldType(Enum):
 
 
 # type hints
+P = ParamSpec("P")
+T = TypeVar("T")
+TDataClass = TypeVar("TDataClass", bound="DataClass[Any]")
+TDims = TypeVar("TDims", covariant=True)
+TDtype = TypeVar("TDtype", covariant=True)
+TName = TypeVar("TName", bound=Hashable)
+
+DataClassFields = Dict[str, Field[Any]]
 DataType = Union[xr.DataArray, xr.Dataset]
 Dims = Tuple[str, ...]
 Dtype = Optional[str]
 Order = Literal["C", "F"]
 Shape = Union[Sequence[int], int]
 Sizes = Dict[str, int]
-T = TypeVar("T")
-TDims = TypeVar("TDims", covariant=True)
-TDtype = TypeVar("TDtype", covariant=True)
-TName = TypeVar("TName", bound=Hashable)
 
 
 @runtime_checkable
 class ArrayLike(Protocol[TDims, TDtype]):
-    """Type hint of array-like objects."""
+    """Type hint for array-like objects."""
 
     def astype(self: T, dtype: Any) -> T:
         """Method to convert data type of the object."""
@@ -105,14 +110,13 @@ class ArrayLike(Protocol[TDims, TDtype]):
         ...
 
 
-class DataClass(Protocol):
-    """Type hint of dataclasses or their objects."""
+class DataClass(Protocol[P]):
+    """Type hint for dataclass objects."""
 
-    __init__: Callable[..., None]
-    __dataclass_fields__: Dict[str, Field[Any]]
+    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
+        ...
 
-
-TDataClass = TypeVar("TDataClass", bound=DataClass)
+    __dataclass_fields__: ClassVar[DataClassFields]
 
 
 Attr = Annotated[T, FieldType.ATTR]
