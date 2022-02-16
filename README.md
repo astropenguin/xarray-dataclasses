@@ -311,14 +311,11 @@ class Custom(xr.DataArray):
         print("Custom method!")
 
 
-dataoptions = DataOptions(Custom)
-
-
 @dataclass
 class Image(AsDataArray):
     """Specs for a monochromatic image."""
 
-    __dataoptions__ = dataoptions
+    __dataoptions__ = DataOptions(Custom)
 
     data: Data[tuple[X, Y], float]
     x: Coord[X, int] = 0
