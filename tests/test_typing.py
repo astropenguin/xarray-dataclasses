@@ -1,10 +1,10 @@
 # standard library
-from typing import Any, Tuple
+from typing import Any, Optional, Tuple, Union
 
 
 # third-party packages
 from pytest import mark
-from typing_extensions import Literal
+from typing_extensions import Annotated, Literal
 
 
 # submodules
@@ -17,6 +17,7 @@ from xarray_dataclasses.typing import (
     get_dims,
     get_dtype,
     get_field_type,
+    get_repr_type,
 )
 
 
@@ -57,6 +58,13 @@ testdata_field_type = [
     (Name[Any], "name"),
 ]
 
+testdata_repr_type = [
+    (int, int),
+    (Annotated[int, "annotation"], int),
+    (Union[int, float], int),
+    (Optional[int], int),
+]
+
 
 # test functions
 @mark.parametrize("type_, dims", testdata_dims)
@@ -72,3 +80,8 @@ def test_get_dtype(type_: Any, dtype: Any) -> None:
 @mark.parametrize("type_, field_type", testdata_field_type)
 def test_get_field_type(type_: Any, field_type: Any) -> None:
     assert get_field_type(type_).value == field_type
+
+
+@mark.parametrize("type_, repr_type", testdata_repr_type)
+def test_get_repr_type(type_: Any, repr_type: Any) -> None:
+    assert get_repr_type(type_) == repr_type

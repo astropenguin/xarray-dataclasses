@@ -344,6 +344,30 @@ def get_inner(hint: Any, *indexes: int) -> Any:
     return get_inner(get_args(hint)[index], *indexes)
 
 
+def get_repr_type(type_: Any) -> Any:
+    """Parse a type and return an representative type.
+
+    Example:
+        All of the following expressions will be ``True``::
+
+            get_repr_type(A) == A
+            get_repr_type(Annotated[A, ...]) == A
+            get_repr_type(Union[A, B, ...]) == A
+            get_repr_type(Optional[A]) == A
+
+    """
+
+    class Temporary:
+        __annotations__ = dict(type=type_)
+
+    unannotated = get_type_hints(Temporary)["type"]
+
+    if get_origin(unannotated) is Union:
+        return get_args(unannotated)[0]
+
+    return unannotated
+
+
 def is_str_literal(hint: Any) -> bool:
     """Check if a type hint is Literal[str]."""
     args: Any = get_args(hint)
