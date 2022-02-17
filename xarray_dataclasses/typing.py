@@ -330,15 +330,6 @@ def get_field_type(type_: Any) -> FieldType:
     raise TypeError(f"Could not find any field type in {type_!r}.")
 
 
-def get_inner(hint: Any, *indexes: int) -> Any:
-    """Return an inner type hint by indexes."""
-    if not indexes:
-        return hint
-
-    index, indexes = indexes[0], indexes[1:]
-    return get_inner(get_args(hint)[index], *indexes)
-
-
 def get_repr_type(type_: Any) -> Any:
     """Parse a type and return an representative type.
 
@@ -361,26 +352,3 @@ def get_repr_type(type_: Any) -> Any:
         return get_args(unannotated)[0]
 
     return unannotated
-
-
-def is_str_literal(hint: Any) -> bool:
-    """Check if a type hint is Literal[str]."""
-    args: Any = get_args(hint)
-    origin = get_origin(hint)
-
-    if origin is not Literal:
-        return False
-
-    if not len(args) == 1:
-        return False
-
-    return isinstance(args[0], str)
-
-
-def unannotate(hint: Any) -> Any:
-    """Recursively remove Annotated type hints."""
-
-    class Temp:
-        __annotations__ = dict(hint=hint)
-
-    return get_type_hints(Temp)["hint"]
