@@ -48,33 +48,6 @@ from typing_extensions import (
 )
 
 
-# constants
-class FieldType(Enum):
-    """Annotation of xarray-related field hints."""
-
-    ATTR = "attr"
-    """Annotation of attribute field hints."""
-
-    COORD = "coord"
-    """Annotation of coordinate field hints."""
-
-    COORDOF = "coordof"
-    """Annotation of coordinate field hints."""
-
-    DATA = "data"
-    """Annotation of data (variable) field hints."""
-
-    DATAOF = "dataof"
-    """Annotation of data (variable) field hints."""
-
-    NAME = "name"
-    """Annotation of name field hints."""
-
-    def annotates(self, hint: Any) -> bool:
-        """Check if a field hint is annotated."""
-        return self in get_args(hint)[1:]
-
-
 # type hints
 P = ParamSpec("P")
 T = TypeVar("T")
@@ -120,6 +93,28 @@ class DataClass(Protocol[P]):
     __dataclass_fields__: ClassVar[DataClassFields]
 
 
+# constants
+class FieldType(Enum):
+    """Annotation of xarray-related field hints."""
+
+    ATTR = "attr"
+    """Annotation of attribute field hints."""
+
+    COORD = "coord"
+    """Annotation of coordinate field hints."""
+
+    DATA = "data"
+    """Annotation of data (variable) field hints."""
+
+    NAME = "name"
+    """Annotation of name field hints."""
+
+    def annotates(self, hint: Any) -> bool:
+        """Check if a field hint is annotated."""
+        return self in get_args(hint)[1:]
+
+
+# public type hints
 Attr = Annotated[T, FieldType.ATTR]
 """Type hint to define attribute fields (``Attr[T]``).
 
@@ -162,7 +157,7 @@ Hint:
 
 """
 
-Coordof = Annotated[Union[TDataClass, Any], FieldType.COORDOF]
+Coordof = Annotated[Union[TDataClass, Any], FieldType.COORD]
 """Type hint to define coordinate fields (``Coordof[TDataClass]``).
 
 Unlike ``Coord``, it specifies a dataclass that defines a DataArray class.
@@ -215,7 +210,7 @@ Examples:
 
 """
 
-Dataof = Annotated[Union[TDataClass, Any], FieldType.DATAOF]
+Dataof = Annotated[Union[TDataClass, Any], FieldType.DATA]
 """Type hint to define data fields (``Coordof[TDataClass]``).
 
 Unlike ``Data``, it specifies a dataclass that defines a DataArray class.
