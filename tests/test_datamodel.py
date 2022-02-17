@@ -53,73 +53,100 @@ color_model = DataModel.from_dataclass(ColorImage)
 
 # test functions
 def test_xaxis_attr() -> None:
-    item = next(iter(xaxis_model.attr.values()))
-    assert item.name == "units"
-    assert item.value == "pixel"
-    assert item.type == "builtins.str"
+    units = xaxis_model.attrs[0]
+    assert units.name == "units"
+    assert units.tag == "attr"
+    assert units.type is str
+    assert units.value == "pixel"
+    assert units.cast == False
 
 
 def test_xaxis_data() -> None:
-    item = next(iter(xaxis_model.data.values()))
-    assert item.name == "data"
-    assert item.type == {"dims": ("x",), "dtype": "int"}
-    assert item.factory is None
+    data = xaxis_model.data_vars[0]
+    assert data.name == "data"
+    assert data.tag == "data"
+    assert data.dims == ("x",)
+    assert data.dtype == "int"
+    assert data.base is None
+    assert data.cast == True
 
 
 def test_yaxis_attr() -> None:
-    item = next(iter(yaxis_model.attr.values()))
-    assert item.name == "units"
-    assert item.value == "pixel"
-    assert item.type == "builtins.str"
+    units = yaxis_model.attrs[0]
+    assert units.name == "units"
+    assert units.tag == "attr"
+    assert units.type is str
+    assert units.value == "pixel"
+    assert units.cast == False
 
 
 def test_yaxis_data() -> None:
-    item = next(iter(yaxis_model.data.values()))
-    assert item.name == "data"
-    assert item.type == {"dims": ("y",), "dtype": "int"}
-    assert item.factory is None
+    data = yaxis_model.data_vars[0]
+    assert data.name == "data"
+    assert data.tag == "data"
+    assert data.dims == ("y",)
+    assert data.dtype == "int"
+    assert data.base is None
+    assert data.cast == True
 
 
 def test_image_coord() -> None:
-    items = iter(image_model.coord.values())
+    mask = image_model.coords[0]
+    assert mask.name == "mask"
+    assert mask.tag == "coord"
+    assert mask.dims == ("x", "y")
+    assert mask.dtype == "bool"
+    assert mask.base is None
+    assert mask.cast == True
 
-    item = next(items)
-    assert item.name == "mask"
-    assert item.type == {"dims": ("x", "y"), "dtype": "bool"}
-    assert item.factory is None
+    x = image_model.coords[1]
+    assert x.name == "x"
+    assert x.tag == "coord"
+    assert x.dims == ("x",)
+    assert x.dtype == "int"
+    assert x.base is XAxis
+    assert x.cast == True
 
-    item = next(items)
-    assert item.name == "x"
-    assert item.type == {"dims": ("x",), "dtype": "int"}
-    assert item.factory is XAxis
-
-    item = next(items)
-    assert item.name == "y"
-    assert item.type == {"dims": ("y",), "dtype": "int"}
-    assert item.factory is YAxis
+    y = image_model.coords[2]
+    assert y.name == "y"
+    assert y.tag == "coord"
+    assert y.dims == ("y",)
+    assert y.dtype == "int"
+    assert y.base is YAxis
+    assert y.cast == True
 
 
 def test_image_data() -> None:
-    item = next(iter(image_model.data.values()))
-    assert item.name == "data"
-    assert item.type == {"dims": ("x", "y"), "dtype": "float"}
-    assert item.factory is None
+    data = image_model.data_vars[0]
+    assert data.name == "data"
+    assert data.tag == "data"
+    assert data.dims == ("x", "y")
+    assert data.dtype == "float"
+    assert data.base is None
+    assert data.cast == True
 
 
 def test_color_data() -> None:
-    items = iter(color_model.data.values())
+    red = color_model.data_vars[0]
+    assert red.name == "red"
+    assert red.tag == "data"
+    assert red.dims == ("x", "y")
+    assert red.dtype == "float"
+    assert red.base is Image
+    assert red.cast == True
 
-    item = next(items)
-    assert item.name == "red"
-    assert item.type == {"dims": ("x", "y"), "dtype": "float"}
-    assert item.factory is Image
+    green = color_model.data_vars[1]
+    assert green.name == "green"
+    assert green.tag == "data"
+    assert green.dims == ("x", "y")
+    assert green.dtype == "float"
+    assert green.base is Image
+    assert green.cast == True
 
-    item = next(items)
-    assert item.name == "green"
-    assert item.type == {"dims": ("x", "y"), "dtype": "float"}
-    assert item.factory is Image
-
-    item = next(items)
-    assert item.name == "blue"
-    assert item.type == {"dims": ("x", "y"), "dtype": "float"}
-    assert item.factory is Image
+    blue = color_model.data_vars[2]
+    assert blue.name == "blue"
+    assert blue.tag == "data"
+    assert blue.dims == ("x", "y")
+    assert blue.dtype == "float"
+    assert blue.base is Image
+    assert blue.cast == True
