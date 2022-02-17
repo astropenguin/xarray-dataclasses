@@ -3,13 +3,13 @@ __all__ = ["DataModel"]
 
 # standard library
 from dataclasses import Field, dataclass, field, is_dataclass
-from typing import Any, Dict, Hashable, Optional, Type, Union, cast
+from typing import Any, Dict, Hashable, List, Optional, Tuple, Type, Union, cast
 
 
 # dependencies
 import numpy as np
 import xarray as xr
-from typing_extensions import ParamSpec, TypedDict, get_type_hints
+from typing_extensions import Literal, ParamSpec, get_type_hints
 
 
 # submodules
@@ -22,158 +22,221 @@ from .typing import (
     FieldType,
     get_dims,
     get_dtype,
-    get_inner,
-    unannotate,
+    get_field_type,
+    get_repr_type,
 )
 
 
 # type hints
 P = ParamSpec("P")
 AnyDataClass = Union[Type[DataClass[P]], DataClass[P]]
-DimsDtype = TypedDict("DimsDtype", dims=Dims, dtype=Dtype)
+AnyEntry = Union["AttrEntry", "DataEntry"]
 
 
-# field models
+# constants
+class MissingType:
+    """Singleton that indicates missing data."""
+
+    _instance = None
+
+    def __new__(cls) -> "MissingType":
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+
+        return cls._instance
+
+    def __repr__(self) -> str:
+        return "<MISSING>"
+
+
+MISSING = MissingType()
+
+
+# runtime classes
 @dataclass(frozen=True)
-class Data:
-    """Field model for data-related fields."""
+class AttrEntry:
+    """Entry of an attribute (i.e. metadata)."""
 
     name: Hashable
-    """Name of the field."""
+    """Name that the attribute is accessed by."""
 
-    value: Any
-    """Value assigned to the field."""
+    tag: Literal["attr", "name"]
+    """Function of the attribute (either attr or name)."""
 
-    type: DimsDtype
-    """Type (dims and dtype) of the field."""
+    type: Any = None
+    """Type or type hint of the attribute."""
 
-    factory: Any = None
-    """Factory dataclass to create a DataArray object."""
+    value: Any = MISSING
+    """Actual value of the attribute."""
+
+    cast: bool = False
+    """Whether the value is cast to the type."""
+
+    def __call__(self) -> Any:
+        """Create an object according to the entry."""
+        if self.value is MISSING:
+            raise ValueError("Value is missing.")
+
+        return self.value
+
+
+@dataclass(frozen=True)
+class DataEntry:
+    """Entry of a data variable."""
+
+    name: Hashable
+    """Name that the attribute is accessed by."""
+
+    tag: Literal["coord", "data"]
+    """Function of the data (either coord or data)."""
+
+    dims: Dims = cast(Dims, None)
+    """Dimensions of the DataArray that the data is cast to."""
+
+    dtype: Dtype = cast(Dtype, None)
+    """Data type of the DataArray that the data is cast to."""
+
+    base: Optional[Type[DataClass[Any]]] = None
+    """Base dataclass that converts the data to a DataArray."""
+
+    value: Any = MISSING
+    """Actual value of the data."""
+
+    cast: bool = True
+    """Whether the value is cast to the data type."""
+
+    def __post_init__(self) -> None:
+        """Update the entry if a base dataclass exists."""
+        if self.base is None:
+            return
+
+        model = DataModel.from_dataclass(self.base)
+
+        setattr = object.__setattr__
+        setattr(self, "dims", model.data_vars[0].dims)
+        setattr(self, "dtype", model.data_vars[0].dtype)
+
+        if model.names:
+            setattr(self, "name", model.names[0].value)
 
     def __call__(self, reference: Optional[DataType] = None) -> xr.DataArray:
-        """Create a DataArray object from the value and a reference."""
+        """Create a DataArray object according to the entry."""
         from .dataarray import asdataarray
 
-        if self.factory is None:
-            return typedarray(
-                self.value,
-                self.type["dims"],
-                self.type["dtype"],
-                reference,
-            )
+        if self.value is MISSING:
+            raise ValueError("Value is missing.")
+
+        if self.base is None:
+            return get_typedarray(self.value, self.dims, self.dtype, reference)
 
         if is_dataclass(self.value):
             return asdataarray(self.value, reference)
         else:
-            return asdataarray(self.factory(self.value), reference)
-
-    @classmethod
-    def from_field(cls, field: Field[Any], value: Any, of: bool) -> "Data":
-        """Create a field model from a dataclass field and a value."""
-        hint = unannotate(field.type)
-
-        if not of:
-            type: DimsDtype = {"dims": get_dims(hint), "dtype": get_dtype(hint)}
-            return cls(field.name, value, type)
-
-        dataclass = get_inner(hint, 0)
-        model = DataModel.from_dataclass(dataclass)
-        data_item = next(iter(model.data.values()))
-
-        if not model.name:
-            return cls(field.name, value, data_item.type, dataclass)
-        else:
-            name_item = next(iter(model.name.values()))
-            return cls(name_item.value, value, data_item.type, dataclass)
+            return asdataarray(self.base(self.value), reference)
 
 
-@dataclass(frozen=True)
-class General:
-    """Field model for general fields."""
-
-    name: Hashable
-    """Name of the field."""
-
-    value: Any
-    """Value assigned to the field."""
-
-    type: str
-    """Type of the field."""
-
-    factory: Optional[Type[Any]] = None
-    """Factory function to create an object."""
-
-    def __call__(self) -> Any:
-        """Create an object from the value."""
-        if self.factory is None:
-            return self.value
-        else:
-            return self.factory(self.value)
-
-    @classmethod
-    def from_field(cls, field: Field[Any], value: Any) -> "General":
-        """Create a field model from a dataclass field and a value."""
-        hint = unannotate(field.type)
-
-        try:
-            return cls(field.name, value, f"{hint.__module__}.{hint.__qualname__}")
-        except AttributeError:
-            return cls(field.name, value, repr(hint))
-
-
-# data models
 @dataclass(frozen=True)
 class DataModel:
-    """Model for dataclasses or their objects."""
+    """Data representation (data model) inside the package."""
 
-    attr: Dict[str, General] = field(default_factory=dict)
-    """Model of the attribute fields."""
+    entries: Dict[str, AnyEntry] = field(default_factory=dict)
+    """Entries of data variable(s) and attribute(s)."""
 
-    coord: Dict[str, Data] = field(default_factory=dict)
-    """Model of the coordinate fields."""
+    @property
+    def attrs(self) -> List[AttrEntry]:
+        """Return a list of attribute entries."""
+        return [v for v in self.entries.values() if v.tag == "attr"]
 
-    data: Dict[str, Data] = field(default_factory=dict)
-    """Model of the data fields."""
+    @property
+    def coords(self) -> List[DataEntry]:
+        """Return a list of coordinate entries."""
+        return [v for v in self.entries.values() if v.tag == "coord"]
 
-    name: Dict[str, General] = field(default_factory=dict)
-    """Model of the name fields."""
+    @property
+    def data_vars(self) -> List[DataEntry]:
+        """Return a list of data variable entries."""
+        return [v for v in self.entries.values() if v.tag == "data"]
+
+    @property
+    def data_vars_items(self) -> List[Tuple[str, DataEntry]]:
+        """Return a list of data variable entries with keys."""
+        return [(k, v) for k, v in self.entries.items() if v.tag == "data"]
+
+    @property
+    def names(self) -> List[AttrEntry]:
+        """Return a list of name entries."""
+        return [v for v in self.entries.values() if v.tag == "name"]
 
     @classmethod
     def from_dataclass(cls, dataclass: AnyDataClass[P]) -> "DataModel":
         """Create a data model from a dataclass or its object."""
         model = cls()
-        eval_field_types(dataclass)
+        eval_dataclass(dataclass)
 
         for field in dataclass.__dataclass_fields__.values():
-            value = getattr(dataclass, field.name, field.default)
-
-            if FieldType.ATTR.annotates(field.type):
-                model.attr[field.name] = General.from_field(field, value)
-            elif FieldType.COORD.annotates(field.type):
-                model.coord[field.name] = Data.from_field(field, value, False)
-            elif FieldType.COORDOF.annotates(field.type):
-                model.coord[field.name] = Data.from_field(field, value, True)
-            elif FieldType.DATA.annotates(field.type):
-                model.data[field.name] = Data.from_field(field, value, False)
-            elif FieldType.DATAOF.annotates(field.type):
-                model.data[field.name] = Data.from_field(field, value, True)
-            elif FieldType.NAME.annotates(field.type):
-                model.name[field.name] = General.from_field(field, value)
+            try:
+                value = getattr(dataclass, field.name, MISSING)
+                model.entries[field.name] = get_entry(field, value)
+            except TypeError:
+                pass
 
         return model
 
 
 # runtime functions
-def eval_field_types(dataclass: AnyDataClass[P]) -> None:
-    """Evaluate field types of a dataclass or its object."""
-    hints = get_type_hints(dataclass, include_extras=True)  # type: ignore
+def eval_dataclass(dataclass: AnyDataClass[P]) -> None:
+    """Evaluate field types of a dataclass."""
+    if not is_dataclass(dataclass):
+        raise TypeError("Not a dataclass or its object.")
 
-    for field in dataclass.__dataclass_fields__.values():
-        if isinstance(field.type, str):
-            field.type = hints[field.name]
+    fields = dataclass.__dataclass_fields__.values()
+
+    # do nothing if field types are already evaluated
+    if not any(isinstance(field.type, str) for field in fields):
+        return
+
+    # otherwise, replace field types with evaluated types
+    if not isinstance(dataclass, type):
+        dataclass = type(dataclass)
+
+    types = get_type_hints(dataclass, include_extras=True)
+
+    for field in fields:
+        field.type = types[field.name]
 
 
-def typedarray(
+def get_entry(field: Field[Any], value: Any) -> AnyEntry:
+    """Create an entry from a field and its value."""
+    field_type = get_field_type(field.type)
+    repr_type = get_repr_type(field.type)
+
+    if field_type is FieldType.ATTR or field_type is FieldType.NAME:
+        return AttrEntry(
+            name=field.name,
+            tag=field_type.value,
+            value=value,
+            type=repr_type,
+        )
+
+    # hereafter field type is either COORD or DATA
+    if is_dataclass(repr_type):
+        return DataEntry(
+            name=field.name,
+            tag=field_type.value,
+            base=repr_type,
+            value=value,
+        )
+    else:
+        return DataEntry(
+            name=field.name,
+            tag=field_type.value,
+            dims=get_dims(repr_type),
+            dtype=get_dtype(repr_type),
+            value=value,
+        )
+
+
+def get_typedarray(
     data: Any,
     dims: Dims,
     dtype: Dtype,

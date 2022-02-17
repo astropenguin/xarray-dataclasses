@@ -19,7 +19,7 @@ __all__ = ["Attr", "Coord", "Coordof", "Data", "Dataof", "Name"]
 
 # standard library
 from dataclasses import Field
-from enum import auto, Enum
+from enum import Enum
 from typing import (
     Any,
     ClassVar,
@@ -35,6 +35,7 @@ from typing import (
 
 # dependencies
 import xarray as xr
+from more_itertools import collapse
 from typing_extensions import (
     Annotated,
     Literal,
@@ -45,33 +46,6 @@ from typing_extensions import (
     get_type_hints,
     runtime_checkable,
 )
-
-
-# constants
-class FieldType(Enum):
-    """Annotation of xarray-related field hints."""
-
-    ATTR = auto()
-    """Annotation of attribute field hints."""
-
-    COORD = auto()
-    """Annotation of coordinate field hints."""
-
-    COORDOF = auto()
-    """Annotation of coordinate field hints."""
-
-    DATA = auto()
-    """Annotation of data (variable) field hints."""
-
-    DATAOF = auto()
-    """Annotation of data (variable) field hints."""
-
-    NAME = auto()
-    """Annotation of name field hints."""
-
-    def annotates(self, hint: Any) -> bool:
-        """Check if a field hint is annotated."""
-        return self in get_args(hint)[1:]
 
 
 # type hints
@@ -119,6 +93,28 @@ class DataClass(Protocol[P]):
     __dataclass_fields__: ClassVar[DataClassFields]
 
 
+# constants
+class FieldType(Enum):
+    """Annotation of xarray-related field hints."""
+
+    ATTR = "attr"
+    """Annotation of attribute field hints."""
+
+    COORD = "coord"
+    """Annotation of coordinate field hints."""
+
+    DATA = "data"
+    """Annotation of data (variable) field hints."""
+
+    NAME = "name"
+    """Annotation of name field hints."""
+
+    def annotates(self, hint: Any) -> bool:
+        """Check if a field hint is annotated."""
+        return self in get_args(hint)[1:]
+
+
+# public type hints
 Attr = Annotated[T, FieldType.ATTR]
 """Type hint to define attribute fields (``Attr[T]``).
 
@@ -161,7 +157,7 @@ Hint:
 
 """
 
-Coordof = Annotated[Union[TDataClass, Any], FieldType.COORDOF]
+Coordof = Annotated[Union[TDataClass, Any], FieldType.COORD]
 """Type hint to define coordinate fields (``Coordof[TDataClass]``).
 
 Unlike ``Coord``, it specifies a dataclass that defines a DataArray class.
@@ -214,7 +210,7 @@ Examples:
 
 """
 
-Dataof = Annotated[Union[TDataClass, Any], FieldType.DATAOF]
+Dataof = Annotated[Union[TDataClass, Any], FieldType.DATA]
 """Type hint to define data fields (``Coordof[TDataClass]``).
 
 Unlike ``Data``, it specifies a dataclass that defines a DataArray class.
@@ -256,70 +252,103 @@ Example:
 
 
 # runtime functions
-def get_dims(hint: Any) -> Dims:
-    """Return dims parsed from a type hint."""
-    t_dims = get_inner(hint, 0, 0)
+def get_dims(type_: Any) -> Dims:
+    """Parse a type and return dims.
 
-    if is_str_literal(t_dims):
-        return (get_inner(t_dims, 0),)
+    Example:
+        All of the following expressions will be ``True``::
 
-    args: Any = get_args(t_dims)
+            get_dims(tuple[()]) == ()
+            get_dims(Literal[A]) == (A,)
+            get_dims(tuple[Literal[A], Literal[B]]) == (A, B)
+            get_dims(ArrayLike[A, ...]) == get_dims(A)
 
-    if args == () or args == ((),):
+    """
+    args = get_args(type_)
+    origin = get_origin(type_)
+
+    if origin is ArrayLike:
+        return get_dims(args[0])
+
+    if origin is tuple or origin is Tuple:
+        return tuple(collapse(map(get_dims, args)))
+
+    if origin is Literal:
+        return (args[0],)
+
+    if type_ == () or type_ == ((),):
         return ()
 
-    if all(map(is_str_literal, args)):
-        return tuple(map(get_inner, args, [0] * len(args)))
-
-    raise ValueError(f"Could not parse dims from {hint!r}.")
+    raise ValueError(f"Could not convert {type_!r} to dims.")
 
 
-def get_dtype(hint: Any) -> Dtype:
-    """Return dtype parsed from a type hint."""
-    t_dtype = get_inner(hint, 0, 1)
+def get_dtype(type_: Any) -> Dtype:
+    """Parse a type and return dtype.
 
-    if t_dtype is Any:
+    Example:
+        All of the following expressions will be ``True``::
+
+            get_dtype(Any) == None
+            get_dtype(NoneType) == None
+            get_dtype(A) == A.__name__
+            get_dtype(Literal[A]) == A
+            get_dtype(ArrayLike[..., A]) == get_dtype(A)
+
+    """
+    args = get_args(type_)
+    origin = get_origin(type_)
+
+    if origin is ArrayLike:
+        return get_dtype(args[1])
+
+    if origin is Literal:
+        return args[0]
+
+    if type_ is Any or type_ is type(None):
         return None
 
-    if t_dtype is type(None):
-        return None
+    if isinstance(type_, type):
+        return type_.__name__
 
-    if isinstance(t_dtype, type):
-        return t_dtype.__name__
-
-    if is_str_literal(t_dtype):
-        return get_inner(t_dtype, 0)
-
-    raise ValueError(f"Could not parse dtype from {hint!r}.")
+    raise ValueError(f"Could not convert {type_!r} to dtype.")
 
 
-def get_inner(hint: Any, *indexes: int) -> Any:
-    """Return an inner type hint by indexes."""
-    if not indexes:
-        return hint
+def get_field_type(type_: Any) -> FieldType:
+    """Parse a type and return a field type if it exists."""
+    if FieldType.ATTR.annotates(type_):
+        return FieldType.ATTR
 
-    index, indexes = indexes[0], indexes[1:]
-    return get_inner(get_args(hint)[index], *indexes)
+    if FieldType.COORD.annotates(type_):
+        return FieldType.COORD
 
+    if FieldType.DATA.annotates(type_):
+        return FieldType.DATA
 
-def is_str_literal(hint: Any) -> bool:
-    """Check if a type hint is Literal[str]."""
-    args: Any = get_args(hint)
-    origin = get_origin(hint)
+    if FieldType.NAME.annotates(type_):
+        return FieldType.NAME
 
-    if origin is not Literal:
-        return False
-
-    if not len(args) == 1:
-        return False
-
-    return isinstance(args[0], str)
+    raise TypeError(f"Could not find any field type in {type_!r}.")
 
 
-def unannotate(hint: Any) -> Any:
-    """Recursively remove Annotated type hints."""
+def get_repr_type(type_: Any) -> Any:
+    """Parse a type and return an representative type.
 
-    class Temp:
-        __annotations__ = dict(hint=hint)
+    Example:
+        All of the following expressions will be ``True``::
 
-    return get_type_hints(Temp)["hint"]
+            get_repr_type(A) == A
+            get_repr_type(Annotated[A, ...]) == A
+            get_repr_type(Union[A, B, ...]) == A
+            get_repr_type(Optional[A]) == A
+
+    """
+
+    class Temporary:
+        __annotations__ = dict(type=type_)
+
+    unannotated = get_type_hints(Temporary)["type"]
+
+    if get_origin(unannotated) is Union:
+        return get_args(unannotated)[0]
+
+    return unannotated
