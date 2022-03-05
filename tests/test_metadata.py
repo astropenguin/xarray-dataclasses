@@ -1,4 +1,4 @@
-# third-party packages
+# dependencies
 import xarray_dataclasses
 
 

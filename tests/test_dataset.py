@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Tuple
 
 
-# third-party packages
+# dependencies
 import numpy as np
 import xarray as xr
 from typing_extensions import Literal
