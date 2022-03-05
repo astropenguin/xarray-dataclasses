@@ -56,18 +56,9 @@ def asdataset(
 
 @overload
 def asdataset(
-    dataclass: OptionedClass[P, Any],
+    dataclass: Any,
     reference: Optional[DataType] = None,
-    dataoptions: Optional[DataOptions[TDataset]] = None,
-) -> TDataset:
-    ...
-
-
-@overload
-def asdataset(
-    dataclass: DataClass[P],
-    reference: Optional[DataType] = None,
-    dataoptions: Optional[DataOptions[TDataset]] = None,
+    dataoptions: DataOptions[TDataset] = DataOptions(xr.Dataset),
 ) -> TDataset:
     ...
 
