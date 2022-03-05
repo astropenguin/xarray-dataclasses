@@ -65,18 +65,9 @@ def asdataarray(
 
 @overload
 def asdataarray(
-    dataclass: OptionedClass[P, Any],
+    dataclass: Any,
     reference: Optional[DataType] = None,
-    dataoptions: Optional[DataOptions[TDataArray]] = None,
-) -> TDataArray:
-    ...
-
-
-@overload
-def asdataarray(
-    dataclass: DataClass[P],
-    reference: Optional[DataType] = None,
-    dataoptions: Optional[DataOptions[TDataArray]] = None,
+    dataoptions: DataOptions[TDataArray] = DataOptions(xr.DataArray),
 ) -> TDataArray:
     ...
 
