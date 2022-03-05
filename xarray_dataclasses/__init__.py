@@ -1,5 +1,4 @@
 # type: ignore
-__author__ = "Akio Taniguchi"
 __version__ = "1.0.0"
 
 
