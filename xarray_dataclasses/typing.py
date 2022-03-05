@@ -23,6 +23,7 @@ from enum import Enum
 from typing import (
     Any,
     ClassVar,
+    Collection,
     Dict,
     Hashable,
     Optional,
@@ -63,6 +64,18 @@ Dtype = Optional[str]
 Order = Literal["C", "F"]
 Shape = Union[Sequence[int], int]
 Sizes = Dict[str, int]
+
+
+class Labeled(Protocol[TDims]):
+    """Type hint for labeled objects."""
+
+    pass
+
+
+class Collection(Labeled[TDims], Collection[TDtype], Protocol):
+    """Type hint for labeled collection objects."""
+
+    pass
 
 
 @runtime_checkable
@@ -138,7 +151,7 @@ Reference:
 
 """
 
-Coord = Annotated[Union[ArrayLike[TDims, TDtype], TDtype], FieldType.COORD]
+Coord = Annotated[Union[Collection[TDims, TDtype], TDtype], FieldType.COORD]
 """Type hint to define coordinate fields (``Coord[TDims, TDtype]``).
 
 Example:
@@ -189,7 +202,7 @@ Hint:
 
 """
 
-Data = Annotated[Union[ArrayLike[TDims, TDtype], TDtype], FieldType.DATA]
+Data = Annotated[Union[Collection[TDims, TDtype], TDtype], FieldType.DATA]
 """Type hint to define data fields (``Coordof[TDims, TDtype]``).
 
 Examples:
@@ -267,7 +280,7 @@ def get_dims(type_: Any) -> Dims:
     args = get_args(type_)
     origin = get_origin(type_)
 
-    if origin is ArrayLike:
+    if origin is Collection:
         return get_dims(args[0])
 
     if origin is tuple or origin is Tuple:
@@ -298,7 +311,7 @@ def get_dtype(type_: Any) -> Dtype:
     args = get_args(type_)
     origin = get_origin(type_)
 
-    if origin is ArrayLike:
+    if origin is Collection:
         return get_dtype(args[1])
 
     if origin is Literal:

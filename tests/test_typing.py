@@ -9,8 +9,8 @@ from typing_extensions import Annotated, Literal
 
 # submodules
 from xarray_dataclasses.typing import (
-    ArrayLike,
     Attr,
+    Collection,
     Coord,
     Data,
     Name,
@@ -34,10 +34,10 @@ testdata_dims = [
     (Tuple[()], ()),
     (Tuple[X], ("x",)),
     (Tuple[X, Y], ("x", "y")),
-    (ArrayLike[X, Any], ("x",)),
-    (ArrayLike[Tuple[()], Any], ()),
-    (ArrayLike[Tuple[X], Any], ("x",)),
-    (ArrayLike[Tuple[X, Y], Any], ("x", "y")),
+    (Collection[X, Any], ("x",)),
+    (Collection[Tuple[()], Any], ()),
+    (Collection[Tuple[X], Any], ("x",)),
+    (Collection[Tuple[X, Y], Any], ("x", "y")),
 ]
 
 testdata_dtype = [
@@ -45,10 +45,10 @@ testdata_dtype = [
     (NoneType, None),
     (Int64, "int64"),
     (int, "int"),
-    (ArrayLike[Any, Any], None),
-    (ArrayLike[Any, NoneType], None),
-    (ArrayLike[Any, Int64], "int64"),
-    (ArrayLike[Any, int], "int"),
+    (Collection[Any, Any], None),
+    (Collection[Any, NoneType], None),
+    (Collection[Any, Int64], "int64"),
+    (Collection[Any, int], "int"),
 ]
 
 testdata_field_type = [
