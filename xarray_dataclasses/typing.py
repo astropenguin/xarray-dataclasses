@@ -45,7 +45,6 @@ from typing_extensions import (
     get_args,
     get_origin,
     get_type_hints,
-    runtime_checkable,
 )
 
 
@@ -76,25 +75,6 @@ class Collection(Labeled[TDims], Collection[TDtype], Protocol):
     """Type hint for labeled collection objects."""
 
     pass
-
-
-@runtime_checkable
-class ArrayLike(Protocol[TDims, TDtype]):
-    """Type hint for array-like objects."""
-
-    def astype(self: T, dtype: Any) -> T:
-        """Method to convert data type of the object."""
-        ...
-
-    @property
-    def ndim(self) -> int:
-        """Number of dimensions of the object."""
-        ...
-
-    @property
-    def shape(self) -> Tuple[int, ...]:
-        """Shape of the object."""
-        ...
 
 
 class DataClass(Protocol[P]):

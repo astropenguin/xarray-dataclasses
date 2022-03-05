@@ -14,7 +14,6 @@ from typing_extensions import Literal, ParamSpec, get_type_hints
 
 # submodules
 from .typing import (
-    ArrayLike,
     DataClass,
     DataType,
     Dims,
@@ -254,27 +253,27 @@ def get_typedarray(
         DataArray object with given dims and dtype.
 
     """
-    if isinstance(data, ArrayLike):
-        array = cast(np.ndarray, data)
-    else:
-        array = np.asarray(data)
+    try:
+        data.__array__
+    except AttributeError:
+        data = np.asarray(data)
 
     if dtype is not None:
-        array = array.astype(dtype, copy=False)
+        data = data.astype(dtype, copy=False)
 
-    if array.ndim == len(dims):
-        dataarray = xr.DataArray(array, dims=dims)
-    elif array.ndim == 0 and reference is not None:
-        dataarray = xr.DataArray(array)
+    if data.ndim == len(dims):
+        dataarray = xr.DataArray(data, dims=dims)
+    elif data.ndim == 0 and reference is not None:
+        dataarray = xr.DataArray(data)
     else:
         raise ValueError(
             "Could not create a DataArray object from data. "
-            f"Mismatch between shape {array.shape} and dims {dims}."
+            f"Mismatch between shape {data.shape} and dims {dims}."
         )
 
     if reference is None:
         return dataarray
-
-    diff_dims = set(reference.dims) - set(dims)
-    subspace = reference.isel({dim: 0 for dim in diff_dims})
-    return dataarray.broadcast_like(subspace)
+    else:
+        ddims = set(reference.dims) - set(dims)
+        reference = reference.isel({dim: 0 for dim in ddims})
+        return dataarray.broadcast_like(reference)
