@@ -1,3 +1,4 @@
+"""Submodule for DataArray creation."""
 __all__ = ["AsDataArray", "asdataarray"]
 
 
@@ -30,14 +31,14 @@ from .typing import DataClass, DataClassFields, DataType, Order, Shape, Sizes
 
 
 # type hints
-P = ParamSpec("P")
+PInit = ParamSpec("PInit")
 TDataArray = TypeVar("TDataArray", bound=xr.DataArray)
 
 
-class OptionedClass(Protocol[P, TDataArray]):
+class OptionedClass(Protocol[PInit, TDataArray]):
     """Type hint for dataclass objects with options."""
 
-    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
+    def __init__(self, *args: PInit.args, **kwargs: PInit.kwargs) -> None:
         ...
 
     __dataclass_fields__: ClassVar[DataClassFields]
@@ -47,7 +48,7 @@ class OptionedClass(Protocol[P, TDataArray]):
 # runtime functions
 @overload
 def asdataarray(
-    dataclass: OptionedClass[P, TDataArray],
+    dataclass: OptionedClass[PInit, TDataArray],
     reference: Optional[DataType] = None,
     dataoptions: None = None,
 ) -> TDataArray:
@@ -56,7 +57,7 @@ def asdataarray(
 
 @overload
 def asdataarray(
-    dataclass: DataClass[P],
+    dataclass: DataClass[PInit],
     reference: Optional[DataType] = None,
     dataoptions: None = None,
 ) -> xr.DataArray:
@@ -65,18 +66,9 @@ def asdataarray(
 
 @overload
 def asdataarray(
-    dataclass: OptionedClass[P, Any],
+    dataclass: Any,
     reference: Optional[DataType] = None,
-    dataoptions: Optional[DataOptions[TDataArray]] = None,
-) -> TDataArray:
-    ...
-
-
-@overload
-def asdataarray(
-    dataclass: DataClass[P],
-    reference: Optional[DataType] = None,
-    dataoptions: Optional[DataOptions[TDataArray]] = None,
+    dataoptions: DataOptions[TDataArray] = DataOptions(xr.DataArray),
 ) -> TDataArray:
     ...
 
@@ -139,16 +131,16 @@ class classproperty:
     def __get__(
         self,
         obj: Any,
-        cls: Type[OptionedClass[P, TDataArray]],
-    ) -> Callable[P, TDataArray]:
+        cls: Type[OptionedClass[PInit, TDataArray]],
+    ) -> Callable[PInit, TDataArray]:
         ...
 
     @overload
     def __get__(
         self,
         obj: Any,
-        cls: Type[DataClass[P]],
-    ) -> Callable[P, xr.DataArray]:
+        cls: Type[DataClass[PInit]],
+    ) -> Callable[PInit, xr.DataArray]:
         ...
 
     def __get__(self, obj: Any, cls: Any) -> Any:
@@ -175,7 +167,7 @@ class AsDataArray:
     @overload
     @classmethod
     def shaped(
-        cls: Type[OptionedClass[P, TDataArray]],
+        cls: Type[OptionedClass[PInit, TDataArray]],
         func: Callable[[Shape], np.ndarray],
         shape: Union[Shape, Sizes],
         **kwargs: Any,
@@ -185,7 +177,7 @@ class AsDataArray:
     @overload
     @classmethod
     def shaped(
-        cls: Type[DataClass[P]],
+        cls: Type[DataClass[PInit]],
         func: Callable[[Shape], np.ndarray],
         shape: Union[Shape, Sizes],
         **kwargs: Any,
@@ -221,7 +213,7 @@ class AsDataArray:
     @overload
     @classmethod
     def empty(
-        cls: Type[OptionedClass[P, TDataArray]],
+        cls: Type[OptionedClass[PInit, TDataArray]],
         shape: Union[Shape, Sizes],
         order: Order = "C",
         **kwargs: Any,
@@ -231,7 +223,7 @@ class AsDataArray:
     @overload
     @classmethod
     def empty(
-        cls: Type[DataClass[P]],
+        cls: Type[DataClass[PInit]],
         shape: Union[Shape, Sizes],
         order: Order = "C",
         **kwargs: Any,
@@ -263,7 +255,7 @@ class AsDataArray:
     @overload
     @classmethod
     def zeros(
-        cls: Type[OptionedClass[P, TDataArray]],
+        cls: Type[OptionedClass[PInit, TDataArray]],
         shape: Union[Shape, Sizes],
         order: Order = "C",
         **kwargs: Any,
@@ -273,7 +265,7 @@ class AsDataArray:
     @overload
     @classmethod
     def zeros(
-        cls: Type[DataClass[P]],
+        cls: Type[DataClass[PInit]],
         shape: Union[Shape, Sizes],
         order: Order = "C",
         **kwargs: Any,
@@ -305,7 +297,7 @@ class AsDataArray:
     @overload
     @classmethod
     def ones(
-        cls: Type[OptionedClass[P, TDataArray]],
+        cls: Type[OptionedClass[PInit, TDataArray]],
         shape: Union[Shape, Sizes],
         order: Order = "C",
         **kwargs: Any,
@@ -315,7 +307,7 @@ class AsDataArray:
     @overload
     @classmethod
     def ones(
-        cls: Type[DataClass[P]],
+        cls: Type[DataClass[PInit]],
         shape: Union[Shape, Sizes],
         order: Order = "C",
         **kwargs: Any,
@@ -347,7 +339,7 @@ class AsDataArray:
     @overload
     @classmethod
     def full(
-        cls: Type[OptionedClass[P, TDataArray]],
+        cls: Type[OptionedClass[PInit, TDataArray]],
         shape: Union[Shape, Sizes],
         fill_value: Any,
         order: Order = "C",
@@ -358,7 +350,7 @@ class AsDataArray:
     @overload
     @classmethod
     def full(
-        cls: Type[DataClass[P]],
+        cls: Type[DataClass[PInit]],
         shape: Union[Shape, Sizes],
         fill_value: Any,
         order: Order = "C",

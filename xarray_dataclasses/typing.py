@@ -48,9 +48,9 @@ from typing_extensions import (
 )
 
 
-# type hints
-P = ParamSpec("P")
-T = TypeVar("T")
+# type hints (private)
+PInit = ParamSpec("PInit")
+TAttr = TypeVar("TAttr")
 TDataClass = TypeVar("TDataClass", bound="DataClass[Any]")
 TDims = TypeVar("TDims", covariant=True)
 TDtype = TypeVar("TDtype", covariant=True)
@@ -77,16 +77,16 @@ class Collection(Labeled[TDims], Collection[TDtype], Protocol):
     pass
 
 
-class DataClass(Protocol[P]):
+class DataClass(Protocol[PInit]):
     """Type hint for dataclass objects."""
 
-    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
+    def __init__(self, *args: PInit.args, **kwargs: PInit.kwargs) -> None:
         ...
 
     __dataclass_fields__: ClassVar[DataClassFields]
 
 
-# constants
+# type hints (public)
 class FieldType(Enum):
     """Annotation of xarray-related field hints."""
 
@@ -107,9 +107,8 @@ class FieldType(Enum):
         return self in get_args(hint)[1:]
 
 
-# public type hints
-Attr = Annotated[T, FieldType.ATTR]
-"""Type hint to define attribute fields (``Attr[T]``).
+Attr = Annotated[TAttr, FieldType.ATTR]
+"""Type hint to define attribute fields (``Attr[TAttr]``).
 
 Example:
     ::
@@ -185,7 +184,7 @@ Hint:
 Data = Annotated[Union[Collection[TDims, TDtype], TDtype], FieldType.DATA]
 """Type hint to define data fields (``Coordof[TDims, TDtype]``).
 
-Examples:
+Example:
     Exactly one data field is allowed in a DataArray class
     (the second and subsequent data fields are just ignored)::
 

@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Tuple
 
 
-# third-party packages
+# dependencies
 import numpy as np
 import xarray as xr
 from typing_extensions import Literal
@@ -34,7 +34,7 @@ class Custom(xr.DataArray):
 
 @dataclass
 class Image(AsDataArray):
-    """Specs for a monochromatic image."""
+    """2D image as DataArray."""
 
     __dataoptions__ = DataOptions(Custom)
 

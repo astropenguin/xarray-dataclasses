@@ -1,3 +1,4 @@
+"""Submodule for data expression inside the package."""
 __all__ = ["DataModel"]
 
 
@@ -27,12 +28,12 @@ from .typing import (
 
 
 # type hints
-P = ParamSpec("P")
-AnyDataClass = Union[Type[DataClass[P]], DataClass[P]]
+PInit = ParamSpec("PInit")
+AnyDataClass = Union[Type[DataClass[PInit]], DataClass[PInit]]
 AnyEntry = Union["AttrEntry", "DataEntry"]
 
 
-# constants
+# runtime classes
 class MissingType:
     """Singleton that indicates missing data."""
 
@@ -51,7 +52,6 @@ class MissingType:
 MISSING = MissingType()
 
 
-# runtime classes
 @dataclass(frozen=True)
 class AttrEntry:
     """Entry of an attribute (i.e. metadata)."""
@@ -167,7 +167,7 @@ class DataModel:
         return [v for v in self.entries.values() if v.tag == "name"]
 
     @classmethod
-    def from_dataclass(cls, dataclass: AnyDataClass[P]) -> "DataModel":
+    def from_dataclass(cls, dataclass: AnyDataClass[PInit]) -> "DataModel":
         """Create a data model from a dataclass or its object."""
         model = cls()
         eval_dataclass(dataclass)
@@ -183,7 +183,7 @@ class DataModel:
 
 
 # runtime functions
-def eval_dataclass(dataclass: AnyDataClass[P]) -> None:
+def eval_dataclass(dataclass: AnyDataClass[PInit]) -> None:
     """Evaluate field types of a dataclass."""
     if not is_dataclass(dataclass):
         raise TypeError("Not a dataclass or its object.")

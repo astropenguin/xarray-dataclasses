@@ -2,7 +2,7 @@
 from typing import Any, Optional, Tuple, Union
 
 
-# third-party packages
+# dependencies
 from pytest import mark
 from typing_extensions import Annotated, Literal
 
