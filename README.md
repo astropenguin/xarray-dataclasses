@@ -262,8 +262,9 @@ class ColorImage(AsDataset):
     red: Dataof[Red]
     green: Dataof[Green]
     blue: Dataof[Blue]
+```
 
-
+```python
 ColorImage.new(
     [[0, 0], [0, 0]],
     [[1, 1], [1, 1]],
