@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?label=License&style=flat-square)](LICENSE)
 [![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.4624819-blue?style=flat-square)](https://doi.org/10.5281/zenodo.4624819)
 
-xarray extension for typed DataArray and Dataset creation
+xarray extension for typed DataArray or Dataset creation
 
 
 ## Overview
