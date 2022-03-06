@@ -34,7 +34,7 @@ class Custom(xr.DataArray):
 
 @dataclass
 class Image(AsDataArray):
-    """Specs for a monochromatic image."""
+    """2D image as DataArray."""
 
     __dataoptions__ = DataOptions(Custom)
 
