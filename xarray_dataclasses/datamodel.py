@@ -1,3 +1,4 @@
+"""Submodule for data expression inside the package."""
 __all__ = ["DataModel"]
 
 
@@ -32,7 +33,7 @@ AnyDataClass = Union[Type[DataClass[PInit]], DataClass[PInit]]
 AnyEntry = Union["AttrEntry", "DataEntry"]
 
 
-# constants
+# runtime classes
 class MissingType:
     """Singleton that indicates missing data."""
 
@@ -51,7 +52,6 @@ class MissingType:
 MISSING = MissingType()
 
 
-# runtime classes
 @dataclass(frozen=True)
 class AttrEntry:
     """Entry of an attribute (i.e. metadata)."""

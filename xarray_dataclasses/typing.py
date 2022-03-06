@@ -48,7 +48,7 @@ from typing_extensions import (
 )
 
 
-# type hints
+# type hints (private)
 PInit = ParamSpec("PInit")
 TAttr = TypeVar("TAttr")
 TDataClass = TypeVar("TDataClass", bound="DataClass[Any]")
@@ -86,7 +86,7 @@ class DataClass(Protocol[PInit]):
     __dataclass_fields__: ClassVar[DataClassFields]
 
 
-# constants
+# type hints (public)
 class FieldType(Enum):
     """Annotation of xarray-related field hints."""
 
@@ -107,9 +107,8 @@ class FieldType(Enum):
         return self in get_args(hint)[1:]
 
 
-# public type hints
 Attr = Annotated[TAttr, FieldType.ATTR]
-"""Type hint to define attribute fields (``Attr[T]``).
+"""Type hint to define attribute fields (``Attr[TAttr]``).
 
 Example:
     ::
@@ -185,7 +184,7 @@ Hint:
 Data = Annotated[Union[Collection[TDims, TDtype], TDtype], FieldType.DATA]
 """Type hint to define data fields (``Coordof[TDims, TDtype]``).
 
-Examples:
+Example:
     Exactly one data field is allowed in a DataArray class
     (the second and subsequent data fields are just ignored)::
 

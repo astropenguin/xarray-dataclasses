@@ -1,3 +1,4 @@
+"""Submodule for customization of DataArray or Dataset creation."""
 __all__ = ["DataOptions"]
 
 

@@ -1,3 +1,4 @@
+"""Submodule for DataArray creation."""
 __all__ = ["AsDataArray", "asdataarray"]
 
 
