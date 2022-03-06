@@ -6,12 +6,12 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?label=License&style=flat-square)](LICENSE)
 [![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.4624819-blue?style=flat-square)](https://doi.org/10.5281/zenodo.4624819)
 
-xarray extension for typed DataArray or Dataset creation
+xarray extension for typed DataArray and Dataset creation
 
 
 ## Overview
 
-xarray-dataclasses is a Python package that makes it easy to create [xarray]'s DataArray or Dataset objects that are "typed" (i.e. fixed dimensions, data type, coordinates, attributes, and name) using [the Python's dataclass]:
+xarray-dataclasses is a Python package that makes it easy to create [xarray]'s DataArray and Dataset objects that are "typed" (i.e. fixed dimensions, data type, coordinates, attributes, and name) using [the Python's dataclass]:
 
 ```python
 from dataclasses import dataclass
