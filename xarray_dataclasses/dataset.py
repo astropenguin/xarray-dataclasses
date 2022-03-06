@@ -21,14 +21,14 @@ from .typing import DataClass, DataClassFields, DataType, Order, Shape, Sizes
 
 
 # type hints
-P = ParamSpec("P")
+PInit = ParamSpec("PInit")
 TDataset = TypeVar("TDataset", bound=xr.Dataset)
 
 
-class OptionedClass(Protocol[P, TDataset]):
+class OptionedClass(Protocol[PInit, TDataset]):
     """Type hint for dataclass objects with options."""
 
-    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
+    def __init__(self, *args: PInit.args, **kwargs: PInit.kwargs) -> None:
         ...
 
     __dataclass_fields__: ClassVar[DataClassFields]
@@ -38,7 +38,7 @@ class OptionedClass(Protocol[P, TDataset]):
 # runtime functions and classes
 @overload
 def asdataset(
-    dataclass: OptionedClass[P, TDataset],
+    dataclass: OptionedClass[PInit, TDataset],
     reference: Optional[DataType] = None,
     dataoptions: None = None,
 ) -> TDataset:
@@ -47,7 +47,7 @@ def asdataset(
 
 @overload
 def asdataset(
-    dataclass: DataClass[P],
+    dataclass: DataClass[PInit],
     reference: Optional[DataType] = None,
     dataoptions: None = None,
 ) -> xr.Dataset:
@@ -121,16 +121,16 @@ class classproperty:
     def __get__(
         self,
         obj: Any,
-        cls: Type[OptionedClass[P, TDataset]],
-    ) -> Callable[P, TDataset]:
+        cls: Type[OptionedClass[PInit, TDataset]],
+    ) -> Callable[PInit, TDataset]:
         ...
 
     @overload
     def __get__(
         self,
         obj: Any,
-        cls: Type[DataClass[P]],
-    ) -> Callable[P, xr.Dataset]:
+        cls: Type[DataClass[PInit]],
+    ) -> Callable[PInit, xr.Dataset]:
         ...
 
     def __get__(self, obj: Any, cls: Any) -> Any:
@@ -157,7 +157,7 @@ class AsDataset:
     @overload
     @classmethod
     def shaped(
-        cls: Type[OptionedClass[P, TDataset]],
+        cls: Type[OptionedClass[PInit, TDataset]],
         func: Callable[[Shape], np.ndarray],
         sizes: Sizes,
         **kwargs: Any,
@@ -167,7 +167,7 @@ class AsDataset:
     @overload
     @classmethod
     def shaped(
-        cls: Type[DataClass[P]],
+        cls: Type[DataClass[PInit]],
         func: Callable[[Shape], np.ndarray],
         sizes: Sizes,
         **kwargs: Any,
@@ -204,7 +204,7 @@ class AsDataset:
     @overload
     @classmethod
     def empty(
-        cls: Type[OptionedClass[P, TDataset]],
+        cls: Type[OptionedClass[PInit, TDataset]],
         sizes: Sizes,
         order: Order = "C",
         **kwargs: Any,
@@ -214,7 +214,7 @@ class AsDataset:
     @overload
     @classmethod
     def empty(
-        cls: Type[DataClass[P]],
+        cls: Type[DataClass[PInit]],
         sizes: Sizes,
         order: Order = "C",
         **kwargs: Any,
@@ -246,7 +246,7 @@ class AsDataset:
     @overload
     @classmethod
     def zeros(
-        cls: Type[OptionedClass[P, TDataset]],
+        cls: Type[OptionedClass[PInit, TDataset]],
         sizes: Sizes,
         order: Order = "C",
         **kwargs: Any,
@@ -256,7 +256,7 @@ class AsDataset:
     @overload
     @classmethod
     def zeros(
-        cls: Type[DataClass[P]],
+        cls: Type[DataClass[PInit]],
         sizes: Sizes,
         order: Order = "C",
         **kwargs: Any,
@@ -288,7 +288,7 @@ class AsDataset:
     @overload
     @classmethod
     def ones(
-        cls: Type[OptionedClass[P, TDataset]],
+        cls: Type[OptionedClass[PInit, TDataset]],
         sizes: Sizes,
         order: Order = "C",
         **kwargs: Any,
@@ -298,7 +298,7 @@ class AsDataset:
     @overload
     @classmethod
     def ones(
-        cls: Type[DataClass[P]],
+        cls: Type[DataClass[PInit]],
         sizes: Sizes,
         order: Order = "C",
         **kwargs: Any,
@@ -330,7 +330,7 @@ class AsDataset:
     @overload
     @classmethod
     def full(
-        cls: Type[OptionedClass[P, TDataset]],
+        cls: Type[OptionedClass[PInit, TDataset]],
         sizes: Sizes,
         fill_value: Any,
         order: Order = "C",
@@ -341,7 +341,7 @@ class AsDataset:
     @overload
     @classmethod
     def full(
-        cls: Type[DataClass[P]],
+        cls: Type[DataClass[PInit]],
         sizes: Sizes,
         fill_value: Any,
         order: Order = "C",

@@ -49,8 +49,8 @@ from typing_extensions import (
 
 
 # type hints
-P = ParamSpec("P")
-T = TypeVar("T")
+PInit = ParamSpec("PInit")
+TAttr = TypeVar("TAttr")
 TDataClass = TypeVar("TDataClass", bound="DataClass[Any]")
 TDims = TypeVar("TDims", covariant=True)
 TDtype = TypeVar("TDtype", covariant=True)
@@ -77,10 +77,10 @@ class Collection(Labeled[TDims], Collection[TDtype], Protocol):
     pass
 
 
-class DataClass(Protocol[P]):
+class DataClass(Protocol[PInit]):
     """Type hint for dataclass objects."""
 
-    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
+    def __init__(self, *args: PInit.args, **kwargs: PInit.kwargs) -> None:
         ...
 
     __dataclass_fields__: ClassVar[DataClassFields]
@@ -108,7 +108,7 @@ class FieldType(Enum):
 
 
 # public type hints
-Attr = Annotated[T, FieldType.ATTR]
+Attr = Annotated[TAttr, FieldType.ATTR]
 """Type hint to define attribute fields (``Attr[T]``).
 
 Example:
