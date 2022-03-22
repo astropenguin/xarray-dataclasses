@@ -229,7 +229,7 @@ class Image(AsDataArray):
     y: Coordof[YAxis] = 0
 ```
 
-### General data varible names in Dataset creation
+### General data variable names in Dataset creation
 
 Due to the limitation of Python's parameter names, it is not possible to define data variable names that contain white spaces, for example.
 In such cases, please define DataArray classes of each data variable so that they have name fields and specify them by `Dataof` in a Dataset class.
