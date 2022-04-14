@@ -1,9 +1,10 @@
-FROM python:3.9-slim
+FROM python:3.10-slim
 
+ENV PATH=$PATH:/root/.local/bin
 ENV POETRY_VIRTUALENVS_CREATE=false
 
 RUN apt-get update \
-    && apt-get install -y git \
+    && apt-get install -y curl git \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && pip install --no-cache-dir poetry
+    && curl -sSL https://install.python-poetry.org | python -
