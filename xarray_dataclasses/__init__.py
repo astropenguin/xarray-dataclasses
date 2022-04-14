@@ -1,5 +1,5 @@
 # type: ignore
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 
 # for Python 3.7 and 3.8
