@@ -36,12 +36,10 @@ pytest = "^7.1"
 sphinx = "^4.5"
 
 [tool.pyright]
-typeCheckingMode = "strict"
 reportImportCycles = "warning"
 reportUnknownArgumentType = "warning"
 reportUnknownMemberType = "warning"
-reportUnknownParameterType = "warning"
-reportUnknownVariableType = "warning"
+typeCheckingMode = "strict"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

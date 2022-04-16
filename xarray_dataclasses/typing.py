@@ -35,6 +35,7 @@ from typing import (
 
 
 # dependencies
+import numpy as np
 import xarray as xr
 from more_itertools import collapse
 from typing_extensions import (
@@ -42,6 +43,7 @@ from typing_extensions import (
     Literal,
     ParamSpec,
     Protocol,
+    TypeAlias,
     get_args,
     get_origin,
     get_type_hints,
@@ -56,7 +58,9 @@ TDims = TypeVar("TDims", covariant=True)
 TDtype = TypeVar("TDtype", covariant=True)
 TName = TypeVar("TName", bound=Hashable)
 
-DataClassFields = Dict[str, Field[Any]]
+AnyArray: TypeAlias = "np.ndarray[Any, Any]"
+AnyField: TypeAlias = "Field[Any]"
+DataClassFields = Dict[str, AnyField]
 DataType = Union[xr.DataArray, xr.Dataset]
 Dims = Tuple[str, ...]
 Dtype = Optional[str]
