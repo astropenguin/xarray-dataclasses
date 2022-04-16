@@ -3,7 +3,7 @@ __all__ = ["DataModel"]
 
 
 # standard library
-from dataclasses import Field, dataclass, field, is_dataclass
+from dataclasses import dataclass, field, is_dataclass
 from typing import Any, Dict, Hashable, List, Optional, Tuple, Type, Union, cast
 
 
@@ -15,6 +15,7 @@ from typing_extensions import Literal, ParamSpec, get_type_hints
 
 # submodules
 from .typing import (
+    AnyField,
     DataClass,
     DataType,
     Dims,
@@ -204,7 +205,7 @@ def eval_dataclass(dataclass: AnyDataClass[PInit]) -> None:
         field.type = types[field.name]
 
 
-def get_entry(field: Field[Any], value: Any) -> AnyEntry:
+def get_entry(field: AnyField, value: Any) -> AnyEntry:
     """Create an entry from a field and its value."""
     field_type = get_field_type(field.type)
     repr_type = get_repr_type(field.type)

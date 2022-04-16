@@ -27,7 +27,7 @@ from typing_extensions import ParamSpec, Protocol
 # submodules
 from .datamodel import DataModel
 from .dataoptions import DataOptions
-from .typing import DataClass, DataClassFields, DataType, Order, Shape, Sizes
+from .typing import AnyArray, DataClass, DataClassFields, DataType, Order, Shape, Sizes
 
 
 # type hints
@@ -168,7 +168,7 @@ class AsDataArray:
     @classmethod
     def shaped(
         cls: Type[OptionedClass[PInit, TDataArray]],
-        func: Callable[[Shape], np.ndarray],
+        func: Callable[[Shape], AnyArray],
         shape: Union[Shape, Sizes],
         **kwargs: Any,
     ) -> TDataArray:
@@ -178,7 +178,7 @@ class AsDataArray:
     @classmethod
     def shaped(
         cls: Type[DataClass[PInit]],
-        func: Callable[[Shape], np.ndarray],
+        func: Callable[[Shape], AnyArray],
         shape: Union[Shape, Sizes],
         **kwargs: Any,
     ) -> xr.DataArray:
@@ -187,7 +187,7 @@ class AsDataArray:
     @classmethod
     def shaped(
         cls: Any,
-        func: Callable[[Shape], np.ndarray],
+        func: Callable[[Shape], AnyArray],
         shape: Union[Shape, Sizes],
         **kwargs: Any,
     ) -> Any:
