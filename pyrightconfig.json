@@ -1,8 +1,0 @@
-{
-    "typeCheckingMode": "strict",
-    "reportImportCycles": "warning",
-    "reportUnknownArgumentType": "warning",
-    "reportUnknownMemberType": "warning",
-    "reportUnknownParameterType": "warning",
-    "reportUnknownVariableType": "warning"
-}
