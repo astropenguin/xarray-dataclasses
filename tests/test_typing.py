@@ -16,7 +16,7 @@ from xarray_dataclasses.typing import (
     Name,
     get_dims,
     get_dtype,
-    get_field_type,
+    get_ftype,
     get_repr_type,
 )
 
@@ -56,6 +56,7 @@ testdata_field_type = [
     (Coord[Any, Any], "coord"),
     (Data[Any, Any], "data"),
     (Name[Any], "name"),
+    (Any, "other"),
 ]
 
 testdata_repr_type = [
@@ -79,7 +80,7 @@ def test_get_dtype(type_: Any, dtype: Any) -> None:
 
 @mark.parametrize("type_, field_type", testdata_field_type)
 def test_get_field_type(type_: Any, field_type: Any) -> None:
-    assert get_field_type(type_).value == field_type
+    assert get_ftype(type_).value == field_type
 
 
 @mark.parametrize("type_, repr_type", testdata_repr_type)

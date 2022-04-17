@@ -91,23 +91,26 @@ class DataClass(Protocol[PInit]):
 
 # type hints (public)
 class FieldType(Enum):
-    """Annotation of xarray-related field hints."""
+    """Annotations for xarray dataclass fields."""
 
     ATTR = "attr"
-    """Annotation of attribute field hints."""
+    """Annotation for attribute fields."""
 
     COORD = "coord"
-    """Annotation of coordinate field hints."""
+    """Annotation for coordinate fields."""
 
     DATA = "data"
-    """Annotation of data (variable) field hints."""
+    """Annotation for data (variable) fields."""
 
     NAME = "name"
-    """Annotation of name field hints."""
+    """Annotation for name fields."""
 
-    def annotates(self, hint: Any) -> bool:
-        """Check if a field hint is annotated."""
-        return self in get_args(hint)[1:]
+    OTHER = "other"
+    """Annotation for other fields."""
+
+    def annotates(self, type_: Any) -> bool:
+        """Check if a type is annotated by the annotation."""
+        return self in get_args(type_)[1:]
 
 
 Attr = Annotated[TAttr, FieldType.ATTR]
@@ -308,8 +311,8 @@ def get_dtype(type_: Any) -> Dtype:
     raise ValueError(f"Could not convert {type_!r} to dtype.")
 
 
-def get_field_type(type_: Any) -> FieldType:
-    """Parse a type and return a field type if it exists."""
+def get_ftype(type_: Any) -> FieldType:
+    """Parse a type and return a field type (ftype)."""
     if FieldType.ATTR.annotates(type_):
         return FieldType.ATTR
 
@@ -322,7 +325,7 @@ def get_field_type(type_: Any) -> FieldType:
     if FieldType.NAME.annotates(type_):
         return FieldType.NAME
 
-    raise TypeError(f"Could not find any field type in {type_!r}.")
+    return FieldType.OTHER
 
 
 def get_repr_type(type_: Any) -> Any:
