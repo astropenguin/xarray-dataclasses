@@ -5,7 +5,7 @@ __all__ = ["AsDataset", "asdataset"]
 # standard library
 from functools import partial, wraps
 from types import MethodType
-from typing import Any, Callable, ClassVar, Dict, Optional, Type, TypeVar, overload
+from typing import Any, Callable, Dict, Optional, Type, TypeVar, overload
 
 
 # dependencies
@@ -18,7 +18,7 @@ from typing_extensions import ParamSpec, Protocol
 # submodules
 from .datamodel import DataModel
 from .dataoptions import DataOptions
-from .typing import AnyArray, DataClass, DataClassFields, DataType, Order, Shape, Sizes
+from .typing import AnyArray, DataClass, DataType, Order, Shape, Sizes
 
 
 # type hints
@@ -26,13 +26,12 @@ PInit = ParamSpec("PInit")
 TDataset = TypeVar("TDataset", bound=xr.Dataset)
 
 
-class OptionedClass(Protocol[PInit, TDataset]):
+class OptionedClass(DataClass[PInit], Protocol[TDataset]):
     """Type hint for dataclass objects with options."""
 
     def __init__(self, *args: PInit.args, **kwargs: PInit.kwargs) -> None:
         ...
 
-    __dataclass_fields__: ClassVar[DataClassFields]
     __dataoptions__: DataOptions[TDataset]
 
 
