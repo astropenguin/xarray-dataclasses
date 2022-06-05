@@ -230,7 +230,7 @@ def get_entry(field: AnyField, value: Any) -> Optional[AnyEntry]:
             return DataEntry(
                 name=field.name,
                 tag=ftype.value,
-                dims=get_dims(repr_type),
+                dims=get_dims(field.type),
                 dtype=get_dtype(field.type),
                 value=value,
             )

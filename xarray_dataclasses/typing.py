@@ -39,7 +39,6 @@ from typing import (
 # dependencies
 import numpy as np
 import xarray as xr
-from more_itertools import collapse
 from typing_extensions import (
     Annotated,
     Literal,
@@ -294,34 +293,29 @@ def get_annotations(tp: Any) -> Tuple[Any, ...]:
     raise TypeError("Could not find any ftype-annotated type.")
 
 
-def get_dims(type_: Any) -> Dims:
-    """Parse a type and return dims.
+def get_dims(tp: Any) -> Dims:
+    """Extract data dimensions (dims)."""
+    try:
+        dims = get_args(get_args(get_annotated(tp))[0])[0]
+    except TypeError:
+        raise TypeError(f"Could not find any dims in {tp!r}.")
 
-    Example:
-        All of the following expressions will be ``True``::
+    args = get_args(dims)
+    origin = get_origin(dims)
 
-            get_dims(tuple[()]) == ()
-            get_dims(Literal[A]) == (A,)
-            get_dims(tuple[Literal[A], Literal[B]]) == (A, B)
-            get_dims(ArrayLike[A, ...]) == get_dims(A)
-
-    """
-    args = get_args(type_)
-    origin = get_origin(type_)
-
-    if origin is Collection:
-        return get_dims(args[0])
-
-    if origin is tuple or origin is Tuple:
-        return tuple(collapse(map(get_dims, args)))
-
-    if origin is Literal:
-        return (args[0],)
-
-    if type_ == () or type_ == ((),):
+    if dims == () or dims == ((),):
         return ()
 
-    raise ValueError(f"Could not convert {type_!r} to dims.")
+    if origin is Literal:
+        return (str(args[0]),)
+
+    if not (origin is tuple or origin is Tuple):
+        raise TypeError("")
+
+    if not all(get_origin(arg) is Literal for arg in args):
+        raise TypeError("")
+
+    return tuple(str(get_args(arg)[0]) for arg in args)
 
 
 def get_dtype(tp: Any) -> Optional[AnyDType]:
