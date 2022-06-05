@@ -15,11 +15,11 @@ from typing_extensions import Literal, ParamSpec, get_type_hints
 
 # submodules
 from .typing import (
+    AnyDType,
     AnyField,
     DataClass,
     DataType,
     Dims,
-    Dtype,
     FType,
     get_dims,
     get_dtype,
@@ -93,7 +93,7 @@ class DataEntry:
     dims: Dims = cast(Dims, None)
     """Dimensions of the DataArray that the data is cast to."""
 
-    dtype: Dtype = cast(Dtype, None)
+    dtype: Optional[AnyDType] = None
     """Data type of the DataArray that the data is cast to."""
 
     base: Optional[Type[DataClass[Any]]] = None
@@ -231,7 +231,7 @@ def get_entry(field: AnyField, value: Any) -> Optional[AnyEntry]:
                 name=field.name,
                 tag=ftype.value,
                 dims=get_dims(repr_type),
-                dtype=get_dtype(repr_type),
+                dtype=get_dtype(field.type),
                 value=value,
             )
 
@@ -239,7 +239,7 @@ def get_entry(field: AnyField, value: Any) -> Optional[AnyEntry]:
 def get_typedarray(
     data: Any,
     dims: Dims,
-    dtype: Dtype,
+    dtype: Optional[AnyDType],
     reference: Optional[DataType] = None,
 ) -> xr.DataArray:
     """Create a DataArray object with given dims and dtype.

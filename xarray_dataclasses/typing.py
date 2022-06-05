@@ -61,6 +61,7 @@ TDtype = TypeVar("TDtype", covariant=True)
 TName = TypeVar("TName", bound=Hashable)
 
 AnyArray: TypeAlias = "np.ndarray[Any, Any]"
+AnyDType: TypeAlias = "np.dtype[Any]"
 AnyField: TypeAlias = "Field[Any]"
 DataClassFields = Dict[str, AnyField]
 DataType = Union[xr.DataArray, xr.Dataset]
@@ -323,35 +324,20 @@ def get_dims(type_: Any) -> Dims:
     raise ValueError(f"Could not convert {type_!r} to dims.")
 
 
-def get_dtype(type_: Any) -> Dtype:
-    """Parse a type and return dtype.
+def get_dtype(tp: Any) -> Optional[AnyDType]:
+    """Extract a NumPy data type (dtype)."""
+    try:
+        dtype = get_args(get_args(get_annotated(tp))[0])[-1]
+    except TypeError:
+        raise TypeError(f"Could not find any dtype in {tp!r}.")
 
-    Example:
-        All of the following expressions will be ``True``::
+    if dtype is Any or dtype is type(None):
+        return
 
-            get_dtype(Any) == None
-            get_dtype(NoneType) == None
-            get_dtype(A) == A.__name__
-            get_dtype(Literal[A]) == A
-            get_dtype(ArrayLike[..., A]) == get_dtype(A)
+    if get_origin(dtype) is Literal:
+        dtype = get_args(dtype)[0]
 
-    """
-    args = get_args(type_)
-    origin = get_origin(type_)
-
-    if origin is Collection:
-        return get_dtype(args[1])
-
-    if origin is Literal:
-        return args[0]
-
-    if type_ is Any or type_ is type(None):
-        return None
-
-    if isinstance(type_, type):
-        return type_.__name__
-
-    raise ValueError(f"Could not convert {type_!r} to dtype.")
+    return np.dtype(dtype)
 
 
 def get_ftype(tp: Any, default: FType = FType.OTHER) -> FType:
