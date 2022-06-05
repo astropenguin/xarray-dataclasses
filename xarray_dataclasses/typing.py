@@ -91,27 +91,34 @@ class DataClass(Protocol[PInit]):
 
 
 # type hints (public)
-class FieldType(Enum):
-    """Annotation of xarray-related field hints."""
+class FType(Enum):
+    """Annotations for typing dataclass fields."""
 
     ATTR = "attr"
-    """Annotation of attribute field hints."""
+    """Annotation for attribute fields."""
 
     COORD = "coord"
-    """Annotation of coordinate field hints."""
+    """Annotation for coordinate fields."""
 
     DATA = "data"
-    """Annotation of data (variable) field hints."""
+    """Annotation for data (variable) fields."""
 
     NAME = "name"
-    """Annotation of name field hints."""
+    """Annotation for name fields."""
 
-    def annotates(self, hint: Any) -> bool:
-        """Check if a field hint is annotated."""
-        return self in get_args(hint)[1:]
+    OTHER = "other"
+    """Annotation for other fields."""
+
+    @classmethod
+    def annotates(cls, tp: Any) -> bool:
+        """Check if any ftype annotates a type hint."""
+        if get_origin(tp) is not Annotated:
+            return False
+
+        return any(isinstance(arg, cls) for arg in get_args(tp))
 
 
-Attr = Annotated[TAttr, FieldType.ATTR]
+Attr = Annotated[TAttr, FType.ATTR]
 """Type hint to define attribute fields (``Attr[TAttr]``).
 
 Example:
@@ -134,7 +141,7 @@ Reference:
 
 """
 
-Coord = Annotated[Union[Collection[TDims, TDtype], TDtype], FieldType.COORD]
+Coord = Annotated[Union[Collection[TDims, TDtype], TDtype], FType.COORD]
 """Type hint to define coordinate fields (``Coord[TDims, TDtype]``).
 
 Example:
@@ -153,7 +160,7 @@ Hint:
 
 """
 
-Coordof = Annotated[Union[TDataClass, Any], FieldType.COORD]
+Coordof = Annotated[Union[TDataClass, Any], FType.COORD]
 """Type hint to define coordinate fields (``Coordof[TDataClass]``).
 
 Unlike ``Coord``, it specifies a dataclass that defines a DataArray class.
@@ -185,7 +192,7 @@ Hint:
 
 """
 
-Data = Annotated[Union[Collection[TDims, TDtype], TDtype], FieldType.DATA]
+Data = Annotated[Union[Collection[TDims, TDtype], TDtype], FType.DATA]
 """Type hint to define data fields (``Coordof[TDims, TDtype]``).
 
 Example:
@@ -206,7 +213,7 @@ Example:
 
 """
 
-Dataof = Annotated[Union[TDataClass, Any], FieldType.DATA]
+Dataof = Annotated[Union[TDataClass, Any], FType.DATA]
 """Type hint to define data fields (``Coordof[TDataClass]``).
 
 Unlike ``Data``, it specifies a dataclass that defines a DataArray class.
@@ -233,7 +240,7 @@ Hint:
 
 """
 
-Name = Annotated[TName, FieldType.NAME]
+Name = Annotated[TName, FType.NAME]
 """Type hint to define name fields (``Name[TName]``).
 
 Example:
