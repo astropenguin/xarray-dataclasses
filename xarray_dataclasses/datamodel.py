@@ -21,10 +21,11 @@ from .typing import (
     DataType,
     Dims,
     FType,
+    get_annotated,
+    get_dataclass,
     get_dims,
     get_dtype,
     get_ftype,
-    get_repr_type,
 )
 
 
@@ -208,25 +209,24 @@ def eval_dataclass(dataclass: AnyDataClass[PInit]) -> None:
 def get_entry(field: AnyField, value: Any) -> Optional[AnyEntry]:
     """Create an entry from a field and its value."""
     ftype = get_ftype(field.type)
-    repr_type = get_repr_type(field.type)
 
     if ftype is FType.ATTR or ftype is FType.NAME:
         return AttrEntry(
             name=field.name,
             tag=ftype.value,
             value=value,
-            type=repr_type,
+            type=get_annotated(field.type),
         )
 
     if ftype is FType.COORD or ftype is FType.DATA:
-        if is_dataclass(repr_type):
+        try:
             return DataEntry(
                 name=field.name,
                 tag=ftype.value,
-                base=repr_type,
+                base=get_dataclass(field.type),
                 value=value,
             )
-        else:
+        except TypeError:
             return DataEntry(
                 name=field.name,
                 tag=ftype.value,

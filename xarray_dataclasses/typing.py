@@ -18,7 +18,7 @@ __all__ = ["Attr", "Coord", "Coordof", "Data", "Dataof", "Name"]
 
 
 # standard library
-from dataclasses import Field
+from dataclasses import Field, is_dataclass
 from enum import Enum
 from itertools import chain
 from typing import (
@@ -31,6 +31,7 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
+    Type,
     TypeVar,
     Union,
 )
@@ -293,6 +294,19 @@ def get_annotations(tp: Any) -> Tuple[Any, ...]:
     raise TypeError("Could not find any ftype-annotated type.")
 
 
+def get_dataclass(tp: Any) -> Type[DataClass[Any]]:
+    """Extract a dataclass."""
+    try:
+        dataclass = get_args(get_annotated(tp))[0]
+    except TypeError:
+        raise TypeError(f"Could not find any dataclass in {tp!r}.")
+
+    if not is_dataclass(dataclass):
+        raise TypeError(f"Could not find any dataclass in {tp!r}.")
+
+    return dataclass
+
+
 def get_dims(tp: Any) -> Dims:
     """Extract data dimensions (dims)."""
     try:
@@ -340,27 +354,3 @@ def get_ftype(tp: Any, default: FType = FType.OTHER) -> FType:
         return get_annotations(tp)[0]
     except TypeError:
         return default
-
-
-def get_repr_type(type_: Any) -> Any:
-    """Parse a type and return an representative type.
-
-    Example:
-        All of the following expressions will be ``True``::
-
-            get_repr_type(A) == A
-            get_repr_type(Annotated[A, ...]) == A
-            get_repr_type(Union[A, B, ...]) == A
-            get_repr_type(Optional[A]) == A
-
-    """
-
-    class Temporary:
-        __annotations__ = dict(type=type_)
-
-    unannotated = get_type_hints(Temporary)["type"]
-
-    if get_origin(unannotated) is Union:
-        return get_args(unannotated)[0]
-
-    return unannotated

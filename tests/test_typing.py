@@ -3,6 +3,7 @@ from typing import Any, Optional, Tuple, Union
 
 
 # dependencies
+import numpy as np
 from pytest import mark
 from typing_extensions import Annotated, Literal
 
@@ -43,12 +44,12 @@ testdata_dims = [
 testdata_dtype = [
     (Any, None),
     (NoneType, None),
-    (Int64, "int64"),
-    (int, "int"),
+    (Int64, np.dtype("i8")),
+    (int, np.dtype("i8")),
     (Collection[Any, Any], None),
     (Collection[Any, NoneType], None),
-    (Collection[Any, Int64], "int64"),
-    (Collection[Any, int], "int"),
+    (Collection[Any, Int64], np.dtype("i8")),
+    (Collection[Any, int], np.dtype),
 ]
 
 testdata_field_type = [
