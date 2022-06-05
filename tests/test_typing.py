@@ -1,88 +1,88 @@
 # standard library
-from typing import Any, Optional, Tuple, Union
+from typing import Any, Tuple, Union
 
 
 # dependencies
 import numpy as np
 from pytest import mark
-from typing_extensions import Annotated, Literal
+from typing_extensions import Annotated as Ann
+from typing_extensions import Literal as L
 
 
 # submodules
 from xarray_dataclasses.typing import (
     Attr,
-    Collection,
     Coord,
     Data,
+    FType,
     Name,
     get_dims,
     get_dtype,
     get_ftype,
-    get_repr_type,
 )
-
-
-# type hints
-Int64 = Literal["int64"]
-NoneType = type(None)
-X = Literal["x"]
-Y = Literal["y"]
 
 
 # test datasets
 testdata_dims = [
-    (X, ("x",)),
-    (Tuple[()], ()),
-    (Tuple[X], ("x",)),
-    (Tuple[X, Y], ("x", "y")),
-    (Collection[X, Any], ("x",)),
-    (Collection[Tuple[()], Any], ()),
-    (Collection[Tuple[X], Any], ("x",)),
-    (Collection[Tuple[X, Y], Any], ("x", "y")),
+    (Coord[Tuple[()], Any], ()),
+    (Coord[L["x"], Any], ("x",)),
+    (Coord[Tuple[L["x"]], Any], ("x",)),
+    (Coord[Tuple[L["x"], L["y"]], Any], ("x", "y")),
+    (Data[Tuple[()], Any], ()),
+    (Data[L["x"], Any], ("x",)),
+    (Data[Tuple[L["x"]], Any], ("x",)),
+    (Data[Tuple[L["x"], L["y"]], Any], ("x", "y")),
+    (Ann[Coord[L["x"], Any], "coord"], ("x",)),
+    (Ann[Data[L["x"], Any], "data"], ("x",)),
+    (Union[Ann[Coord[L["x"], Any], "coord"], Ann[Any, "any"]], ("x",)),
+    (Union[Ann[Data[L["x"], Any], "data"], Ann[Any, "any"]], ("x",)),
 ]
 
 testdata_dtype = [
-    (Any, None),
-    (NoneType, None),
-    (Int64, np.dtype("i8")),
-    (int, np.dtype("i8")),
-    (Collection[Any, Any], None),
-    (Collection[Any, NoneType], None),
-    (Collection[Any, Int64], np.dtype("i8")),
-    (Collection[Any, int], np.dtype),
+    (Coord[Any, Any], None),
+    (Coord[Any, None], None),
+    (Coord[Any, int], np.dtype("i8")),
+    (Coord[Any, L["i8"]], np.dtype("i8")),
+    (Data[Any, Any], None),
+    (Data[Any, None], None),
+    (Data[Any, int], np.dtype("i8")),
+    (Data[Any, L["i8"]], np.dtype("i8")),
+    (Ann[Coord[Any, float], "coord"], np.dtype("f8")),
+    (Ann[Data[Any, float], "data"], np.dtype("f8")),
+    (Union[Ann[Coord[Any, float], "coord"], Ann[Any, "any"]], np.dtype("f8")),
+    (Union[Ann[Data[Any, float], "data"], Ann[Any, "any"]], np.dtype("f8")),
 ]
 
-testdata_field_type = [
-    (Attr[Any], "attr"),
-    (Coord[Any, Any], "coord"),
-    (Data[Any, Any], "data"),
-    (Name[Any], "name"),
-]
-
-testdata_repr_type = [
-    (int, int),
-    (Annotated[int, "annotation"], int),
-    (Union[int, float], int),
-    (Optional[int], int),
+testdata_ftype = [
+    (Attr[Any], FType.ATTR),
+    (Data[Any, Any], FType.DATA),
+    (Coord[Any, Any], FType.COORD),
+    (Name[Any], FType.NAME),
+    (Any, FType.OTHER),
+    (Ann[Attr[Any], "attr"], FType.ATTR),
+    (Ann[Data[Any, Any], "data"], FType.DATA),
+    (Ann[Coord[Any, Any], "coord"], FType.COORD),
+    (Ann[Name[Any], "name"], FType.NAME),
+    (Ann[Any, "other"], FType.OTHER),
+    (Union[Ann[Attr[Any], "attr"], Ann[Any, "any"]], FType.ATTR),
+    (Union[Ann[Data[Any, Any], "data"], Ann[Any, "any"]], FType.DATA),
+    (Union[Ann[Coord[Any, Any], "coord"], Ann[Any, "any"]], FType.COORD),
+    (Union[Ann[Name[Any], "name"], Ann[Any, "any"]], FType.NAME),
+    (Union[Ann[Any, "other"], Ann[Any, "any"]], FType.OTHER),
 ]
 
 
 # test functions
-@mark.parametrize("type_, dims", testdata_dims)
-def test_get_dims(type_: Any, dims: Any) -> None:
-    assert get_dims(type_) == dims
+@mark.parametrize("tp, dims", testdata_dims)
+def test_get_dims(tp: Any, dims: Any) -> None:
+    assert get_dims(tp) == dims
 
 
-@mark.parametrize("type_, dtype", testdata_dtype)
-def test_get_dtype(type_: Any, dtype: Any) -> None:
-    assert get_dtype(type_) == dtype
+@mark.parametrize("tp, dtype", testdata_dtype)
+def test_get_dtype(tp: Any, dtype: Any) -> None:
+    assert get_dtype(tp) == dtype
 
 
-@mark.parametrize("type_, field_type", testdata_field_type)
-def test_get_ftype(type_: Any, field_type: Any) -> None:
-    assert get_ftype(type_).value == field_type
-
-
-@mark.parametrize("type_, repr_type", testdata_repr_type)
-def test_get_repr_type(type_: Any, repr_type: Any) -> None:
-    assert get_repr_type(type_) == repr_type
+@mark.parametrize("tp, ftype", testdata_ftype)
+def test_get_ftype(tp: Any, ftype: Any) -> None:
+    assert get_ftype(tp) == ftype
