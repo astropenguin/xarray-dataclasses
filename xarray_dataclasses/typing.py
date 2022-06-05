@@ -317,17 +317,17 @@ def get_dims(tp: Any) -> Dims:
     args = get_args(dims)
     origin = get_origin(dims)
 
-    if dims == () or dims == ((),):
-        return ()
-
     if origin is Literal:
         return (str(args[0]),)
 
     if not (origin is tuple or origin is Tuple):
-        raise TypeError("")
+        raise TypeError(f"Could not find any dims in {tp!r}.")
+
+    if args == () or args == ((),):
+        return ()
 
     if not all(get_origin(arg) is Literal for arg in args):
-        raise TypeError("")
+        raise TypeError(f"Could not find any dims in {tp!r}.")
 
     return tuple(str(get_args(arg)[0]) for arg in args)
 
