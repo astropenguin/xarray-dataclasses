@@ -20,12 +20,14 @@ __all__ = ["Attr", "Coord", "Coordof", "Data", "Dataof", "Name"]
 # standard library
 from dataclasses import Field
 from enum import Enum
+from itertools import chain
 from typing import (
     Any,
     ClassVar,
     Collection,
     Dict,
     Hashable,
+    Iterable,
     Optional,
     Sequence,
     Tuple,
@@ -255,6 +257,42 @@ Example:
 
 
 # runtime functions
+def deannotate(tp: Any) -> Any:
+    """Recursively remove annotations in a type hint."""
+
+    class Temporary:
+        __annotations__ = dict(type=tp)
+
+    return get_type_hints(Temporary)["type"]
+
+
+def find_annotated(tp: Any) -> Iterable[Any]:
+    """Generate all annotated types in a type hint."""
+    args = get_args(tp)
+
+    if get_origin(tp) is Annotated:
+        yield tp
+        yield from find_annotated(args[0])
+    else:
+        yield from chain(*map(find_annotated, args))
+
+
+def get_annotated(tp: Any) -> Any:
+    """Extract the first ftype-annotated type."""
+    for annotated in filter(FType.annotates, find_annotated(tp)):
+        return deannotate(annotated)
+
+    raise TypeError("Could not find any ftype-annotated type.")
+
+
+def get_annotations(tp: Any) -> Tuple[Any, ...]:
+    """Extract annotations of the first ftype-annotated type."""
+    for annotated in filter(FType.annotates, find_annotated(tp)):
+        return get_args(annotated)[1:]
+
+    raise TypeError("Could not find any ftype-annotated type.")
+
+
 def get_dims(type_: Any) -> Dims:
     """Parse a type and return dims.
 
@@ -316,21 +354,12 @@ def get_dtype(type_: Any) -> Dtype:
     raise ValueError(f"Could not convert {type_!r} to dtype.")
 
 
-def get_field_type(type_: Any) -> FieldType:
-    """Parse a type and return a field type if it exists."""
-    if FieldType.ATTR.annotates(type_):
-        return FieldType.ATTR
-
-    if FieldType.COORD.annotates(type_):
-        return FieldType.COORD
-
-    if FieldType.DATA.annotates(type_):
-        return FieldType.DATA
-
-    if FieldType.NAME.annotates(type_):
-        return FieldType.NAME
-
-    raise TypeError(f"Could not find any field type in {type_!r}.")
+def get_ftype(tp: Any, default: FType = FType.OTHER) -> FType:
+    """Extract an ftype if found or return given default."""
+    try:
+        return get_annotations(tp)[0]
+    except TypeError:
+        return default
 
 
 def get_repr_type(type_: Any) -> Any:
