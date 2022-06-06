@@ -26,6 +26,7 @@ from typing import (
     ClassVar,
     Collection,
     Dict,
+    Generic,
     Hashable,
     Iterable,
     Optional,
@@ -57,7 +58,7 @@ PInit = ParamSpec("PInit")
 TAttr = TypeVar("TAttr")
 TDataClass = TypeVar("TDataClass", bound="DataClass[Any]")
 TDims = TypeVar("TDims", covariant=True)
-TDtype = TypeVar("TDtype", covariant=True)
+TDType = TypeVar("TDType", covariant=True)
 TName = TypeVar("TName", bound=Hashable)
 
 AnyArray: TypeAlias = "np.ndarray[Any, Any]"
@@ -72,18 +73,6 @@ Shape = Union[Sequence[int], int]
 Sizes = Dict[str, int]
 
 
-class Labeled(Protocol[TDims]):
-    """Type hint for labeled objects."""
-
-    pass
-
-
-class Collection(Labeled[TDims], Collection[TDtype], Protocol):
-    """Type hint for labeled collection objects."""
-
-    pass
-
-
 class DataClass(Protocol[PInit]):
     """Type hint for dataclass objects."""
 
@@ -91,6 +80,12 @@ class DataClass(Protocol[PInit]):
         ...
 
     __dataclass_fields__: ClassVar[DataClassFields]
+
+
+class Labeled(Generic[TDims]):
+    """Type hint for labeled objects."""
+
+    pass
 
 
 # type hints (public)
@@ -144,8 +139,8 @@ Reference:
 
 """
 
-Coord = Annotated[Union[Collection[TDims, TDtype], TDtype], FType.COORD]
-"""Type hint to define coordinate fields (``Coord[TDims, TDtype]``).
+Coord = Annotated[Union[Labeled[TDims], Collection[TDType], TDType], FType.COORD]
+"""Type hint to define coordinate fields (``Coord[TDims, TDType]``).
 
 Example:
     ::
@@ -195,8 +190,8 @@ Hint:
 
 """
 
-Data = Annotated[Union[Collection[TDims, TDtype], TDtype], FType.DATA]
-"""Type hint to define data fields (``Coordof[TDims, TDtype]``).
+Data = Annotated[Union[Labeled[TDims], Collection[TDType], TDType], FType.DATA]
+"""Type hint to define data fields (``Coordof[TDims, TDType]``).
 
 Example:
     Exactly one data field is allowed in a DataArray class
@@ -335,7 +330,7 @@ def get_dims(tp: Any) -> Dims:
 def get_dtype(tp: Any) -> Optional[AnyDType]:
     """Extract a NumPy data type (dtype)."""
     try:
-        dtype = get_args(get_args(get_annotated(tp))[0])[-1]
+        dtype = get_args(get_args(get_annotated(tp))[1])[0]
     except TypeError:
         raise TypeError(f"Could not find any dtype in {tp!r}.")
 
