@@ -64,7 +64,6 @@ TName = TypeVar("TName", bound=Hashable)
 AnyArray: TypeAlias = "np.ndarray[Any, Any]"
 AnyDType: TypeAlias = "np.dtype[Any]"
 AnyField: TypeAlias = "Field[Any]"
-DataClassFields = Dict[str, AnyField]
 DataType = Union[xr.DataArray, xr.Dataset]
 Dims = Tuple[str, ...]
 Dtype = Optional[str]
@@ -79,7 +78,7 @@ class DataClass(Protocol[PInit]):
     def __init__(self, *args: PInit.args, **kwargs: PInit.kwargs) -> None:
         ...
 
-    __dataclass_fields__: ClassVar[DataClassFields]
+    __dataclass_fields__: ClassVar[Dict[str, AnyField]]
 
 
 class Labeled(Generic[TDims]):

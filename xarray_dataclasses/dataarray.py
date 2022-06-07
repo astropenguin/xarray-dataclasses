@@ -9,6 +9,7 @@ from typing import (
     Any,
     Callable,
     ClassVar,
+    Dict,
     Optional,
     Type,
     TypeVar,
@@ -27,7 +28,7 @@ from typing_extensions import ParamSpec, Protocol
 # submodules
 from .datamodel import DataModel
 from .dataoptions import DataOptions
-from .typing import AnyArray, DataClass, DataClassFields, DataType, Order, Shape, Sizes
+from .typing import AnyArray, AnyField, DataClass, DataType, Order, Shape, Sizes
 
 
 # type hints
@@ -41,7 +42,7 @@ class OptionedClass(Protocol[PInit, TDataArray]):
     def __init__(self, *args: PInit.args, **kwargs: PInit.kwargs) -> None:
         ...
 
-    __dataclass_fields__: ClassVar[DataClassFields]
+    __dataclass_fields__: ClassVar[Dict[str, AnyField]]
     __dataoptions__: DataOptions[TDataArray]
 
 
