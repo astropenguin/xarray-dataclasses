@@ -8,17 +8,17 @@ from typing import Callable, Generic, TypeVar
 
 
 # submodules
-from .typing import DataType
+from .typing import AnyXarray
 
 
 # type hints
-TDataType = TypeVar("TDataType", bound=DataType)
+TAnyXarray = TypeVar("TAnyXarray", bound=AnyXarray)
 
 
 # dataclasses
 @dataclass(frozen=True)
-class DataOptions(Generic[TDataType]):
+class DataOptions(Generic[TAnyXarray]):
     """Options for DataArray or Dataset creation."""
 
-    factory: Callable[..., TDataType]
+    factory: Callable[..., TAnyXarray]
     """Factory function for DataArray or Dataset."""

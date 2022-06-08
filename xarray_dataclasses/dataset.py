@@ -5,7 +5,7 @@ __all__ = ["AsDataset", "asdataset"]
 # standard library
 from functools import partial, wraps
 from types import MethodType
-from typing import Any, Callable, ClassVar, Dict, Optional, Type, TypeVar, overload
+from typing import Any, Callable, Dict, Optional, Type, TypeVar, overload
 
 
 # dependencies
@@ -18,7 +18,7 @@ from typing_extensions import ParamSpec, Protocol
 # submodules
 from .datamodel import DataModel
 from .dataoptions import DataOptions
-from .typing import AnyArray, DataClass, DataClassFields, DataType, Order, Shape, Sizes
+from .typing import AnyArray, AnyXarray, DataClass, Order, Shape, Sizes
 
 
 # type hints
@@ -26,13 +26,9 @@ PInit = ParamSpec("PInit")
 TDataset = TypeVar("TDataset", bound=xr.Dataset)
 
 
-class OptionedClass(Protocol[PInit, TDataset]):
+class OptionedClass(DataClass[PInit], Protocol[PInit, TDataset]):
     """Type hint for dataclass objects with options."""
 
-    def __init__(self, *args: PInit.args, **kwargs: PInit.kwargs) -> None:
-        ...
-
-    __dataclass_fields__: ClassVar[DataClassFields]
     __dataoptions__: DataOptions[TDataset]
 
 
@@ -40,7 +36,7 @@ class OptionedClass(Protocol[PInit, TDataset]):
 @overload
 def asdataset(
     dataclass: OptionedClass[PInit, TDataset],
-    reference: Optional[DataType] = None,
+    reference: Optional[AnyXarray] = None,
     dataoptions: None = None,
 ) -> TDataset:
     ...
@@ -49,7 +45,7 @@ def asdataset(
 @overload
 def asdataset(
     dataclass: DataClass[PInit],
-    reference: Optional[DataType] = None,
+    reference: Optional[AnyXarray] = None,
     dataoptions: None = None,
 ) -> xr.Dataset:
     ...
@@ -58,7 +54,7 @@ def asdataset(
 @overload
 def asdataset(
     dataclass: Any,
-    reference: Optional[DataType] = None,
+    reference: Optional[AnyXarray] = None,
     dataoptions: DataOptions[TDataset] = DataOptions(xr.Dataset),
 ) -> TDataset:
     ...
@@ -66,7 +62,7 @@ def asdataset(
 
 def asdataset(
     dataclass: Any,
-    reference: Optional[DataType] = None,
+    reference: Optional[AnyXarray] = None,
     dataoptions: Any = None,
 ) -> Any:
     """Create a Dataset object from a dataclass object.

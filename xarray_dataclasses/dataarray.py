@@ -5,16 +5,7 @@ __all__ = ["AsDataArray", "asdataarray"]
 # standard library
 from functools import partial, wraps
 from types import MethodType
-from typing import (
-    Any,
-    Callable,
-    ClassVar,
-    Optional,
-    Type,
-    TypeVar,
-    Union,
-    overload,
-)
+from typing import Any, Callable, Optional, Type, TypeVar, Union, overload
 
 
 # dependencies
@@ -27,7 +18,7 @@ from typing_extensions import ParamSpec, Protocol
 # submodules
 from .datamodel import DataModel
 from .dataoptions import DataOptions
-from .typing import AnyArray, DataClass, DataClassFields, DataType, Order, Shape, Sizes
+from .typing import AnyArray, AnyXarray, DataClass, Order, Shape, Sizes
 
 
 # type hints
@@ -35,13 +26,9 @@ PInit = ParamSpec("PInit")
 TDataArray = TypeVar("TDataArray", bound=xr.DataArray)
 
 
-class OptionedClass(Protocol[PInit, TDataArray]):
+class OptionedClass(DataClass[PInit], Protocol[PInit, TDataArray]):
     """Type hint for dataclass objects with options."""
 
-    def __init__(self, *args: PInit.args, **kwargs: PInit.kwargs) -> None:
-        ...
-
-    __dataclass_fields__: ClassVar[DataClassFields]
     __dataoptions__: DataOptions[TDataArray]
 
 
@@ -49,7 +36,7 @@ class OptionedClass(Protocol[PInit, TDataArray]):
 @overload
 def asdataarray(
     dataclass: OptionedClass[PInit, TDataArray],
-    reference: Optional[DataType] = None,
+    reference: Optional[AnyXarray] = None,
     dataoptions: None = None,
 ) -> TDataArray:
     ...
@@ -58,7 +45,7 @@ def asdataarray(
 @overload
 def asdataarray(
     dataclass: DataClass[PInit],
-    reference: Optional[DataType] = None,
+    reference: Optional[AnyXarray] = None,
     dataoptions: None = None,
 ) -> xr.DataArray:
     ...
@@ -67,7 +54,7 @@ def asdataarray(
 @overload
 def asdataarray(
     dataclass: Any,
-    reference: Optional[DataType] = None,
+    reference: Optional[AnyXarray] = None,
     dataoptions: DataOptions[TDataArray] = DataOptions(xr.DataArray),
 ) -> TDataArray:
     ...
@@ -75,7 +62,7 @@ def asdataarray(
 
 def asdataarray(
     dataclass: Any,
-    reference: Optional[DataType] = None,
+    reference: Optional[AnyXarray] = None,
     dataoptions: Any = None,
 ) -> Any:
     """Create a DataArray object from a dataclass object.

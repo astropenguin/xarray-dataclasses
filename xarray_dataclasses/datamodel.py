@@ -15,16 +15,17 @@ from typing_extensions import Literal, ParamSpec, get_type_hints
 
 # submodules
 from .typing import (
+    AnyDType,
     AnyField,
     DataClass,
-    DataType,
+    AnyXarray,
     Dims,
-    Dtype,
-    FieldType,
+    FType,
+    get_annotated,
+    get_dataclass,
     get_dims,
     get_dtype,
-    get_field_type,
-    get_repr_type,
+    get_ftype,
 )
 
 
@@ -93,7 +94,7 @@ class DataEntry:
     dims: Dims = cast(Dims, None)
     """Dimensions of the DataArray that the data is cast to."""
 
-    dtype: Dtype = cast(Dtype, None)
+    dtype: Optional[AnyDType] = None
     """Data type of the DataArray that the data is cast to."""
 
     base: Optional[Type[DataClass[Any]]] = None
@@ -119,7 +120,7 @@ class DataEntry:
         if model.names:
             setattr(self, "name", model.names[0].value)
 
-    def __call__(self, reference: Optional[DataType] = None) -> xr.DataArray:
+    def __call__(self, reference: Optional[AnyXarray] = None) -> xr.DataArray:
         """Create a DataArray object according to the entry."""
         from .dataarray import asdataarray
 
@@ -174,11 +175,11 @@ class DataModel:
         eval_dataclass(dataclass)
 
         for field in dataclass.__dataclass_fields__.values():
-            try:
-                value = getattr(dataclass, field.name, MISSING)
-                model.entries[field.name] = get_entry(field, value)
-            except TypeError:
-                pass
+            value = getattr(dataclass, field.name, MISSING)
+            entry = get_entry(field, value)
+
+            if entry is not None:
+                model.entries[field.name] = entry
 
         return model
 
@@ -205,42 +206,41 @@ def eval_dataclass(dataclass: AnyDataClass[PInit]) -> None:
         field.type = types[field.name]
 
 
-def get_entry(field: AnyField, value: Any) -> AnyEntry:
+def get_entry(field: AnyField, value: Any) -> Optional[AnyEntry]:
     """Create an entry from a field and its value."""
-    field_type = get_field_type(field.type)
-    repr_type = get_repr_type(field.type)
+    ftype = get_ftype(field.type)
 
-    if field_type is FieldType.ATTR or field_type is FieldType.NAME:
+    if ftype is FType.ATTR or ftype is FType.NAME:
         return AttrEntry(
             name=field.name,
-            tag=field_type.value,
+            tag=ftype.value,
             value=value,
-            type=repr_type,
+            type=get_annotated(field.type),
         )
 
-    # hereafter field type is either COORD or DATA
-    if is_dataclass(repr_type):
-        return DataEntry(
-            name=field.name,
-            tag=field_type.value,
-            base=repr_type,
-            value=value,
-        )
-    else:
-        return DataEntry(
-            name=field.name,
-            tag=field_type.value,
-            dims=get_dims(repr_type),
-            dtype=get_dtype(repr_type),
-            value=value,
-        )
+    if ftype is FType.COORD or ftype is FType.DATA:
+        try:
+            return DataEntry(
+                name=field.name,
+                tag=ftype.value,
+                base=get_dataclass(field.type),
+                value=value,
+            )
+        except TypeError:
+            return DataEntry(
+                name=field.name,
+                tag=ftype.value,
+                dims=get_dims(field.type),
+                dtype=get_dtype(field.type),
+                value=value,
+            )
 
 
 def get_typedarray(
     data: Any,
     dims: Dims,
-    dtype: Dtype,
-    reference: Optional[DataType] = None,
+    dtype: Optional[AnyDType],
+    reference: Optional[AnyXarray] = None,
 ) -> xr.DataArray:
     """Create a DataArray object with given dims and dtype.
 

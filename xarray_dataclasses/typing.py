@@ -18,17 +18,21 @@ __all__ = ["Attr", "Coord", "Coordof", "Data", "Dataof", "Name"]
 
 
 # standard library
-from dataclasses import Field
+from dataclasses import Field, is_dataclass
 from enum import Enum
+from itertools import chain
 from typing import (
     Any,
     ClassVar,
     Collection,
     Dict,
+    Generic,
     Hashable,
+    Iterable,
     Optional,
     Sequence,
     Tuple,
+    Type,
     TypeVar,
     Union,
 )
@@ -37,7 +41,6 @@ from typing import (
 # dependencies
 import numpy as np
 import xarray as xr
-from more_itertools import collapse
 from typing_extensions import (
     Annotated,
     Literal,
@@ -52,33 +55,20 @@ from typing_extensions import (
 
 # type hints (private)
 PInit = ParamSpec("PInit")
-TAttr = TypeVar("TAttr")
+T = TypeVar("T")
 TDataClass = TypeVar("TDataClass", bound="DataClass[Any]")
 TDims = TypeVar("TDims", covariant=True)
-TDtype = TypeVar("TDtype", covariant=True)
-TName = TypeVar("TName", bound=Hashable)
+TDType = TypeVar("TDType", covariant=True)
+THashable = TypeVar("THashable", bound=Hashable)
 
 AnyArray: TypeAlias = "np.ndarray[Any, Any]"
+AnyDType: TypeAlias = "np.dtype[Any]"
 AnyField: TypeAlias = "Field[Any]"
-DataClassFields = Dict[str, AnyField]
-DataType = Union[xr.DataArray, xr.Dataset]
+AnyXarray = Union[xr.DataArray, xr.Dataset]
 Dims = Tuple[str, ...]
-Dtype = Optional[str]
 Order = Literal["C", "F"]
 Shape = Union[Sequence[int], int]
 Sizes = Dict[str, int]
-
-
-class Labeled(Protocol[TDims]):
-    """Type hint for labeled objects."""
-
-    pass
-
-
-class Collection(Labeled[TDims], Collection[TDtype], Protocol):
-    """Type hint for labeled collection objects."""
-
-    pass
 
 
 class DataClass(Protocol[PInit]):
@@ -87,32 +77,45 @@ class DataClass(Protocol[PInit]):
     def __init__(self, *args: PInit.args, **kwargs: PInit.kwargs) -> None:
         ...
 
-    __dataclass_fields__: ClassVar[DataClassFields]
+    __dataclass_fields__: ClassVar[Dict[str, AnyField]]
+
+
+class Labeled(Generic[TDims]):
+    """Type hint for labeled objects."""
+
+    pass
 
 
 # type hints (public)
-class FieldType(Enum):
-    """Annotation of xarray-related field hints."""
+class FType(Enum):
+    """Annotations for typing dataclass fields."""
 
     ATTR = "attr"
-    """Annotation of attribute field hints."""
+    """Annotation for attribute fields."""
 
     COORD = "coord"
-    """Annotation of coordinate field hints."""
+    """Annotation for coordinate fields."""
 
     DATA = "data"
-    """Annotation of data (variable) field hints."""
+    """Annotation for data (variable) fields."""
 
     NAME = "name"
-    """Annotation of name field hints."""
+    """Annotation for name fields."""
 
-    def annotates(self, hint: Any) -> bool:
-        """Check if a field hint is annotated."""
-        return self in get_args(hint)[1:]
+    OTHER = "other"
+    """Annotation for other fields."""
+
+    @classmethod
+    def annotates(cls, tp: Any) -> bool:
+        """Check if any ftype annotates a type hint."""
+        if get_origin(tp) is not Annotated:
+            return False
+
+        return any(isinstance(arg, cls) for arg in get_args(tp))
 
 
-Attr = Annotated[TAttr, FieldType.ATTR]
-"""Type hint to define attribute fields (``Attr[TAttr]``).
+Attr = Annotated[T, FType.ATTR]
+"""Type hint for attribute fields (``Attr[T]``).
 
 Example:
     ::
@@ -134,8 +137,8 @@ Reference:
 
 """
 
-Coord = Annotated[Union[Collection[TDims, TDtype], TDtype], FieldType.COORD]
-"""Type hint to define coordinate fields (``Coord[TDims, TDtype]``).
+Coord = Annotated[Union[Labeled[TDims], Collection[TDType], TDType], FType.COORD]
+"""Type hint for coordinate fields (``Coord[TDims, TDType]``).
 
 Example:
     ::
@@ -153,8 +156,8 @@ Hint:
 
 """
 
-Coordof = Annotated[Union[TDataClass, Any], FieldType.COORD]
-"""Type hint to define coordinate fields (``Coordof[TDataClass]``).
+Coordof = Annotated[Union[TDataClass, Any], FType.COORD]
+"""Type hint for coordinate fields (``Coordof[TDataClass]``).
 
 Unlike ``Coord``, it specifies a dataclass that defines a DataArray class.
 This is useful when users want to add metadata to dimensions for plotting.
@@ -185,8 +188,8 @@ Hint:
 
 """
 
-Data = Annotated[Union[Collection[TDims, TDtype], TDtype], FieldType.DATA]
-"""Type hint to define data fields (``Coordof[TDims, TDtype]``).
+Data = Annotated[Union[Labeled[TDims], Collection[TDType], TDType], FType.DATA]
+"""Type hint for data fields (``Coordof[TDims, TDType]``).
 
 Example:
     Exactly one data field is allowed in a DataArray class
@@ -206,8 +209,8 @@ Example:
 
 """
 
-Dataof = Annotated[Union[TDataClass, Any], FieldType.DATA]
-"""Type hint to define data fields (``Coordof[TDataClass]``).
+Dataof = Annotated[Union[TDataClass, Any], FType.DATA]
+"""Type hint for data fields (``Coordof[TDataClass]``).
 
 Unlike ``Data``, it specifies a dataclass that defines a DataArray class.
 This is useful when users want to reuse a dataclass in a Dataset class.
@@ -233,8 +236,8 @@ Hint:
 
 """
 
-Name = Annotated[TName, FieldType.NAME]
-"""Type hint to define name fields (``Name[TName]``).
+Name = Annotated[THashable, FType.NAME]
+"""Type hint for name fields (``Name[THashable]``).
 
 Example:
     ::
@@ -248,103 +251,99 @@ Example:
 
 
 # runtime functions
-def get_dims(type_: Any) -> Dims:
-    """Parse a type and return dims.
-
-    Example:
-        All of the following expressions will be ``True``::
-
-            get_dims(tuple[()]) == ()
-            get_dims(Literal[A]) == (A,)
-            get_dims(tuple[Literal[A], Literal[B]]) == (A, B)
-            get_dims(ArrayLike[A, ...]) == get_dims(A)
-
-    """
-    args = get_args(type_)
-    origin = get_origin(type_)
-
-    if origin is Collection:
-        return get_dims(args[0])
-
-    if origin is tuple or origin is Tuple:
-        return tuple(collapse(map(get_dims, args)))
-
-    if origin is Literal:
-        return (args[0],)
-
-    if type_ == () or type_ == ((),):
-        return ()
-
-    raise ValueError(f"Could not convert {type_!r} to dims.")
-
-
-def get_dtype(type_: Any) -> Dtype:
-    """Parse a type and return dtype.
-
-    Example:
-        All of the following expressions will be ``True``::
-
-            get_dtype(Any) == None
-            get_dtype(NoneType) == None
-            get_dtype(A) == A.__name__
-            get_dtype(Literal[A]) == A
-            get_dtype(ArrayLike[..., A]) == get_dtype(A)
-
-    """
-    args = get_args(type_)
-    origin = get_origin(type_)
-
-    if origin is Collection:
-        return get_dtype(args[1])
-
-    if origin is Literal:
-        return args[0]
-
-    if type_ is Any or type_ is type(None):
-        return None
-
-    if isinstance(type_, type):
-        return type_.__name__
-
-    raise ValueError(f"Could not convert {type_!r} to dtype.")
-
-
-def get_field_type(type_: Any) -> FieldType:
-    """Parse a type and return a field type if it exists."""
-    if FieldType.ATTR.annotates(type_):
-        return FieldType.ATTR
-
-    if FieldType.COORD.annotates(type_):
-        return FieldType.COORD
-
-    if FieldType.DATA.annotates(type_):
-        return FieldType.DATA
-
-    if FieldType.NAME.annotates(type_):
-        return FieldType.NAME
-
-    raise TypeError(f"Could not find any field type in {type_!r}.")
-
-
-def get_repr_type(type_: Any) -> Any:
-    """Parse a type and return an representative type.
-
-    Example:
-        All of the following expressions will be ``True``::
-
-            get_repr_type(A) == A
-            get_repr_type(Annotated[A, ...]) == A
-            get_repr_type(Union[A, B, ...]) == A
-            get_repr_type(Optional[A]) == A
-
-    """
+def deannotate(tp: Any) -> Any:
+    """Recursively remove annotations in a type hint."""
 
     class Temporary:
-        __annotations__ = dict(type=type_)
+        __annotations__ = dict(type=tp)
 
-    unannotated = get_type_hints(Temporary)["type"]
+    return get_type_hints(Temporary)["type"]
 
-    if get_origin(unannotated) is Union:
-        return get_args(unannotated)[0]
 
-    return unannotated
+def find_annotated(tp: Any) -> Iterable[Any]:
+    """Generate all annotated types in a type hint."""
+    args = get_args(tp)
+
+    if get_origin(tp) is Annotated:
+        yield tp
+        yield from find_annotated(args[0])
+    else:
+        yield from chain(*map(find_annotated, args))
+
+
+def get_annotated(tp: Any) -> Any:
+    """Extract the first ftype-annotated type."""
+    for annotated in filter(FType.annotates, find_annotated(tp)):
+        return deannotate(annotated)
+
+    raise TypeError("Could not find any ftype-annotated type.")
+
+
+def get_annotations(tp: Any) -> Tuple[Any, ...]:
+    """Extract annotations of the first ftype-annotated type."""
+    for annotated in filter(FType.annotates, find_annotated(tp)):
+        return get_args(annotated)[1:]
+
+    raise TypeError("Could not find any ftype-annotated type.")
+
+
+def get_dataclass(tp: Any) -> Type[DataClass[Any]]:
+    """Extract a dataclass."""
+    try:
+        dataclass = get_args(get_annotated(tp))[0]
+    except TypeError:
+        raise TypeError(f"Could not find any dataclass in {tp!r}.")
+
+    if not is_dataclass(dataclass):
+        raise TypeError(f"Could not find any dataclass in {tp!r}.")
+
+    return dataclass
+
+
+def get_dims(tp: Any) -> Dims:
+    """Extract data dimensions (dims)."""
+    try:
+        dims = get_args(get_args(get_annotated(tp))[0])[0]
+    except TypeError:
+        raise TypeError(f"Could not find any dims in {tp!r}.")
+
+    args = get_args(dims)
+    origin = get_origin(dims)
+
+    if origin is Literal:
+        return (str(args[0]),)
+
+    if not (origin is tuple or origin is Tuple):
+        raise TypeError(f"Could not find any dims in {tp!r}.")
+
+    if args == () or args == ((),):
+        return ()
+
+    if not all(get_origin(arg) is Literal for arg in args):
+        raise TypeError(f"Could not find any dims in {tp!r}.")
+
+    return tuple(str(get_args(arg)[0]) for arg in args)
+
+
+def get_dtype(tp: Any) -> Optional[AnyDType]:
+    """Extract a NumPy data type (dtype)."""
+    try:
+        dtype = get_args(get_args(get_annotated(tp))[1])[0]
+    except TypeError:
+        raise TypeError(f"Could not find any dtype in {tp!r}.")
+
+    if dtype is Any or dtype is type(None):
+        return
+
+    if get_origin(dtype) is Literal:
+        dtype = get_args(dtype)[0]
+
+    return np.dtype(dtype)
+
+
+def get_ftype(tp: Any, default: FType = FType.OTHER) -> FType:
+    """Extract an ftype if found or return given default."""
+    try:
+        return get_annotations(tp)[0]
+    except TypeError:
+        return default
