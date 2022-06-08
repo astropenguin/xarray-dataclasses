@@ -2,7 +2,7 @@
     "name": "xarray-dataclasses",
     "build": {
         "context": "..",
-        "dockerfile": "Dockerfile",
+        "dockerfile": "Dockerfile"
     },
     "postCreateCommand": "poetry install",
     "extensions": [
@@ -10,7 +10,7 @@
         "mhutchie.git-graph",
         "ms-python.python",
         "streetsidesoftware.code-spell-checker",
-        "tamasfe.even-better-toml",
+        "tamasfe.even-better-toml"
     ],
     "settings": {
         "files.insertFinalNewline": true,
@@ -20,7 +20,7 @@
         "[python]": {
             "editor.formatOnSave": true,
             "editor.insertSpaces": true,
-            "editor.tabSize": 4,
-        },
-    },
+            "editor.tabSize": 4
+        }
+    }
 }

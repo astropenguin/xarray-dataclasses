@@ -1,10 +1,10 @@
 # xarray-dataclasses
 
-[![PyPI](https://img.shields.io/pypi/v/xarray-dataclasses.svg?label=PyPI&style=flat-square)](https://pypi.org/project/xarray-dataclasses/)
-[![Python](https://img.shields.io/pypi/pyversions/xarray-dataclasses.svg?label=Python&color=yellow&style=flat-square)](https://pypi.org/project/xarray-dataclasses/)
-[![Test](https://img.shields.io/github/workflow/status/astropenguin/xarray-dataclasses/Tests?logo=github&label=Test&style=flat-square)](https://github.com/astropenguin/xarray-dataclasses/actions)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg?label=License&style=flat-square)](LICENSE)
-[![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.4624819-blue?style=flat-square)](https://doi.org/10.5281/zenodo.4624819)
+[![Release](https://img.shields.io/pypi/v/xarray-dataclasses?label=Release&color=cornflowerblue&style=flat-square)](https://pypi.org/project/xarray-dataclasses/)
+[![Python](https://img.shields.io/pypi/pyversions/xarray-dataclasses?label=Python&color=cornflowerblue&style=flat-square)](https://pypi.org/project/xarray-dataclasses/)
+![Downloads](https://img.shields.io/pypi/dm/xarray-dataclasses?label=Downloads&color=cornflowerblue&style=flat-square)
+[![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.4624819-cornflowerblue?style=flat-square)](https://doi.org/10.5281/zenodo.4624819)
+[![Tests](https://img.shields.io/github/workflow/status/astropenguin/xarray-dataclasses/Tests?label=Tests&style=flat-square)](https://github.com/astropenguin/xarray-dataclasses/actions)
 
 xarray extension for typed DataArray and Dataset creation
 
