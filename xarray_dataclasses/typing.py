@@ -55,11 +55,11 @@ from typing_extensions import (
 
 # type hints (private)
 PInit = ParamSpec("PInit")
-TAttr = TypeVar("TAttr")
+T = TypeVar("T")
 TDataClass = TypeVar("TDataClass", bound="DataClass[Any]")
 TDims = TypeVar("TDims", covariant=True)
 TDType = TypeVar("TDType", covariant=True)
-TName = TypeVar("TName", bound=Hashable)
+THashable = TypeVar("THashable", bound=Hashable)
 
 AnyArray: TypeAlias = "np.ndarray[Any, Any]"
 AnyDType: TypeAlias = "np.dtype[Any]"
@@ -114,7 +114,7 @@ class FType(Enum):
         return any(isinstance(arg, cls) for arg in get_args(tp))
 
 
-Attr = Annotated[TAttr, FType.ATTR]
+Attr = Annotated[T, FType.ATTR]
 """Type hint to define attribute fields (``Attr[TAttr]``).
 
 Example:
@@ -236,7 +236,7 @@ Hint:
 
 """
 
-Name = Annotated[TName, FType.NAME]
+Name = Annotated[THashable, FType.NAME]
 """Type hint to define name fields (``Name[TName]``).
 
 Example:
