@@ -115,7 +115,7 @@ class FType(Enum):
 
 
 Attr = Annotated[T, FType.ATTR]
-"""Type hint to define attribute fields (``Attr[TAttr]``).
+"""Type hint for attribute fields (``Attr[T]``).
 
 Example:
     ::
@@ -138,7 +138,7 @@ Reference:
 """
 
 Coord = Annotated[Union[Labeled[TDims], Collection[TDType], TDType], FType.COORD]
-"""Type hint to define coordinate fields (``Coord[TDims, TDType]``).
+"""Type hint for coordinate fields (``Coord[TDims, TDType]``).
 
 Example:
     ::
@@ -157,7 +157,7 @@ Hint:
 """
 
 Coordof = Annotated[Union[TDataClass, Any], FType.COORD]
-"""Type hint to define coordinate fields (``Coordof[TDataClass]``).
+"""Type hint for coordinate fields (``Coordof[TDataClass]``).
 
 Unlike ``Coord``, it specifies a dataclass that defines a DataArray class.
 This is useful when users want to add metadata to dimensions for plotting.
@@ -189,7 +189,7 @@ Hint:
 """
 
 Data = Annotated[Union[Labeled[TDims], Collection[TDType], TDType], FType.DATA]
-"""Type hint to define data fields (``Coordof[TDims, TDType]``).
+"""Type hint for data fields (``Coordof[TDims, TDType]``).
 
 Example:
     Exactly one data field is allowed in a DataArray class
@@ -210,7 +210,7 @@ Example:
 """
 
 Dataof = Annotated[Union[TDataClass, Any], FType.DATA]
-"""Type hint to define data fields (``Coordof[TDataClass]``).
+"""Type hint for data fields (``Coordof[TDataClass]``).
 
 Unlike ``Data``, it specifies a dataclass that defines a DataArray class.
 This is useful when users want to reuse a dataclass in a Dataset class.
@@ -237,7 +237,7 @@ Hint:
 """
 
 Name = Annotated[THashable, FType.NAME]
-"""Type hint to define name fields (``Name[TName]``).
+"""Type hint for name fields (``Name[THashable]``).
 
 Example:
     ::
