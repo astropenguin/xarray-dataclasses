@@ -64,9 +64,8 @@ TName = TypeVar("TName", bound=Hashable)
 AnyArray: TypeAlias = "np.ndarray[Any, Any]"
 AnyDType: TypeAlias = "np.dtype[Any]"
 AnyField: TypeAlias = "Field[Any]"
-DataType = Union[xr.DataArray, xr.Dataset]
+AnyXarray = Union[xr.DataArray, xr.Dataset]
 Dims = Tuple[str, ...]
-Dtype = Optional[str]
 Order = Literal["C", "F"]
 Shape = Union[Sequence[int], int]
 Sizes = Dict[str, int]

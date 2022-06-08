@@ -18,7 +18,7 @@ from .typing import (
     AnyDType,
     AnyField,
     DataClass,
-    DataType,
+    AnyXarray,
     Dims,
     FType,
     get_annotated,
@@ -120,7 +120,7 @@ class DataEntry:
         if model.names:
             setattr(self, "name", model.names[0].value)
 
-    def __call__(self, reference: Optional[DataType] = None) -> xr.DataArray:
+    def __call__(self, reference: Optional[AnyXarray] = None) -> xr.DataArray:
         """Create a DataArray object according to the entry."""
         from .dataarray import asdataarray
 
@@ -240,7 +240,7 @@ def get_typedarray(
     data: Any,
     dims: Dims,
     dtype: Optional[AnyDType],
-    reference: Optional[DataType] = None,
+    reference: Optional[AnyXarray] = None,
 ) -> xr.DataArray:
     """Create a DataArray object with given dims and dtype.
 

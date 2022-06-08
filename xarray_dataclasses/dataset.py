@@ -18,7 +18,7 @@ from typing_extensions import ParamSpec, Protocol
 # submodules
 from .datamodel import DataModel
 from .dataoptions import DataOptions
-from .typing import AnyArray, AnyField, DataClass, DataType, Order, Shape, Sizes
+from .typing import AnyArray, AnyField, AnyXarray, DataClass, Order, Shape, Sizes
 
 
 # type hints
@@ -40,7 +40,7 @@ class OptionedClass(Protocol[PInit, TDataset]):
 @overload
 def asdataset(
     dataclass: OptionedClass[PInit, TDataset],
-    reference: Optional[DataType] = None,
+    reference: Optional[AnyXarray] = None,
     dataoptions: None = None,
 ) -> TDataset:
     ...
@@ -49,7 +49,7 @@ def asdataset(
 @overload
 def asdataset(
     dataclass: DataClass[PInit],
-    reference: Optional[DataType] = None,
+    reference: Optional[AnyXarray] = None,
     dataoptions: None = None,
 ) -> xr.Dataset:
     ...
@@ -58,7 +58,7 @@ def asdataset(
 @overload
 def asdataset(
     dataclass: Any,
-    reference: Optional[DataType] = None,
+    reference: Optional[AnyXarray] = None,
     dataoptions: DataOptions[TDataset] = DataOptions(xr.Dataset),
 ) -> TDataset:
     ...
@@ -66,7 +66,7 @@ def asdataset(
 
 def asdataset(
     dataclass: Any,
-    reference: Optional[DataType] = None,
+    reference: Optional[AnyXarray] = None,
     dataoptions: Any = None,
 ) -> Any:
     """Create a Dataset object from a dataclass object.
