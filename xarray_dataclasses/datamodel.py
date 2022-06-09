@@ -26,6 +26,7 @@ from .typing import (
     get_dims,
     get_dtype,
     get_ftype,
+    get_name,
 )
 
 
@@ -209,10 +210,11 @@ def eval_dataclass(dataclass: AnyDataClass[PInit]) -> None:
 def get_entry(field: AnyField, value: Any) -> Optional[AnyEntry]:
     """Create an entry from a field and its value."""
     ftype = get_ftype(field.type)
+    name = get_name(field.type, field.name)
 
     if ftype is FType.ATTR or ftype is FType.NAME:
         return AttrEntry(
-            name=field.name,
+            name=name,
             tag=ftype.value,
             value=value,
             type=get_annotated(field.type),
@@ -221,14 +223,14 @@ def get_entry(field: AnyField, value: Any) -> Optional[AnyEntry]:
     if ftype is FType.COORD or ftype is FType.DATA:
         try:
             return DataEntry(
-                name=field.name,
+                name=name,
                 tag=ftype.value,
                 base=get_dataclass(field.type),
                 value=value,
             )
         except TypeError:
             return DataEntry(
-                name=field.name,
+                name=name,
                 tag=ftype.value,
                 dims=get_dims(field.type),
                 dtype=get_dtype(field.type),
