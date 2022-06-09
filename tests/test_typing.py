@@ -19,6 +19,7 @@ from xarray_dataclasses.typing import (
     get_dims,
     get_dtype,
     get_ftype,
+    get_name,
 )
 
 
@@ -71,6 +72,24 @@ testdata_ftype = [
     (Union[Ann[Any, "other"], Ann[Any, "any"]], FType.OTHER),
 ]
 
+testdata_name = [
+    (Attr[Any], None),
+    (Data[Any, Any], None),
+    (Coord[Any, Any], None),
+    (Name[Any], None),
+    (Any, None),
+    (Ann[Attr[Any], "attr"], "attr"),
+    (Ann[Data[Any, Any], "data"], "data"),
+    (Ann[Coord[Any, Any], "coord"], "coord"),
+    (Ann[Name[Any], "name"], "name"),
+    (Ann[Any, "other"], None),
+    (Union[Ann[Attr[Any], "attr"], Ann[Any, "any"]], "attr"),
+    (Union[Ann[Data[Any, Any], "data"], Ann[Any, "any"]], "data"),
+    (Union[Ann[Coord[Any, Any], "coord"], Ann[Any, "any"]], "coord"),
+    (Union[Ann[Name[Any], "name"], Ann[Any, "any"]], "name"),
+    (Union[Ann[Any, "other"], Ann[Any, "any"]], None),
+]
+
 
 # test functions
 @mark.parametrize("tp, dims", testdata_dims)
@@ -86,3 +105,8 @@ def test_get_dtype(tp: Any, dtype: Any) -> None:
 @mark.parametrize("tp, ftype", testdata_ftype)
 def test_get_ftype(tp: Any, ftype: Any) -> None:
     assert get_ftype(tp) == ftype
+
+
+@mark.parametrize("tp, name", testdata_name)
+def test_get_name(tp: Any, name: Any) -> None:
+    assert get_name(tp) == name
