@@ -1,6 +1,9 @@
+__all__ = ["DataSpec", "DataOptions"]
+
+
 # standard library
-from dataclasses import dataclass
-from typing import Any, Dict, Hashable, Optional, Type
+from dataclasses import dataclass, field
+from typing import Any, Dict, Generic, Hashable, Optional, Type, TypeVar
 
 
 # dependencies
@@ -8,11 +11,12 @@ from typing_extensions import Literal, TypeAlias
 
 
 # submodules
-from .typing import Dims, DataClass, AnyDType
+from .typing import AnyDType, AnyXarray, DataClass, Dims
 
 
 # type hints
 AnySpec: TypeAlias = "ArraySpec | ScalarSpec"
+TReturn = TypeVar("TReturn", AnyXarray, None)
 
 
 # runtime classes
@@ -56,7 +60,7 @@ class ScalarSpec:
     """Data type of the scalar."""
 
 
-class Specs(Dict[str, AnySpec]):
+class SpecDict(Dict[str, AnySpec]):
     """Dictionary of any specifications."""
 
     @property
@@ -78,3 +82,22 @@ class Specs(Dict[str, AnySpec]):
     def of_name(self) -> Dict[str, ScalarSpec]:
         """Limit to name specifications."""
         return {k: v for k, v in self.items() if v.role == "name"}
+
+
+@dataclass(frozen=True)
+class DataOptions(Generic[TReturn]):
+    """Options for xarray data creation."""
+
+    factory: Type[TReturn]
+    """Factory for xarray data creation."""
+
+
+@dataclass(frozen=True)
+class DataSpec:
+    """Data specification of an xarray dataclass."""
+
+    specs: SpecDict = field(default_factory=SpecDict)
+    """Dictionary of any specifications."""
+
+    options: DataOptions[Any] = DataOptions(type(None))
+    """Options for xarray data creation."""
