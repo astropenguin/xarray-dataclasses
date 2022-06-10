@@ -7,6 +7,7 @@ from .dataarray import *
 from .dataset import *
 from .datamodel import *
 from .dataoptions import *
+from .specs import *
 from .typing import *
 
 
