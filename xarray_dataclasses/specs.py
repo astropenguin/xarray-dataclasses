@@ -45,14 +45,14 @@ class ArraySpec:
     role: Literal["coord", "data"]
     """Role of the array."""
 
-    default: Any
-    """Default value of the array."""
-
-    dims: Dims = ()
+    dims: Dims
     """Dimensions of the array."""
 
-    dtype: Optional[AnyDType] = None
+    dtype: Optional[AnyDType]
     """Data type of the array."""
+
+    default: Any
+    """Default value of the array."""
 
     origin: Optional[Type[DataClass[Any]]] = None
     """Dataclass as origins of name, dims, and dtype."""
@@ -85,11 +85,11 @@ class ScalarSpec:
     role: Literal["attr", "name"]
     """Role of the scalar."""
 
+    type: Any
+    """Type (hint) of the scalar."""
+
     default: Any
     """Default value of the scalar."""
-
-    dtype: Any
-    """Data type of the scalar."""
 
 
 class SpecDict(Dict[str, AnySpec]):
@@ -178,6 +178,8 @@ def get_spec(field: AnyField) -> Optional[AnySpec]:
             return ArraySpec(
                 name=name,
                 role=role.value,
+                dims=(),  # dummy
+                dtype=None,  # dummy
                 default=field.default,
                 origin=get_dataclass(field.type),
             )
@@ -185,15 +187,15 @@ def get_spec(field: AnyField) -> Optional[AnySpec]:
             return ArraySpec(
                 name=name,
                 role=role.value,
-                default=field.default,
                 dims=get_dims(field.type),
                 dtype=get_dtype(field.type),
+                default=field.default,
             )
 
     if role is Role.ATTR or role is Role.NAME:
         return ScalarSpec(
             name=name,
             role=role.value,
+            type=get_annotated(field.type),
             default=field.default,
-            dtype=get_annotated(field.type),
         )
