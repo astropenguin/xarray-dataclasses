@@ -51,27 +51,27 @@ class ArraySpec:
     dims: Dims = ()
     """Dimensions of the array."""
 
-    type: Optional[AnyDType] = None
+    dtype: Optional[AnyDType] = None
     """Data type of the array."""
 
     origin: Optional[Type[DataClass[Any]]] = None
-    """Dataclass as origins of name, dims, and type."""
+    """Dataclass as origins of name, dims, and dtype."""
 
     def __post_init__(self) -> None:
-        """Update name, dims, and type if origin exists."""
+        """Update name, dims, and dtype if origin exists."""
         if self.origin is None:
             return
 
         dataspec = DataSpec.from_dataclass(self.origin)
         setattr = object.__setattr__
 
-        for spec in dataspec.specs.of_data.values():
-            setattr(self, "dims", spec.dims)
-            setattr(self, "type", spec.type)
-            break
-
         for spec in dataspec.specs.of_name.values():
             setattr(self, "name", spec.default)
+            break
+
+        for spec in dataspec.specs.of_data.values():
+            setattr(self, "dims", spec.dims)
+            setattr(self, "dtype", spec.dtype)
             break
 
 
@@ -88,7 +88,7 @@ class ScalarSpec:
     default: Any
     """Default value of the scalar."""
 
-    type: Any
+    dtype: Any
     """Data type of the scalar."""
 
 
@@ -183,7 +183,7 @@ def get_spec(field: AnyField) -> Optional[AnySpec]:
                 role=role.value,
                 default=field.default,
                 dims=get_dims(field.type),
-                type=get_dtype(field.type),
+                dtype=get_dtype(field.type),
             )
 
     if role is Role.ATTR or role is Role.NAME:
@@ -191,5 +191,5 @@ def get_spec(field: AnyField) -> Optional[AnySpec]:
             name=name,
             role=role.value,
             default=field.default,
-            type=get_annotated(field.type),
+            dtype=get_annotated(field.type),
         )
