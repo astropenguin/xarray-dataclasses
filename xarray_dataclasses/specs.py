@@ -135,25 +135,29 @@ class DataSpec:
     """Options for xarray data creation."""
 
     @classmethod
-    def from_dataclass(cls, dataclass: Type[DataClass[PInit]]) -> "DataSpec":
+    def from_dataclass(
+        cls,
+        dataclass: Type[DataClass[PInit]],
+        dataoptions: Optional[DataOptions[Any]] = None,
+    ) -> "DataSpec":
         """Create a data specification from a dataclass."""
         specs = SpecDict()
 
-        for field in fields(eval_fields(dataclass)):
+        for field in fields(eval_types(dataclass)):
             spec = get_spec(field)
 
             if spec is not None:
                 specs[field.name] = spec
 
-        try:
-            return cls(specs, dataclass.__dataoptions__)  # type: ignore
-        except AttributeError:
+        if dataoptions is None:
             return cls(specs)
+        else:
+            return cls(specs, dataoptions)
 
 
 # runtime functions
 @lru_cache(maxsize=None)
-def eval_fields(dataclass: Type[DataClass[PInit]]) -> Type[DataClass[PInit]]:
+def eval_types(dataclass: Type[DataClass[PInit]]) -> Type[DataClass[PInit]]:
     """Evaluate field types of a dataclass."""
     types = get_type_hints(dataclass, include_extras=True)
 
