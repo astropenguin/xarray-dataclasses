@@ -8,7 +8,7 @@ from typing import Any, Dict, Generic, Hashable, Optional, Type, TypeVar
 
 
 # dependencies
-from typing_extensions import Literal, TypeAlias, get_type_hints
+from typing_extensions import Literal, ParamSpec, TypeAlias, get_type_hints
 
 
 # submodules
@@ -30,7 +30,7 @@ from .typing import (
 
 # type hints
 AnySpec: TypeAlias = "ArraySpec | ScalarSpec"
-TDataClass = TypeVar("TDataClass", bound=DataClass[...])
+PInit = ParamSpec("PInit")
 TReturn = TypeVar("TReturn", AnyXarray, None)
 
 
@@ -135,7 +135,7 @@ class DataSpec:
     """Options for xarray data creation."""
 
     @classmethod
-    def from_dataclass(cls, dataclass: Type[DataClass[...]]) -> "DataSpec":
+    def from_dataclass(cls, dataclass: Type[DataClass[PInit]]) -> "DataSpec":
         """Create a data specification from a dataclass."""
         specs = SpecDict()
 
@@ -153,7 +153,7 @@ class DataSpec:
 
 # runtime functions
 @lru_cache(maxsize=None)
-def eval_fields(dataclass: Type[TDataClass]) -> Type[TDataClass]:
+def eval_fields(dataclass: Type[DataClass[PInit]]) -> Type[DataClass[PInit]]:
     """Evaluate field types of a dataclass."""
     types = get_type_hints(dataclass, include_extras=True)
 
