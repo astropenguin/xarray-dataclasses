@@ -5,9 +5,10 @@ from typing import Tuple
 
 # dependencies
 import numpy as np
+import xarray as xr
 from typing_extensions import Annotated as Ann
 from typing_extensions import Literal as L
-from xarray_dataclasses.specs import DataSpec
+from xarray_dataclasses.specs import DataOptions, DataSpec
 from xarray_dataclasses.typing import Attr, Coordof, Data, Name
 
 
@@ -171,3 +172,10 @@ def test_name() -> None:
     assert spec.role == "name"
     assert spec.type is str
     assert spec.default == "weather"
+
+
+def test_dataoptions() -> None:
+    options = DataOptions(xr.DataArray)
+
+    assert DataSpec().options.factory is type(None)
+    assert DataSpec(options=options).options.factory is xr.DataArray
