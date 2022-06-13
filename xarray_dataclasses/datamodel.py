@@ -17,16 +17,16 @@ from typing_extensions import Literal, ParamSpec, get_type_hints
 from .typing import (
     AnyDType,
     AnyField,
-    DataClass,
     AnyXarray,
+    DataClass,
     Dims,
-    FType,
+    Role,
     get_annotated,
     get_dataclass,
     get_dims,
     get_dtype,
-    get_ftype,
     get_name,
+    get_role,
 )
 
 
@@ -209,29 +209,29 @@ def eval_dataclass(dataclass: AnyDataClass[PInit]) -> None:
 
 def get_entry(field: AnyField, value: Any) -> Optional[AnyEntry]:
     """Create an entry from a field and its value."""
-    ftype = get_ftype(field.type)
+    role = get_role(field.type)
     name = get_name(field.type, field.name)
 
-    if ftype is FType.ATTR or ftype is FType.NAME:
+    if role is Role.ATTR or role is Role.NAME:
         return AttrEntry(
             name=name,
-            tag=ftype.value,
+            tag=role.value,
             value=value,
             type=get_annotated(field.type),
         )
 
-    if ftype is FType.COORD or ftype is FType.DATA:
+    if role is Role.COORD or role is Role.DATA:
         try:
             return DataEntry(
                 name=name,
-                tag=ftype.value,
+                tag=role.value,
                 base=get_dataclass(field.type),
                 value=value,
             )
         except TypeError:
             return DataEntry(
                 name=name,
-                tag=ftype.value,
+                tag=role.value,
                 dims=get_dims(field.type),
                 dtype=get_dtype(field.type),
                 value=value,

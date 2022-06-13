@@ -64,7 +64,7 @@ THashable = TypeVar("THashable", bound=Hashable)
 AnyArray: TypeAlias = "np.ndarray[Any, Any]"
 AnyDType: TypeAlias = "np.dtype[Any]"
 AnyField: TypeAlias = "Field[Any]"
-AnyXarray = Union[xr.DataArray, xr.Dataset]
+AnyXarray: TypeAlias = "xr.DataArray | xr.Dataset"
 Dims = Tuple[str, ...]
 Order = Literal["C", "F"]
 Shape = Union[Sequence[int], int]
@@ -87,7 +87,7 @@ class Labeled(Generic[TDims]):
 
 
 # type hints (public)
-class FType(Enum):
+class Role(Enum):
     """Annotations for typing dataclass fields."""
 
     ATTR = "attr"
@@ -107,14 +107,14 @@ class FType(Enum):
 
     @classmethod
     def annotates(cls, tp: Any) -> bool:
-        """Check if any ftype annotates a type hint."""
+        """Check if any role annotates a type hint."""
         if get_origin(tp) is not Annotated:
             return False
 
         return any(isinstance(arg, cls) for arg in get_args(tp))
 
 
-Attr = Annotated[T, FType.ATTR]
+Attr = Annotated[T, Role.ATTR]
 """Type hint for attribute fields (``Attr[T]``).
 
 Example:
@@ -137,7 +137,7 @@ Reference:
 
 """
 
-Coord = Annotated[Union[Labeled[TDims], Collection[TDType], TDType], FType.COORD]
+Coord = Annotated[Union[Labeled[TDims], Collection[TDType], TDType], Role.COORD]
 """Type hint for coordinate fields (``Coord[TDims, TDType]``).
 
 Example:
@@ -156,7 +156,7 @@ Hint:
 
 """
 
-Coordof = Annotated[Union[TDataClass, Any], FType.COORD]
+Coordof = Annotated[Union[TDataClass, Any], Role.COORD]
 """Type hint for coordinate fields (``Coordof[TDataClass]``).
 
 Unlike ``Coord``, it specifies a dataclass that defines a DataArray class.
@@ -188,7 +188,7 @@ Hint:
 
 """
 
-Data = Annotated[Union[Labeled[TDims], Collection[TDType], TDType], FType.DATA]
+Data = Annotated[Union[Labeled[TDims], Collection[TDType], TDType], Role.DATA]
 """Type hint for data fields (``Coordof[TDims, TDType]``).
 
 Example:
@@ -209,7 +209,7 @@ Example:
 
 """
 
-Dataof = Annotated[Union[TDataClass, Any], FType.DATA]
+Dataof = Annotated[Union[TDataClass, Any], Role.DATA]
 """Type hint for data fields (``Coordof[TDataClass]``).
 
 Unlike ``Data``, it specifies a dataclass that defines a DataArray class.
@@ -236,7 +236,7 @@ Hint:
 
 """
 
-Name = Annotated[THashable, FType.NAME]
+Name = Annotated[THashable, Role.NAME]
 """Type hint for name fields (``Name[THashable]``).
 
 Example:
@@ -272,19 +272,19 @@ def find_annotated(tp: Any) -> Iterable[Any]:
 
 
 def get_annotated(tp: Any) -> Any:
-    """Extract the first ftype-annotated type."""
-    for annotated in filter(FType.annotates, find_annotated(tp)):
+    """Extract the first role-annotated type."""
+    for annotated in filter(Role.annotates, find_annotated(tp)):
         return deannotate(annotated)
 
-    raise TypeError("Could not find any ftype-annotated type.")
+    raise TypeError("Could not find any role-annotated type.")
 
 
 def get_annotations(tp: Any) -> Tuple[Any, ...]:
-    """Extract annotations of the first ftype-annotated type."""
-    for annotated in filter(FType.annotates, find_annotated(tp)):
+    """Extract annotations of the first role-annotated type."""
+    for annotated in filter(Role.annotates, find_annotated(tp)):
         return get_args(annotated)[1:]
 
-    raise TypeError("Could not find any ftype-annotated type.")
+    raise TypeError("Could not find any role-annotated type.")
 
 
 def get_dataclass(tp: Any) -> Type[DataClass[Any]]:
@@ -341,14 +341,6 @@ def get_dtype(tp: Any) -> Optional[AnyDType]:
     return np.dtype(dtype)
 
 
-def get_ftype(tp: Any, default: FType = FType.OTHER) -> FType:
-    """Extract an ftype if found or return given default."""
-    try:
-        return get_annotations(tp)[0]
-    except TypeError:
-        return default
-
-
 def get_name(tp: Any, default: Hashable = None) -> Hashable:
     """Extract a name if found or return given default."""
     try:
@@ -361,3 +353,11 @@ def get_name(tp: Any, default: Hashable = None) -> Hashable:
             return annotation
 
     return default
+
+
+def get_role(tp: Any, default: Role = Role.OTHER) -> Role:
+    """Extract a role if found or return given default."""
+    try:
+        return get_annotations(tp)[0]
+    except TypeError:
+        return default

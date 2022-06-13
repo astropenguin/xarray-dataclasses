@@ -14,12 +14,12 @@ from xarray_dataclasses.typing import (
     Attr,
     Coord,
     Data,
-    FType,
     Name,
+    Role,
     get_dims,
     get_dtype,
-    get_ftype,
     get_name,
+    get_role,
 )
 
 
@@ -54,24 +54,6 @@ testdata_dtype = [
     (Union[Ann[Data[Any, float], "data"], Ann[Any, "any"]], np.dtype("f8")),
 ]
 
-testdata_ftype = [
-    (Attr[Any], FType.ATTR),
-    (Data[Any, Any], FType.DATA),
-    (Coord[Any, Any], FType.COORD),
-    (Name[Any], FType.NAME),
-    (Any, FType.OTHER),
-    (Ann[Attr[Any], "attr"], FType.ATTR),
-    (Ann[Data[Any, Any], "data"], FType.DATA),
-    (Ann[Coord[Any, Any], "coord"], FType.COORD),
-    (Ann[Name[Any], "name"], FType.NAME),
-    (Ann[Any, "other"], FType.OTHER),
-    (Union[Ann[Attr[Any], "attr"], Ann[Any, "any"]], FType.ATTR),
-    (Union[Ann[Data[Any, Any], "data"], Ann[Any, "any"]], FType.DATA),
-    (Union[Ann[Coord[Any, Any], "coord"], Ann[Any, "any"]], FType.COORD),
-    (Union[Ann[Name[Any], "name"], Ann[Any, "any"]], FType.NAME),
-    (Union[Ann[Any, "other"], Ann[Any, "any"]], FType.OTHER),
-]
-
 testdata_name = [
     (Attr[Any], None),
     (Data[Any, Any], None),
@@ -90,6 +72,24 @@ testdata_name = [
     (Union[Ann[Any, "other"], Ann[Any, "any"]], None),
 ]
 
+testdata_role = [
+    (Attr[Any], Role.ATTR),
+    (Data[Any, Any], Role.DATA),
+    (Coord[Any, Any], Role.COORD),
+    (Name[Any], Role.NAME),
+    (Any, Role.OTHER),
+    (Ann[Attr[Any], "attr"], Role.ATTR),
+    (Ann[Data[Any, Any], "data"], Role.DATA),
+    (Ann[Coord[Any, Any], "coord"], Role.COORD),
+    (Ann[Name[Any], "name"], Role.NAME),
+    (Ann[Any, "other"], Role.OTHER),
+    (Union[Ann[Attr[Any], "attr"], Ann[Any, "any"]], Role.ATTR),
+    (Union[Ann[Data[Any, Any], "data"], Ann[Any, "any"]], Role.DATA),
+    (Union[Ann[Coord[Any, Any], "coord"], Ann[Any, "any"]], Role.COORD),
+    (Union[Ann[Name[Any], "name"], Ann[Any, "any"]], Role.NAME),
+    (Union[Ann[Any, "other"], Ann[Any, "any"]], Role.OTHER),
+]
+
 
 # test functions
 @mark.parametrize("tp, dims", testdata_dims)
@@ -102,11 +102,11 @@ def test_get_dtype(tp: Any, dtype: Any) -> None:
     assert get_dtype(tp) == dtype
 
 
-@mark.parametrize("tp, ftype", testdata_ftype)
-def test_get_ftype(tp: Any, ftype: Any) -> None:
-    assert get_ftype(tp) == ftype
-
-
 @mark.parametrize("tp, name", testdata_name)
 def test_get_name(tp: Any, name: Any) -> None:
     assert get_name(tp) == name
+
+
+@mark.parametrize("tp, role", testdata_role)
+def test_get_role(tp: Any, role: Any) -> None:
+    assert get_role(tp) == role
