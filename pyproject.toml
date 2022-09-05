@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "xarray-dataclasses"
-version = "1.2.0"
+version = "1.3.0"
 description = "xarray extension for typed DataArray and Dataset creation"
 authors = ["Akio Taniguchi <taniguchi@a.phys.nagoya-u.ac.jp>"]
 keywords = ["xarray", "dataclass", "dataarray", "dataset", "typing"]
