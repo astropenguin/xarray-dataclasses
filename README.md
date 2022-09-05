@@ -6,8 +6,7 @@
 [![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.4624819-cornflowerblue?style=flat-square)](https://doi.org/10.5281/zenodo.4624819)
 [![Tests](https://img.shields.io/github/workflow/status/astropenguin/xarray-dataclasses/Tests?label=Tests&style=flat-square)](https://github.com/astropenguin/xarray-dataclasses/actions)
 
-xarray extension for typed DataArray and Dataset creation
-
+xarray data creation made easy by dataclass
 
 ## Overview
 
