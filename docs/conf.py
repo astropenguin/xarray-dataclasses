@@ -19,14 +19,18 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
 ]
+myst_heading_anchors = 3
 templates_path = ["_templates"]
 
 
 # options for HTML output
-html_logo = "_static/logo.svg"
 html_static_path = ["_static"]
 html_theme = "pydata_sphinx_theme"
 html_theme_options = {
+    "logo": {
+        "image_light": "logo-light.svg",
+        "image_dark": "logo-dark.svg",
+    },
     "github_url": "https://github.com/astropenguin/xarray-dataclasses/",
     "twitter_url": "https://twitter.com/astropengu_in/",
 }
