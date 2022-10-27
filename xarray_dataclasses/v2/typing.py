@@ -1,4 +1,4 @@
-__all__ = ["Attr", "Column", "Data", "Index", "Other"]
+__all__ = ["Attr", "Coord", "Coordof", "Data", "Dataof", "Other"]
 
 
 # standard library
@@ -10,6 +10,7 @@ from typing import (
     Callable,
     Collection,
     Dict,
+    Generic,
     Hashable,
     Iterable,
     Optional,
@@ -20,8 +21,8 @@ from typing import (
 
 
 # dependencies
-import pandas as pd
-from pandas.api.types import pandas_dtype
+import numpy as np
+import xarray as xr
 from typing_extensions import (
     Annotated,
     Literal,
@@ -34,12 +35,15 @@ from typing_extensions import (
 
 
 # type hints (private)
-Pandas = Union[pd.DataFrame, "pd.Series[Any]"]
 P = ParamSpec("P")
 T = TypeVar("T")
-TPandas = TypeVar("TPandas", bound=Pandas)
-TFrame = TypeVar("TFrame", bound=pd.DataFrame)
-TSeries = TypeVar("TSeries", bound="pd.Series[Any]")
+TDataClass = TypeVar("TDataClass", bound="DataClass[Any]")
+TDataArray = TypeVar("TDataArray", bound=xr.DataArray)
+TDataset = TypeVar("TDataset", bound=xr.Dataset)
+TDims = TypeVar("TDims")
+TDType = TypeVar("TDType")
+TXarray = TypeVar("TXarray", bound="Xarray")
+Xarray = Union[xr.DataArray, xr.Dataset]
 
 
 class DataClass(Protocol[P]):
@@ -51,14 +55,20 @@ class DataClass(Protocol[P]):
         ...
 
 
-class PandasClass(Protocol[P, TPandas]):
-    """Type hint for dataclass objects with a pandas factory."""
+class XarrayClass(Protocol[P, TXarray]):
+    """Type hint for dataclass objects with a xarray factory."""
 
     __dataclass_fields__: Dict[str, "Field[Any]"]
-    __pandas_factory__: Callable[..., TPandas]
+    __xarray_factory__: Callable[..., TXarray]
 
     def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
         ...
+
+
+class Dims(Generic[TDims]):
+    """Empty class for storing type of dimensions."""
+
+    pass
 
 
 class Role(Enum):
@@ -67,14 +77,11 @@ class Role(Enum):
     ATTR = auto()
     """Annotation for attribute fields."""
 
-    COLUMN = auto()
-    """Annotation for column fields."""
+    COORD = auto()
+    """Annotation for coordinate fields."""
 
     DATA = auto()
     """Annotation for data fields."""
-
-    INDEX = auto()
-    """Annotation for index fields."""
 
     OTHER = auto()
     """Annotation for other fields."""
@@ -89,14 +96,17 @@ class Role(Enum):
 Attr = Annotated[T, Role.ATTR]
 """Type hint for attribute fields (``Attr[T]``)."""
 
-Column = Annotated[T, Role.COLUMN]
-"""Type hint for column fields (``Column[T]``)."""
+Coord = Annotated[Union[Dims[TDims], Collection[TDType]], Role.COORD]
+"""Type hint for coordinate fields (``Coord[TDims, TDType]``)."""
 
-Data = Annotated[Collection[T], Role.DATA]
-"""Type hint for data fields (``Data[T]``)."""
+Coordof = Annotated[TDataClass, Role.COORD]
+"""Type hint for coordinate fields (``Dataof[TDataClass]``)."""
 
-Index = Annotated[Collection[T], Role.INDEX]
-"""Type hint for index fields (``Index[T]``)."""
+Data = Annotated[Union[Dims[TDims], Collection[TDType]], Role.DATA]
+"""Type hint for data fields (``Coord[TDims, TDType]``)."""
+
+Dataof = Annotated[TDataClass, Role.DATA]
+"""Type hint for data fields (``Dataof[TDataClass]``)."""
 
 Other = Annotated[T, Role.OTHER]
 """Type hint for other fields (``Other[T]``)."""
@@ -139,10 +149,35 @@ def get_annotations(tp: Any) -> Tuple[Any, ...]:
     raise TypeError("Could not find any role-annotated type.")
 
 
-def get_dtype(tp: Any) -> Optional[str]:
-    """Extract a NumPy or pandas data type."""
+def get_dims(tp: Any) -> Optional[Tuple[str, ...]]:
+    """Extract dimensions if found or return None."""
     try:
-        dtype = get_args(get_annotated(tp))[0]
+        dims = get_args(get_args(get_annotated(tp))[0])[0]
+    except (IndexError, TypeError):
+        return None
+
+    args = get_args(dims)
+    origin = get_origin(dims)
+
+    if args == () or args == ((),):
+        return ()
+
+    if origin is Literal:
+        return (str(args[0]),)
+
+    if not (origin is tuple or origin is Tuple):
+        raise TypeError(f"Could not find any dims in {tp!r}.")
+
+    if not all(get_origin(arg) is Literal for arg in args):
+        raise TypeError(f"Could not find any dims in {tp!r}.")
+
+    return tuple(str(get_args(arg)[0]) for arg in args)
+
+
+def get_dtype(tp: Any) -> Optional[str]:
+    """Extract a data type if found or return None."""
+    try:
+        dtype = get_args(get_args(get_annotated(tp))[1])[0]
     except (IndexError, TypeError):
         return None
 
@@ -152,7 +187,7 @@ def get_dtype(tp: Any) -> Optional[str]:
     if get_origin(dtype) is Literal:
         dtype = get_args(dtype)[0]
 
-    return pandas_dtype(dtype).name
+    return np.dtype(dtype).name
 
 
 def get_name(tp: Any, default: Hashable = None) -> Hashable:
@@ -170,12 +205,12 @@ def get_name(tp: Any, default: Hashable = None) -> Hashable:
     except TypeError:
         raise ValueError("Could not find any valid name.")
 
-    return name  # type: ignore
+    return name
 
 
 def get_role(tp: Any, default: Role = Role.OTHER) -> Role:
     """Extract a role if found or return given default."""
     try:
-        return get_annotations(tp)[0]  # type: ignore
+        return get_annotations(tp)[0]
     except TypeError:
         return default
