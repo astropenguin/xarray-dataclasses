@@ -1,4 +1,5 @@
-__all__ = ["typing"]
+__all__ = ["specs", "typing"]
 
 
+from . import specs
 from . import typing
