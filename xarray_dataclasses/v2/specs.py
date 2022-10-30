@@ -2,10 +2,10 @@ __all__ = ["Spec"]
 
 
 # standard library
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, is_dataclass, replace
 from dataclasses import Field as Field_, fields as fields_
 from functools import lru_cache
-from typing import Any, Callable, Hashable, List, Optional, Type
+from typing import Any, Callable, Hashable, List, Optional, Tuple, Type
 
 
 # dependencies
@@ -13,7 +13,17 @@ from typing_extensions import Literal, get_type_hints
 
 
 # submodules
-from .typing import P, DataClass, Pandas, Role, get_dtype, get_name, get_role
+from .typing import (
+    P,
+    DataClass,
+    Role,
+    Xarray,
+    get_annotated,
+    get_dims,
+    get_dtype,
+    get_name,
+    get_role,
+)
 
 
 # runtime classes
@@ -27,17 +37,33 @@ class Field:
     name: Hashable
     """Name of the field."""
 
-    role: Literal["attr", "column", "data", "index"]
+    role: Literal["attr", "coord", "data"]
     """Role of the field."""
-
-    type: Optional[Any]
-    """Type (hint) of the field data."""
-
-    dtype: Optional[str]
-    """Data type of the field data."""
 
     default: Any
     """Default value of the field data."""
+
+    type: Optional[Any] = None
+    """Type (hint) of the field data."""
+
+    dims: Optional[Tuple[str, ...]] = None
+    """Dimensions of the field data."""
+
+    dtype: Optional[str] = None
+    """Data type of the field data."""
+
+    def __post_init__(self) -> None:
+        """Post updates for coordinate and data fields."""
+        if not (self.role == "coord" or self.role == "data"):
+            return None
+
+        if is_dataclass(self.type):
+            spec = Spec.from_dataclass(self.type)  # type: ignore
+            field = spec.fields.of_data[0]
+            object.__setattr__(self, "dims", field.dims)
+            object.__setattr__(self, "dtype", field.dtype)
+        else:
+            object.__setattr__(self, "type", None)
 
     def update(self, obj: DataClass[P]) -> "Field":
         """Update the specification by a dataclass object."""
@@ -57,19 +83,14 @@ class Fields(List[Field]):
         return Fields(field for field in self if field.role == "attr")
 
     @property
-    def of_column(self) -> "Fields":
-        """Select only column field specifications."""
-        return Fields(field for field in self if field.role == "column")
+    def of_coord(self) -> "Fields":
+        """Select only coordinate field specifications."""
+        return Fields(field for field in self if field.role == "coord")
 
     @property
     def of_data(self) -> "Fields":
         """Select only data field specifications."""
         return Fields(field for field in self if field.role == "data")
-
-    @property
-    def of_index(self) -> "Fields":
-        """Select only index field specifications."""
-        return Fields(field for field in self if field.role == "index")
 
     def update(self, obj: DataClass[P]) -> "Fields":
         """Update the specifications by a dataclass object."""
@@ -78,13 +99,13 @@ class Fields(List[Field]):
 
 @dataclass(frozen=True)
 class Spec:
-    """Specification of a pandas dataclass."""
+    """Specification of a xarray dataclass."""
 
     fields: Fields
     """List of field specifications."""
 
-    factory: Optional[Callable[..., Pandas]] = None
-    """Factory for pandas data creation."""
+    factory: Optional[Callable[..., Xarray]] = None
+    """Factory for xarray data creation."""
 
     @classmethod
     def from_dataclass(cls, dataclass: Type[DataClass[P]]) -> "Spec":
@@ -97,7 +118,7 @@ class Spec:
             if field is not None:
                 fields.append(field)
 
-        factory = getattr(dataclass, "__pandas_factory__", None)
+        factory = getattr(dataclass, "__xarray_factory__", None)
         return cls(fields, factory)
 
     def update(self, obj: DataClass[P]) -> "Spec":
@@ -122,9 +143,10 @@ def convert_field(field_: "Field_[Any]") -> Optional[Field]:
         id=field_.name,
         name=get_name(field_.type, field_.name),
         role=role.name.lower(),  # type: ignore
-        type=field_.type,
-        dtype=get_dtype(field_.type),
         default=field_.default,
+        type=get_annotated(field_.type),
+        dims=get_dims(field_.type),
+        dtype=get_dtype(field_.type),
     )
 
 
