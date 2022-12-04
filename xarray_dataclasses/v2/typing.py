@@ -2,6 +2,7 @@ __all__ = ["Attr", "Coord", "Coordof", "Data", "Dataof", "Other"]
 
 
 # standard library
+import types
 from dataclasses import Field
 from enum import Enum, auto
 from itertools import chain
@@ -184,6 +185,9 @@ def get_dtype(tp: Any) -> Optional[str]:
     if dtype is Any or dtype is type(None):
         return None
 
+    if is_union_type(dtype):
+        dtype = get_args(dtype)[0]
+
     if get_origin(dtype) is Literal:
         dtype = get_args(dtype)[0]
 
@@ -214,3 +218,12 @@ def get_role(tp: Any, default: Role = Role.OTHER) -> Role:
         return get_annotations(tp)[0]
     except TypeError:
         return default
+
+
+def is_union_type(tp: Any) -> bool:
+    """Check if a type hint is a union type."""
+    if get_origin(tp) is Union:
+        return True
+
+    UnionType = getattr(types, "UnionType", None)
+    return UnionType is not None and isinstance(tp, UnionType)
