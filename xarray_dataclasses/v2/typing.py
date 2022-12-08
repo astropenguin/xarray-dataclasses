@@ -72,7 +72,7 @@ class Dims(Generic[TDims]):
     pass
 
 
-class Role(Enum):
+class Tag(Enum):
     """Annotations for typing dataclass fields."""
 
     ATTR = auto()
@@ -89,27 +89,27 @@ class Role(Enum):
 
     @classmethod
     def annotates(cls, tp: Any) -> bool:
-        """Check if any role annotates a type hint."""
+        """Check if any tag annotates a type hint."""
         return any(isinstance(arg, cls) for arg in get_args(tp))
 
 
 # type hints (public)
-Attr = Annotated[T, Role.ATTR]
+Attr = Annotated[T, Tag.ATTR]
 """Type hint for attribute fields (``Attr[T]``)."""
 
-Coord = Annotated[Union[Dims[TDims], Collection[TDType]], Role.COORD]
+Coord = Annotated[Union[Dims[TDims], Collection[TDType]], Tag.COORD]
 """Type hint for coordinate fields (``Coord[TDims, TDType]``)."""
 
-Coordof = Annotated[TDataClass, Role.COORD]
-"""Type hint for coordinate fields (``Dataof[TDataClass]``)."""
+Coordof = Annotated[TDataClass, Tag.COORD]
+"""Type hint for coordinate fields (``Coordof[TDataClass, TDType]``)."""
 
-Data = Annotated[Union[Dims[TDims], Collection[TDType]], Role.DATA]
-"""Type hint for data fields (``Coord[TDims, TDType]``)."""
+Data = Annotated[Union[Dims[TDims], Collection[TDType]], Tag.DATA]
+"""Type hint for data fields (``Data[TDims, TDType]``)."""
 
-Dataof = Annotated[TDataClass, Role.DATA]
-"""Type hint for data fields (``Dataof[TDataClass]``)."""
+Dataof = Annotated[TDataClass, Tag.DATA]
+"""Type hint for data fields (``Dataof[TDataClass, TDType]``)."""
 
-Other = Annotated[T, Role.OTHER]
+Other = Annotated[T, Tag.OTHER]
 """Type hint for other fields (``Other[T]``)."""
 
 
@@ -135,19 +135,19 @@ def find_annotated(tp: Any) -> Iterable[Any]:
 
 
 def get_annotated(tp: Any) -> Any:
-    """Extract the first role-annotated type."""
-    for annotated in filter(Role.annotates, find_annotated(tp)):
+    """Extract the first tag-annotated type."""
+    for annotated in filter(Tag.annotates, find_annotated(tp)):
         return deannotate(annotated)
 
-    raise TypeError("Could not find any role-annotated type.")
+    raise TypeError("Could not find any tag-annotated type.")
 
 
 def get_annotations(tp: Any) -> Tuple[Any, ...]:
-    """Extract annotations of the first role-annotated type."""
-    for annotated in filter(Role.annotates, find_annotated(tp)):
+    """Extract annotations of the first tag-annotated type."""
+    for annotated in filter(Tag.annotates, find_annotated(tp)):
         return get_args(annotated)[1:]
 
-    raise TypeError("Could not find any role-annotated type.")
+    raise TypeError("Could not find any tag-annotated type.")
 
 
 def get_dims(tp: Any) -> Optional[Tuple[str, ...]]:
@@ -212,11 +212,11 @@ def get_name(tp: Any, default: Hashable = None) -> Hashable:
     return name
 
 
-def get_role(tp: Any, default: Role = Role.OTHER) -> Role:
-    """Extract a role if found or return given default."""
+def get_tag(tp: Any, default: Tag = Tag.OTHER) -> Tag:
+    """Extract a tag if found or return given default."""
     try:
         return get_annotations(tp)[0]
-    except TypeError:
+    except (IndexError, TypeError):
         return default
 
 

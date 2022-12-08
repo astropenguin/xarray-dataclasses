@@ -16,13 +16,13 @@ from typing_extensions import Literal, get_type_hints
 from .typing import (
     P,
     DataClass,
-    Role,
+    Tag,
     Xarray,
     get_annotated,
     get_dims,
     get_dtype,
     get_name,
-    get_role,
+    get_tag,
 )
 
 
@@ -37,8 +37,8 @@ class Field:
     name: Hashable
     """Name of the field."""
 
-    role: Literal["attr", "coord", "data"]
-    """Role of the field."""
+    tag: Literal["attr", "coord", "data"]
+    """Tag of the field."""
 
     default: Any
     """Default value of the field data."""
@@ -54,7 +54,7 @@ class Field:
 
     def __post_init__(self) -> None:
         """Post updates for coordinate and data fields."""
-        if not (self.role == "coord" or self.role == "data"):
+        if not (self.tag == "coord" or self.tag == "data"):
             return None
 
         if is_dataclass(self.type):
@@ -80,17 +80,17 @@ class Fields(List[Field]):
     @property
     def of_attr(self) -> "Fields":
         """Select only attribute field specifications."""
-        return Fields(field for field in self if field.role == "attr")
+        return Fields(field for field in self if field.tag == "attr")
 
     @property
     def of_coord(self) -> "Fields":
         """Select only coordinate field specifications."""
-        return Fields(field for field in self if field.role == "coord")
+        return Fields(field for field in self if field.tag == "coord")
 
     @property
     def of_data(self) -> "Fields":
         """Select only data field specifications."""
-        return Fields(field for field in self if field.role == "data")
+        return Fields(field for field in self if field.tag == "data")
 
     def update(self, obj: DataClass[P]) -> "Fields":
         """Update the specifications by a dataclass object."""
@@ -134,15 +134,15 @@ class Spec:
 @lru_cache(maxsize=None)
 def convert_field(field_: "Field_[Any]") -> Optional[Field]:
     """Convert a dataclass field to a field specification."""
-    role = get_role(field_.type)
+    tag = get_tag(field_.type)
 
-    if role is Role.OTHER:
+    if tag is Tag.OTHER:
         return None
 
     return Field(
         id=field_.name,
         name=get_name(field_.type, field_.name),
-        role=role.name.lower(),  # type: ignore
+        tag=tag.name.lower(),  # type: ignore
         default=field_.default,
         type=get_annotated(field_.type),
         dims=get_dims(field_.type),

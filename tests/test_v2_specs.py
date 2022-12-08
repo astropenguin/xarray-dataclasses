@@ -18,7 +18,7 @@ def test_temp() -> None:
 
     assert field.id == "temp"
     assert field.name == "Temperature ({.temp_unit})"
-    assert field.role == "data"
+    assert field.tag == "data"
     assert field.default is MISSING
     assert field.type is None
     assert field.dims == ("x", "y", "time")
@@ -30,7 +30,7 @@ def test_temp_updated() -> None:
 
     assert field.id == "temp"
     assert field.name == "Temperature (deg C)"
-    assert field.role == "data"
+    assert field.tag == "data"
     assert (field.default == weather.temp).all()
     assert field.type is None
     assert field.dims == ("x", "y", "time")
@@ -42,7 +42,7 @@ def test_prec() -> None:
 
     assert field.id == "prec"
     assert field.name == "Precipitation ({.prec_unit})"
-    assert field.role == "data"
+    assert field.tag == "data"
     assert field.default is MISSING
     assert field.type is None
     assert field.dims == ("x", "y", "time")
@@ -54,7 +54,7 @@ def test_prec_updated() -> None:
 
     assert field.id == "prec"
     assert field.name == "Precipitation (mm)"
-    assert field.role == "data"
+    assert field.tag == "data"
     assert (field.default == weather.prec).all()
     assert field.type is None
     assert field.dims == ("x", "y", "time")
@@ -66,7 +66,7 @@ def test_lon() -> None:
 
     assert field.id == "lon"
     assert field.name == "Longitude"
-    assert field.role == "coord"
+    assert field.tag == "coord"
     assert field.default is MISSING
     assert field.type is Longitude
     assert field.dims == ("x", "y")
@@ -78,7 +78,7 @@ def test_lon_updated() -> None:
 
     assert field.id == "lon"
     assert field.name == "Longitude"
-    assert field.role == "coord"
+    assert field.tag == "coord"
     assert (field.default == weather.lon).all()
     assert field.type is Longitude
     assert field.dims == ("x", "y")
@@ -90,7 +90,7 @@ def test_lat() -> None:
 
     assert field.id == "lat"
     assert field.name == "Latitude"
-    assert field.role == "coord"
+    assert field.tag == "coord"
     assert field.default is MISSING
     assert field.type is Latitude
     assert field.dims == ("x", "y")
@@ -102,7 +102,7 @@ def test_lat_updated() -> None:
 
     assert field.id == "lat"
     assert field.name == "Latitude"
-    assert field.role == "coord"
+    assert field.tag == "coord"
     assert (field.default == weather.lat).all()
     assert field.type is Latitude
     assert field.dims == ("x", "y")
@@ -114,7 +114,7 @@ def test_time() -> None:
 
     assert field.id == "time"
     assert field.name == "time"
-    assert field.role == "coord"
+    assert field.tag == "coord"
     assert field.default is MISSING
     assert field.type is None
     assert field.dims == ("time",)
@@ -126,7 +126,7 @@ def test_time_updated() -> None:
 
     assert field.id == "time"
     assert field.name == "time"
-    assert field.role == "coord"
+    assert field.tag == "coord"
     assert (field.default == weather.time).all()
     assert field.type is None
     assert field.dims == ("time",)
@@ -138,7 +138,7 @@ def test_reference_time() -> None:
 
     assert field.id == "reference_time"
     assert field.name == "reference_time"
-    assert field.role == "coord"
+    assert field.tag == "coord"
     assert field.default is MISSING
     assert field.type is None
     assert field.dims == ()
@@ -150,7 +150,7 @@ def test_reference_time_updated() -> None:
 
     assert field.id == "reference_time"
     assert field.name == "reference_time"
-    assert field.role == "coord"
+    assert field.tag == "coord"
     assert field.default == weather.reference_time
     assert field.type is None
     assert field.dims == ()

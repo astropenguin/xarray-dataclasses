@@ -11,11 +11,11 @@ from xarray_dataclasses.v2.typing import (
     Coordof,
     Data,
     Dataof,
-    Role,
+    Tag,
     get_dims,
     get_dtype,
     get_name,
-    get_role,
+    get_tag,
 )
 from pytest import mark
 from typing_extensions import Annotated as Ann, Literal as L
@@ -98,25 +98,25 @@ testdata_name = [
     (Union[Ann[Any, "other"], Ann[Any, "any"]], None),
 ]
 
-testdata_role = [
-    (Attr[Any], Role.ATTR),
-    (Coord[Any, Any], Role.COORD),
-    (Coordof[DataClass], Role.COORD),
-    (Data[Any, Any], Role.DATA),
-    (Dataof[DataClass], Role.DATA),
-    (Any, Role.OTHER),
-    (Ann[Attr[Any], "attr"], Role.ATTR),
-    (Ann[Coord[Any, Any], "coord"], Role.COORD),
-    (Ann[Coordof[DataClass], "coord"], Role.COORD),
-    (Ann[Data[Any, Any], "data"], Role.DATA),
-    (Ann[Dataof[DataClass], "data"], Role.DATA),
-    (Ann[Any, "other"], Role.OTHER),
-    (Union[Ann[Attr[Any], "attr"], Ann[Any, "any"]], Role.ATTR),
-    (Union[Ann[Coord[Any, Any], "coord"], Ann[Any, "any"]], Role.COORD),
-    (Union[Ann[Coordof[DataClass], "coord"], Ann[Any, "any"]], Role.COORD),
-    (Union[Ann[Data[Any, Any], "data"], Ann[Any, "any"]], Role.DATA),
-    (Union[Ann[Dataof[DataClass], "data"], Ann[Any, "any"]], Role.DATA),
-    (Union[Ann[Any, "other"], Ann[Any, "any"]], Role.OTHER),
+testdata_tag = [
+    (Attr[Any], Tag.ATTR),
+    (Coord[Any, Any], Tag.COORD),
+    (Coordof[DataClass], Tag.COORD),
+    (Data[Any, Any], Tag.DATA),
+    (Dataof[DataClass], Tag.DATA),
+    (Any, Tag.OTHER),
+    (Ann[Attr[Any], "attr"], Tag.ATTR),
+    (Ann[Coord[Any, Any], "coord"], Tag.COORD),
+    (Ann[Coordof[DataClass], "coord"], Tag.COORD),
+    (Ann[Data[Any, Any], "data"], Tag.DATA),
+    (Ann[Dataof[DataClass], "data"], Tag.DATA),
+    (Ann[Any, "other"], Tag.OTHER),
+    (Union[Ann[Attr[Any], "attr"], Ann[Any, "any"]], Tag.ATTR),
+    (Union[Ann[Coord[Any, Any], "coord"], Ann[Any, "any"]], Tag.COORD),
+    (Union[Ann[Coordof[DataClass], "coord"], Ann[Any, "any"]], Tag.COORD),
+    (Union[Ann[Data[Any, Any], "data"], Ann[Any, "any"]], Tag.DATA),
+    (Union[Ann[Dataof[DataClass], "data"], Ann[Any, "any"]], Tag.DATA),
+    (Union[Ann[Any, "other"], Ann[Any, "any"]], Tag.OTHER),
 ]
 
 
@@ -136,6 +136,6 @@ def test_get_name(tp: Any, name: Any) -> None:
     assert get_name(tp) == name
 
 
-@mark.parametrize("tp, role", testdata_role)
-def test_get_role(tp: Any, role: Any) -> None:
-    assert get_role(tp) is role
+@mark.parametrize("tp, tag", testdata_tag)
+def test_get_tag(tp: Any, tag: Any) -> None:
+    assert get_tag(tp) is tag
