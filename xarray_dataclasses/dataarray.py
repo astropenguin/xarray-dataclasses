@@ -3,7 +3,8 @@ __all__ = ["AsDataArray", "asdataarray"]
 
 
 # standard library
-from functools import partial, wraps
+from functools import partial
+from inspect import signature
 from types import MethodType
 from typing import Any, Callable, Optional, Type, TypeVar, Union, overload
 
@@ -11,7 +12,6 @@ from typing import Any, Callable, Optional, Type, TypeVar, Union, overload
 # dependencies
 import numpy as np
 import xarray as xr
-from morecopy import copy
 from typing_extensions import ParamSpec, Protocol
 
 
@@ -141,14 +141,14 @@ class AsDataArray:
     def new(cls: Any) -> Any:
         """Create a DataArray object from dataclass parameters."""
 
-        init = copy(cls.__init__)
-        init.__doc__ = cls.__init__.__doc__
-        init.__annotations__["return"] = TDataArray
+        sig = signature(cls.__init__)  # type: ignore
+        sig = sig.replace(return_annotation=TDataArray)
 
-        @wraps(init)
         def new(cls: Any, *args: Any, **kwargs: Any) -> Any:
             return asdataarray(cls(*args, **kwargs))
 
+        setattr(new, "__doc__", cls.__init__.__doc__)
+        setattr(new, "__signature__", sig)
         return MethodType(new, cls)
 
     @overload
