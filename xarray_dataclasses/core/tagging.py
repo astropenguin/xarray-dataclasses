@@ -19,11 +19,14 @@ class Tag(Flag):
     ATTR = auto()
     """Tag for a type specifying an attribute field."""
 
+    COORD = auto()
+    """Tag for a type specifying a coordinate."""
+
     DATA = auto()
     """Tag for a type specifying a data field."""
 
-    INDEX = auto()
-    """Tag for a type specifying an index field."""
+    DIMS = auto()
+    """Tag for a type specifying dimensions."""
 
     DTYPE = auto()
     """Tag for a type specifying a data type."""
@@ -31,10 +34,13 @@ class Tag(Flag):
     MULTIPLE = auto()
     """Tag for a type specifying a multiple-item field."""
 
-    FIELD = ATTR | DATA | INDEX
+    ORIGIN = auto()
+    """Tag for a type specifying an origin."""
+
+    FIELD = ATTR | COORD | DATA
     """Union of field-related tags."""
 
-    ANY = FIELD | DTYPE | MULTIPLE
+    ANY = FIELD | DIMS | DTYPE | MULTIPLE | ORIGIN
     """Union of all tags."""
 
     def annotates(self, tp: Any) -> bool:
