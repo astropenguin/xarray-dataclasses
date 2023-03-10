@@ -40,7 +40,10 @@ class Tag(Flag):
     FIELD = ATTR | COORD | DATA
     """Union of field-related tags."""
 
-    ANY = FIELD | DIMS | DTYPE | MULTIPLE | ORIGIN
+    OPTION = DIMS | DTYPE | MULTIPLE | ORIGIN
+    """Union of option-related tags."""
+
+    ANY = FIELD | OPTION
     """Union of all tags."""
 
     def annotates(self, tp: Any) -> bool:
