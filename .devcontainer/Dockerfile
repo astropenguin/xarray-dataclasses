@@ -2,7 +2,7 @@ FROM python:3.11-slim
 
 ENV PATH=$PATH:/root/.local/bin
 ENV POETRY_VIRTUALENVS_CREATE=false
-ENV POETRY_VERSION=1.3.2
+ENV POETRY_VERSION=1.4.0
 
 RUN apt-get update \
     && apt-get install -y curl git \
