@@ -1,13 +1,12 @@
 __all__ = [
     "DataClass",
     "DataClassOf",
-    "HashDict",
-    "Pandas",
     "PAny",
     "TAny",
-    "TFrame",
-    "TPandas",
-    "TSeries",
+    "TDataArray",
+    "TDataset",
+    "TXarray",
+    "Xarray",
     "is_union",
 ]
 
@@ -15,19 +14,16 @@ __all__ = [
 # standard library
 import types
 from dataclasses import Field
-from typing import Any, Callable, ClassVar, Dict, Hashable, Protocol, TypeVar, Union
+from typing import Any, Callable, ClassVar, Dict, Protocol, TypeVar, Union
 
 
 # dependencies
-from pandas import DataFrame, Series
+from xarray import DataArray, Dataset
 from typing_extensions import ParamSpec, get_origin
 
 
-HashDict = Dict[Hashable, Hashable]
-"""Type hint for dictionary of hashable keys and values."""
-
-Pandas = Union[DataFrame, "Series[Any]"]
-"""Type hint for any pandas object."""
+Xarray = Union[DataArray, Dataset]
+"""Type hint for any xarray object."""
 
 PAny = ParamSpec("PAny")
 """Parameter specification variable for any function."""
@@ -35,14 +31,14 @@ PAny = ParamSpec("PAny")
 TAny = TypeVar("TAny")
 """Type variable for any class."""
 
-TFrame = TypeVar("TFrame", bound=DataFrame)
-"""Type variable for pandas DataFrame."""
+TDataArray = TypeVar("TDataArray", bound=DataArray)
+"""Type variable for xarray DataArray."""
 
-TPandas = TypeVar("TPandas", bound=Pandas)
-"""Type variable for any class of pandas object."""
+TDataset = TypeVar("TDataset", bound=Dataset)
+"""Type variable for xarray Dataset."""
 
-TSeries = TypeVar("TSeries", bound="Series[Any]")
-"""Type variable for pandas Series (of any dtype)."""
+TXarray = TypeVar("TXarray", bound=Xarray)
+"""Type variable for any class of xarray object."""
 
 
 class DataClass(Protocol[PAny]):
@@ -54,11 +50,11 @@ class DataClass(Protocol[PAny]):
         ...
 
 
-class DataClassOf(Protocol[TPandas, PAny]):
+class DataClassOf(Protocol[TXarray, PAny]):
     """Protocol for any dataclass object with a factory."""
 
     __dataclass_fields__: ClassVar[Dict[str, "Field[Any]"]]
-    __pandas_factory__: Callable[..., TPandas]
+    __xarray_factory__: Callable[..., TXarray]
 
     def __init__(self, *args: PAny.args, **kwargs: PAny.kwargs) -> None:
         ...
