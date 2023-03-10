@@ -34,4 +34,5 @@ jobs:
       - name: Test code's execution (pytest)
         run: pytest -v tests
       - name: Test docs' building (Sphinx)
+        if: ${{ contains('3.10, 3.11', matrix.python) }}
         run: docs/build
