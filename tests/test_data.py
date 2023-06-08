@@ -1,11 +1,11 @@
 # standard library
 from dataclasses import dataclass
-from typing import Collection, Tuple, Union
+from typing import Collection, Literal as L, Tuple, Union
 
 
 # dependencies
 import numpy as np
-from typing_extensions import Annotated as Ann, Literal as L
+from typing_extensions import Annotated as Ann
 from xarray_dataclasses.typing import Attr, Coord, Coordof, Data
 
 

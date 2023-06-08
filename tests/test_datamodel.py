@@ -1,10 +1,6 @@
 # standard library
 from dataclasses import dataclass
-from typing import Tuple
-
-
-# dependencies
-from typing_extensions import Literal
+from typing import Literal, Tuple
 
 
 # submodules

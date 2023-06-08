@@ -29,7 +29,9 @@ from typing import (
     Generic,
     Hashable,
     Iterable,
+    Literal,
     Optional,
+    Protocol,
     Sequence,
     Tuple,
     Type,
@@ -43,9 +45,7 @@ import numpy as np
 import xarray as xr
 from typing_extensions import (
     Annotated,
-    Literal,
     ParamSpec,
-    Protocol,
     TypeAlias,
     get_args,
     get_origin,

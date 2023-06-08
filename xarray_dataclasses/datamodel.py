@@ -4,13 +4,24 @@ __all__ = ["DataModel"]
 
 # standard library
 from dataclasses import dataclass, field, is_dataclass
-from typing import Any, Dict, Hashable, List, Optional, Tuple, Type, Union, cast
+from typing import (
+    Any,
+    Dict,
+    Hashable,
+    List,
+    Literal,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 
 # dependencies
 import numpy as np
 import xarray as xr
-from typing_extensions import Literal, ParamSpec, get_type_hints
+from typing_extensions import ParamSpec, get_type_hints
 
 
 # submodules
