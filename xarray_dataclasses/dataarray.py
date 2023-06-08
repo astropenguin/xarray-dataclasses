@@ -6,13 +6,13 @@ __all__ = ["AsDataArray", "asdataarray"]
 from functools import partial
 from inspect import signature
 from types import MethodType
-from typing import Any, Callable, Optional, Type, TypeVar, Union, overload
+from typing import Any, Callable, Optional, Protocol, Type, TypeVar, Union, overload
 
 
 # dependencies
 import numpy as np
 import xarray as xr
-from typing_extensions import ParamSpec, Protocol
+from typing_extensions import ParamSpec
 
 
 # submodules
