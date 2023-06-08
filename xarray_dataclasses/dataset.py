@@ -6,13 +6,13 @@ __all__ = ["AsDataset", "asdataset"]
 from functools import partial
 from inspect import signature
 from types import MethodType
-from typing import Any, Callable, Dict, Optional, Type, TypeVar, overload
+from typing import Any, Callable, Dict, Optional, Protocol, Type, TypeVar, overload
 
 
 # dependencies
 import numpy as np
 import xarray as xr
-from typing_extensions import ParamSpec, Protocol
+from typing_extensions import ParamSpec
 
 
 # submodules
