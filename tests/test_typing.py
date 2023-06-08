@@ -1,12 +1,11 @@
 # standard library
-from typing import Any, Tuple, Union
+from typing import Any, Literal as L, Tuple, Union
 
 
 # dependencies
 import numpy as np
 from pytest import mark
 from typing_extensions import Annotated as Ann
-from typing_extensions import Literal as L
 
 
 # submodules

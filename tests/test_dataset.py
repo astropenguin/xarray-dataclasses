@@ -1,12 +1,11 @@
 # standard library
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Literal, Tuple
 
 
 # dependencies
 import numpy as np
 import xarray as xr
-from typing_extensions import Literal
 
 
 # submodules
