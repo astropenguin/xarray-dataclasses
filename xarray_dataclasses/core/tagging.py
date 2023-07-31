@@ -6,11 +6,11 @@ from enum import Flag, auto
 from functools import reduce
 from itertools import chain, filterfalse
 from operator import or_
-from typing import Any, Iterable, Optional, Tuple
+from typing import Annotated, Any, Iterable, Optional
 
 
 # dependencies
-from typing_extensions import Annotated, Self, TypeGuard, get_args, get_origin
+from typing_extensions import Self, TypeGuard, get_args, get_origin
 
 
 class Tag(Flag):
@@ -89,13 +89,13 @@ def get_tagged(
         return tagged if keep_annotations else get_args(tagged)[0]
 
 
-def get_tags(tp: Any, bound: Tag = Tag.ANY) -> Tuple[Tag, ...]:
+def get_tags(tp: Any, bound: Tag = Tag.ANY) -> tuple[Tag, ...]:
     """Extract all tags from the first tagged type."""
     tagged = get_tagged(tp, bound, True)
     return tuple(filter(Tag.creates, get_args(tagged)[1:]))
 
 
-def get_nontags(tp: Any, bound: Tag = Tag.ANY) -> Tuple[Any, ...]:
+def get_nontags(tp: Any, bound: Tag = Tag.ANY) -> tuple[Any, ...]:
     """Extract all except tags from the first tagged type."""
     tagged = get_tagged(tp, bound, True)
     return tuple(filterfalse(Tag.creates, get_args(tagged)[1:]))

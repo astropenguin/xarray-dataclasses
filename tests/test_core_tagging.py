@@ -1,10 +1,9 @@
 # standard library
-from typing import Any, Dict, Iterable, Tuple, Union
+from typing import Annotated as Ann, Any, Iterable, Union
 
 
 # dependencies
 from pytest import mark
-from typing_extensions import Annotated as Ann
 from xarray_dataclasses.core.tagging import Tag, get_tags
 
 
@@ -72,9 +71,9 @@ data_get_tags = [
     (Ann[Any, Tag.DATA, object()], Tag.ANY, (Tag.DATA,)),
     (Ann[Any, Tag.DATA, object()], Tag.FIELD, (Tag.DATA,)),
     (Ann[Any, Tag.DATA, object()], Tag.OPTION, ()),
-    (Dict[str, Ann[Any, Tag.DATA]], Tag.ANY, (Tag.DATA,)),
-    (Dict[str, Ann[Any, Tag.DATA]], Tag.FIELD, (Tag.DATA,)),
-    (Dict[str, Ann[Any, Tag.DATA]], Tag.OPTION, ()),
+    (dict[str, Ann[Any, Tag.DATA]], Tag.ANY, (Tag.DATA,)),
+    (dict[str, Ann[Any, Tag.DATA]], Tag.FIELD, (Tag.DATA,)),
+    (dict[str, Ann[Any, Tag.DATA]], Tag.OPTION, ()),
     (Ann[Any, Tag.DATA, Tag.MULTIPLE], Tag.ANY, (Tag.DATA, Tag.MULTIPLE)),
     (Ann[Any, Tag.DATA, Tag.MULTIPLE], Tag.FIELD, (Tag.DATA, Tag.MULTIPLE)),
     (Ann[Any, Tag.DATA, Tag.MULTIPLE], Tag.OPTION, (Tag.DATA, Tag.MULTIPLE)),
@@ -100,5 +99,5 @@ def test_union(tags: Iterable[Tag], expected: Tag) -> None:
 
 
 @mark.parametrize("tp, bound, expected", data_get_tags)
-def test_get_tags(tp: Any, bound: Tag, expected: Tuple[Tag, ...]) -> None:
+def test_get_tags(tp: Any, bound: Tag, expected: tuple[Tag, ...]) -> None:
     assert get_tags(tp, bound) == expected

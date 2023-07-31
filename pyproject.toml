@@ -7,25 +7,23 @@ keywords = ["xarray", "dataclass", "dataarray", "dataset", "typing"]
 license = "MIT"
 readme = "README.md"
 homepage = "https://github.com/astropenguin/xarray-dataclasses/"
+repository = "https://github.com/astropenguin/xarray-dataclasses/"
 documentation = "https://astropenguin.github.io/xarray-dataclasses/"
 
 [tool.poetry.dependencies]
-python = ">=3.8, <3.12"
+python = ">=3.9, <3.12"
 numpy = "^1.22"
 typing-extensions = "^4.0"
-xarray = [
-    { version = ">=2022.3, <2023.2", python = ">=3.8, <3.9" },
-    { version = "^2022.3", python = ">=3.9, <3.12" },
-]
+xarray = "^2022.3 | ^2023.1"
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.1"
-ipython = "^8.11"
-myst-parser = "^1.0"
+black = "^23.7"
+ipython = "^8.14"
+myst-parser = "^2.0"
 pydata-sphinx-theme = "^0.13"
 pyright = "^1.1"
-pytest = "^7.2"
-sphinx = "^6.1"
+pytest = "^7.4"
+sphinx = "^7.1"
 
 [tool.pyright]
 reportImportCycles = "warning"

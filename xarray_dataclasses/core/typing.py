@@ -14,7 +14,7 @@ __all__ = [
 # standard library
 import types
 from dataclasses import Field
-from typing import Any, Callable, ClassVar, Dict, Protocol, TypeVar, Union
+from typing import Any, Callable, ClassVar, Protocol, TypeVar, Union
 
 
 # dependencies
@@ -44,7 +44,7 @@ TXarray = TypeVar("TXarray", bound=Xarray)
 class DataClass(Protocol[PAny]):
     """Protocol for any dataclass object."""
 
-    __dataclass_fields__: ClassVar[Dict[str, "Field[Any]"]]
+    __dataclass_fields__: ClassVar[dict[str, Field[Any]]]
 
     def __init__(self, *args: PAny.args, **kwargs: PAny.kwargs) -> None:
         ...
@@ -53,7 +53,7 @@ class DataClass(Protocol[PAny]):
 class DataClassOf(Protocol[TXarray, PAny]):
     """Protocol for any dataclass object with a factory."""
 
-    __dataclass_fields__: ClassVar[Dict[str, "Field[Any]"]]
+    __dataclass_fields__: ClassVar[dict[str, Field[Any]]]
     __xarray_factory__: Callable[..., TXarray]
 
     def __init__(self, *args: PAny.args, **kwargs: PAny.kwargs) -> None:
