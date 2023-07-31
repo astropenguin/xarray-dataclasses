@@ -22,5 +22,5 @@ else:
 
 
 @mark.parametrize("tp, expected", data_is_union)
-def test_get_tags(tp: Any, expected: bool) -> None:
+def test_is_union(tp: Any, expected: bool) -> None:
     assert is_union(tp) == expected
