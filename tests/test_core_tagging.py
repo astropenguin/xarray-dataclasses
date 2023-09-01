@@ -1,5 +1,6 @@
 # standard library
-from typing import Annotated as Ann, Any, Iterable, Union
+from collections.abc import Iterable
+from typing import Annotated as Ann, Any, Union
 
 
 # dependencies
@@ -7,97 +8,112 @@ from pytest import mark
 from xarray_dataclasses.core.tagging import Tag, get_tags
 
 
-data_annotates = [
+testdata_annotates = [
     (Tag.ANY, Ann[Any, Tag.ATTR], True),
     (Tag.ANY, Ann[Any, Tag.COORD], True),
-    (Tag.ANY, Ann[Any, Tag.DATA], True),
     (Tag.ANY, Ann[Any, Tag.DIMS], True),
     (Tag.ANY, Ann[Any, Tag.DTYPE], True),
     (Tag.ANY, Ann[Any, Tag.MULTIPLE], True),
-    (Tag.ANY, Ann[Any, Tag.ORIGIN], True),
-    (Tag.ANY, Ann[Any, Tag.FIELD], True),
+    (Tag.ANY, Ann[Any, Tag.NAME], True),
+    (Tag.ANY, Ann[Any, Tag.VAR], True),
+    (Tag.ANY, Ann[Any, Tag.INTENT], True),
     (Tag.ANY, Ann[Any, Tag.OPTION], True),
+    (Tag.ANY, Ann[Any, Tag.TYPE], True),
     (Tag.ANY, Ann[Any, Tag.ANY], True),
-    (Tag.FIELD, Ann[Any, Tag.OPTION], False),
-    (Tag.OPTION, Ann[Any, Tag.FIELD], False),
+    (Tag.INTENT, Ann[Any, Tag.OPTION], False),
+    (Tag.OPTION, Ann[Any, Tag.TYPE], False),
+    (Tag.TYPE, Ann[Any, Tag.INTENT], False),
     (Tag.ANY, Any, False),
 ]
 
-data_creates = [
+testdata_creates = [
     (Tag.ATTR, True),
     (Tag.COORD, True),
-    (Tag.DATA, True),
     (Tag.DIMS, True),
     (Tag.DTYPE, True),
     (Tag.MULTIPLE, True),
-    (Tag.ORIGIN, True),
-    (Tag.FIELD, True),
+    (Tag.NAME, True),
+    (Tag.VAR, True),
+    (Tag.INTENT, True),
     (Tag.OPTION, True),
+    (Tag.TYPE, True),
     (Tag.ANY, True),
     (object(), False),
 ]
 
-data_union = [
-    ([Tag.ATTR, Tag.COORD, Tag.DATA], Tag.FIELD),
-    ([Tag.DIMS, Tag.DTYPE, Tag.MULTIPLE, Tag.ORIGIN], Tag.OPTION),
-    ([Tag.FIELD, Tag.OPTION], Tag.ANY),
+testdata_union = [
+    ([Tag.ATTR, Tag.COORD, Tag.NAME, Tag.VAR], Tag.INTENT),
+    ([Tag.DIMS, Tag.DTYPE], Tag.TYPE),
+    ([Tag.MULTIPLE], Tag.OPTION),
+    ([Tag.INTENT, Tag.OPTION, Tag.TYPE], Tag.ANY),
 ]
 
-data_get_tags = [
+testdata_get_tags = [
     (Any, Tag.ANY, ()),
-    (Any, Tag.FIELD, ()),
+    (Any, Tag.INTENT, ()),
     (Any, Tag.OPTION, ()),
     (Ann[Any, Tag.ATTR], Tag.ANY, (Tag.ATTR,)),
-    (Ann[Any, Tag.ATTR], Tag.FIELD, (Tag.ATTR,)),
+    (Ann[Any, Tag.ATTR], Tag.INTENT, (Tag.ATTR,)),
     (Ann[Any, Tag.ATTR], Tag.OPTION, ()),
+    (Ann[Any, Tag.ATTR], Tag.TYPE, ()),
     (Ann[Any, Tag.COORD], Tag.ANY, (Tag.COORD,)),
-    (Ann[Any, Tag.COORD], Tag.FIELD, (Tag.COORD,)),
+    (Ann[Any, Tag.COORD], Tag.INTENT, (Tag.COORD,)),
     (Ann[Any, Tag.COORD], Tag.OPTION, ()),
-    (Ann[Any, Tag.DATA], Tag.ANY, (Tag.DATA,)),
-    (Ann[Any, Tag.DATA], Tag.FIELD, (Tag.DATA,)),
-    (Ann[Any, Tag.DATA], Tag.OPTION, ()),
+    (Ann[Any, Tag.COORD], Tag.TYPE, ()),
     (Ann[Any, Tag.DIMS], Tag.ANY, (Tag.DIMS,)),
-    (Ann[Any, Tag.DIMS], Tag.FIELD, ()),
-    (Ann[Any, Tag.DIMS], Tag.OPTION, (Tag.DIMS,)),
+    (Ann[Any, Tag.DIMS], Tag.INTENT, ()),
+    (Ann[Any, Tag.DIMS], Tag.OPTION, ()),
+    (Ann[Any, Tag.DIMS], Tag.TYPE, (Tag.DIMS,)),
     (Ann[Any, Tag.DTYPE], Tag.ANY, (Tag.DTYPE,)),
-    (Ann[Any, Tag.DTYPE], Tag.FIELD, ()),
-    (Ann[Any, Tag.DTYPE], Tag.OPTION, (Tag.DTYPE,)),
+    (Ann[Any, Tag.DTYPE], Tag.INTENT, ()),
+    (Ann[Any, Tag.DTYPE], Tag.OPTION, ()),
+    (Ann[Any, Tag.DTYPE], Tag.TYPE, (Tag.DTYPE,)),
     (Ann[Any, Tag.MULTIPLE], Tag.ANY, (Tag.MULTIPLE,)),
-    (Ann[Any, Tag.MULTIPLE], Tag.FIELD, ()),
+    (Ann[Any, Tag.MULTIPLE], Tag.INTENT, ()),
     (Ann[Any, Tag.MULTIPLE], Tag.OPTION, (Tag.MULTIPLE,)),
-    (Ann[Any, Tag.ORIGIN], Tag.ANY, (Tag.ORIGIN,)),
-    (Ann[Any, Tag.ORIGIN], Tag.OPTION, (Tag.ORIGIN,)),
-    (Ann[Any, Tag.ORIGIN], Tag.FIELD, ()),
-    (Ann[Any, Tag.DATA, object()], Tag.ANY, (Tag.DATA,)),
-    (Ann[Any, Tag.DATA, object()], Tag.FIELD, (Tag.DATA,)),
-    (Ann[Any, Tag.DATA, object()], Tag.OPTION, ()),
-    (dict[str, Ann[Any, Tag.DATA]], Tag.ANY, (Tag.DATA,)),
-    (dict[str, Ann[Any, Tag.DATA]], Tag.FIELD, (Tag.DATA,)),
-    (dict[str, Ann[Any, Tag.DATA]], Tag.OPTION, ()),
-    (Ann[Any, Tag.DATA, Tag.MULTIPLE], Tag.ANY, (Tag.DATA, Tag.MULTIPLE)),
-    (Ann[Any, Tag.DATA, Tag.MULTIPLE], Tag.FIELD, (Tag.DATA, Tag.MULTIPLE)),
-    (Ann[Any, Tag.DATA, Tag.MULTIPLE], Tag.OPTION, (Tag.DATA, Tag.MULTIPLE)),
-    (Union[Ann[Any, Tag.DATA], Ann[Any, Tag.ORIGIN]], Tag.ANY, (Tag.DATA,)),
-    (Union[Ann[Any, Tag.DATA], Ann[Any, Tag.ORIGIN]], Tag.FIELD, (Tag.DATA,)),
-    (Union[Ann[Any, Tag.DATA], Ann[Any, Tag.ORIGIN]], Tag.OPTION, (Tag.ORIGIN,)),
+    (Ann[Any, Tag.MULTIPLE], Tag.TYPE, ()),
+    (Ann[Any, Tag.NAME], Tag.ANY, (Tag.NAME,)),
+    (Ann[Any, Tag.NAME], Tag.INTENT, (Tag.NAME,)),
+    (Ann[Any, Tag.NAME], Tag.OPTION, ()),
+    (Ann[Any, Tag.NAME], Tag.TYPE, ()),
+    (Ann[Any, Tag.VAR], Tag.ANY, (Tag.VAR,)),
+    (Ann[Any, Tag.VAR], Tag.INTENT, (Tag.VAR,)),
+    (Ann[Any, Tag.VAR], Tag.OPTION, ()),
+    (Ann[Any, Tag.VAR], Tag.TYPE, ()),
+    (Ann[Any, Tag.VAR, object()], Tag.ANY, (Tag.VAR,)),
+    (Ann[Any, Tag.VAR, object()], Tag.INTENT, (Tag.VAR,)),
+    (Ann[Any, Tag.VAR, object()], Tag.OPTION, ()),
+    (Ann[Any, Tag.VAR, object()], Tag.TYPE, ()),
+    (Ann[Any, Tag.VAR, Tag.MULTIPLE], Tag.ANY, (Tag.VAR, Tag.MULTIPLE)),
+    (Ann[Any, Tag.VAR, Tag.MULTIPLE], Tag.INTENT, (Tag.VAR, Tag.MULTIPLE)),
+    (Ann[Any, Tag.VAR, Tag.MULTIPLE], Tag.OPTION, (Tag.VAR, Tag.MULTIPLE)),
+    (Ann[Any, Tag.VAR, Tag.MULTIPLE], Tag.TYPE, ()),
+    (dict[str, Ann[Any, Tag.VAR]], Tag.ANY, (Tag.VAR,)),
+    (dict[str, Ann[Any, Tag.VAR]], Tag.INTENT, (Tag.VAR,)),
+    (dict[str, Ann[Any, Tag.VAR]], Tag.OPTION, ()),
+    (dict[str, Ann[Any, Tag.VAR]], Tag.TYPE, ()),
+    (Union[Ann[Any, Tag.VAR], Ann[Any, Tag.COORD]], Tag.ANY, (Tag.VAR,)),
+    (Union[Ann[Any, Tag.VAR], Ann[Any, Tag.COORD]], Tag.INTENT, (Tag.VAR,)),
+    (Union[Ann[Any, Tag.VAR], Ann[Any, Tag.COORD]], Tag.OPTION, ()),
+    (Union[Ann[Any, Tag.VAR], Ann[Any, Tag.COORD]], Tag.TYPE, ()),
 ]
 
 
-@mark.parametrize("tag, tp, expected", data_annotates)
+@mark.parametrize("tag, tp, expected", testdata_annotates)
 def test_annotates(tag: Tag, tp: Any, expected: bool) -> None:
     assert tag.annotates(tp) == expected
 
 
-@mark.parametrize("obj, expected", data_creates)
+@mark.parametrize("obj, expected", testdata_creates)
 def test_creates(obj: Any, expected: bool) -> None:
     assert Tag.creates(obj) == expected
 
 
-@mark.parametrize("tags, expected", data_union)
+@mark.parametrize("tags, expected", testdata_union)
 def test_union(tags: Iterable[Tag], expected: Tag) -> None:
     assert Tag.union(tags) is expected
 
 
-@mark.parametrize("tp, bound, expected", data_get_tags)
+@mark.parametrize("tp, bound, expected", testdata_get_tags)
 def test_get_tags(tp: Any, bound: Tag, expected: tuple[Tag, ...]) -> None:
     assert get_tags(tp, bound) == expected

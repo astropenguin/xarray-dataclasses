@@ -1,20 +1,8 @@
-__all__ = [
-    "DataClass",
-    "DataClassOf",
-    "PAny",
-    "TAny",
-    "TDataArray",
-    "TDataset",
-    "TXarray",
-    "Xarray",
-    "is_union",
-]
-
-
 # standard library
 import types
+from collections.abc import Callable, Collection as Collection_
 from dataclasses import Field
-from typing import Any, Callable, ClassVar, Protocol, TypeVar, Union
+from typing import Any, ClassVar, Protocol, TypeVar, Union
 
 
 # dependencies
@@ -37,6 +25,12 @@ TDataArray = TypeVar("TDataArray", bound=DataArray)
 TDataset = TypeVar("TDataset", bound=Dataset)
 """Type variable for xarray Dataset."""
 
+TDims = TypeVar("TDims", covariant=True)
+"""Type variable for data dimensions (dims)."""
+
+TDtype = TypeVar("TDtype", covariant=True)
+"""Type variable for data type (dtype)."""
+
 TXarray = TypeVar("TXarray", bound=Xarray)
 """Type variable for any class of xarray object."""
 
@@ -50,14 +44,20 @@ class DataClass(Protocol[PAny]):
         ...
 
 
-class DataClassOf(Protocol[TXarray, PAny]):
+class DataClassOf(Protocol[TAny, PAny]):
     """Protocol for any dataclass object with a factory."""
 
     __dataclass_fields__: ClassVar[dict[str, Field[Any]]]
-    __xarray_factory__: Callable[..., TXarray]
+    __dataclass_factory__: Callable[..., TAny]
 
     def __init__(self, *args: PAny.args, **kwargs: PAny.kwargs) -> None:
         ...
+
+
+class Collection(Collection_[TDtype], Protocol[TDims, TDtype]):
+    """Same as collections.abc.Collection but accepts data dimensions."""
+
+    pass
 
 
 def is_union(tp: Any) -> bool:

@@ -2,11 +2,12 @@ __all__ = ["Tag"]
 
 
 # standard library
+from collections.abc import Iterable
 from enum import Flag, auto
 from functools import reduce
 from itertools import chain, filterfalse
 from operator import or_
-from typing import Annotated, Any, Iterable, Optional
+from typing import Annotated, Any, Optional
 
 
 # dependencies
@@ -17,33 +18,36 @@ class Tag(Flag):
     """Collection of tags for annotating types."""
 
     ATTR = auto()
-    """Tag for a type specifying an attribute field."""
+    """Tag for an attribute-intended type."""
 
     COORD = auto()
-    """Tag for a type specifying a coordinate."""
-
-    DATA = auto()
-    """Tag for a type specifying a data field."""
+    """Tag for a coordinate-intended type."""
 
     DIMS = auto()
-    """Tag for a type specifying dimensions."""
+    """Tag for data dimensions."""
 
     DTYPE = auto()
-    """Tag for a type specifying a data type."""
+    """Tag for a data type."""
 
     MULTIPLE = auto()
-    """Tag for a type specifying a multiple-item field."""
+    """Tag for multiplicity."""
 
-    ORIGIN = auto()
-    """Tag for a type specifying an origin."""
+    NAME = auto()
+    """Tag for a name-intended type."""
 
-    FIELD = ATTR | COORD | DATA
-    """Union of field-related tags."""
+    VAR = auto()
+    """Tag for a variable-intended type."""
 
-    OPTION = DIMS | DTYPE | MULTIPLE | ORIGIN
+    INTENT = ATTR | COORD | NAME | VAR
+    """Union of intent-related tags."""
+
+    OPTION = MULTIPLE
     """Union of option-related tags."""
 
-    ANY = FIELD | OPTION
+    TYPE = DIMS | DTYPE
+    """Union of type-related tags."""
+
+    ANY = INTENT | OPTION | TYPE
     """Union of all tags."""
 
     def annotates(self, tp: Any) -> bool:
