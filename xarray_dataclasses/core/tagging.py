@@ -18,10 +18,10 @@ class Tag(Flag):
     """Collection of tags for annotating types."""
 
     ATTR = auto()
-    """Tag for an attribute-field type."""
+    """Tag for an attribute-intended type."""
 
     COORD = auto()
-    """Tag for a coordinate-field type."""
+    """Tag for a coordinate-intended type."""
 
     DIMS = auto()
     """Tag for data dimensions."""
@@ -33,18 +33,21 @@ class Tag(Flag):
     """Tag for multiplicity."""
 
     NAME = auto()
-    """Tag for a name-field type."""
+    """Tag for a name-intended type."""
 
     VAR = auto()
-    """Tag for a variable-field type."""
+    """Tag for a variable-intended type."""
 
-    FIELD = ATTR | COORD | NAME | VAR
-    """Union of field-related tags."""
+    INTENT = ATTR | COORD | NAME | VAR
+    """Union of intent-related tags."""
 
-    OPTION = DIMS | DTYPE | MULTIPLE
+    OPTION = MULTIPLE
     """Union of option-related tags."""
 
-    ANY = FIELD | OPTION
+    TYPE = DIMS | DTYPE
+    """Union of type-related tags."""
+
+    ANY = INTENT | OPTION | TYPE
     """Union of all tags."""
 
     def annotates(self, tp: Any) -> bool:
