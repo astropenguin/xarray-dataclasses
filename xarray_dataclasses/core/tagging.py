@@ -2,11 +2,12 @@ __all__ = ["Tag"]
 
 
 # standard library
+from collections.abc import Iterable
 from enum import Flag, auto
 from functools import reduce
 from itertools import chain, filterfalse
 from operator import or_
-from typing import Annotated, Any, Iterable, Optional
+from typing import Annotated, Any, Optional
 
 
 # dependencies
@@ -17,30 +18,30 @@ class Tag(Flag):
     """Collection of tags for annotating types."""
 
     ATTR = auto()
-    """Tag for a type specifying an attribute field."""
+    """Tag for an attribute-field type."""
 
     COORD = auto()
-    """Tag for a type specifying a coordinate."""
-
-    DATA = auto()
-    """Tag for a type specifying a data field."""
+    """Tag for a coordinate-field type."""
 
     DIMS = auto()
-    """Tag for a type specifying dimensions."""
+    """Tag for data dimensions."""
 
     DTYPE = auto()
-    """Tag for a type specifying a data type."""
+    """Tag for a data type."""
 
     MULTIPLE = auto()
-    """Tag for a type specifying a multiple-item field."""
+    """Tag for multiplicity."""
 
-    ORIGIN = auto()
-    """Tag for a type specifying an origin."""
+    NAME = auto()
+    """Tag for a name-field type."""
 
-    FIELD = ATTR | COORD | DATA
+    VAR = auto()
+    """Tag for a variable-field type."""
+
+    FIELD = ATTR | COORD | NAME | VAR
     """Union of field-related tags."""
 
-    OPTION = DIMS | DTYPE | MULTIPLE | ORIGIN
+    OPTION = DIMS | DTYPE | MULTIPLE
     """Union of option-related tags."""
 
     ANY = FIELD | OPTION
