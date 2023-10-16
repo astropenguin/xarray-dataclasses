@@ -1,10 +1,11 @@
 {
     "name": "xarray-dataclasses",
-    "build": {
-        "context": "..",
-        "dockerfile": "Dockerfile"
-    },
+    "image":"python:3.12",
+    "onCreateCommand": "pip install poetry==1.6.1",
     "postCreateCommand": "poetry install",
+    "containerEnv": {
+        "POETRY_VIRTUALENVS_CREATE": "false"
+    },
     "customizations": {
         "vscode": {
             "extensions": [
