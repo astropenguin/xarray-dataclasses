@@ -3,8 +3,8 @@ message: "If you use this software, please cite it as below."
 
 title: "xarray-dataclasses"
 abstract: "xarray data creation made easy by dataclass"
-version: 1.6.0
-date-released: 2023-06-09
+version: 1.7.0
+date-released: 2023-10-16
 license: "MIT"
 doi: "10.5281/zenodo.4624819"
 url: "https://github.com/astropenguin/xarray-dataclasses"

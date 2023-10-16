@@ -1,12 +1,13 @@
 [tool.poetry]
 name = "xarray-dataclasses"
-version = "1.6.0"
+version = "1.7.0"
 description = "xarray data creation made easy by dataclass"
 authors = ["Akio Taniguchi <taniguchi@a.phys.nagoya-u.ac.jp>"]
 keywords = ["xarray", "dataclass", "dataarray", "dataset", "typing"]
 license = "MIT"
 readme = "README.md"
 homepage = "https://github.com/astropenguin/xarray-dataclasses/"
+repository = "https://github.com/astropenguin/xarray-dataclasses/"
 documentation = "https://astropenguin.github.io/xarray-dataclasses/"
 
 [tool.poetry.dependencies]
