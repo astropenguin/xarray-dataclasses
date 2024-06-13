@@ -297,7 +297,7 @@ def get_dataclass(tp: Any) -> Type[DataClass[Any]]:
     if not is_dataclass(dataclass):
         raise TypeError(f"Could not find any dataclass in {tp!r}.")
 
-    return dataclass # type: ignore
+    return dataclass  # type: ignore
 
 
 def get_dims(tp: Any) -> Dims:
