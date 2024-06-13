@@ -1,4 +1,5 @@
 """Submodule for Dataset creation."""
+
 __all__ = ["AsDataset", "asdataset"]
 
 
@@ -38,8 +39,7 @@ def asdataset(
     dataclass: OptionedClass[PInit, TDataset],
     reference: Optional[AnyXarray] = None,
     dataoptions: None = None,
-) -> TDataset:
-    ...
+) -> TDataset: ...
 
 
 @overload
@@ -47,8 +47,7 @@ def asdataset(
     dataclass: DataClass[PInit],
     reference: Optional[AnyXarray] = None,
     dataoptions: None = None,
-) -> xr.Dataset:
-    ...
+) -> xr.Dataset: ...
 
 
 @overload
@@ -56,8 +55,7 @@ def asdataset(
     dataclass: Any,
     reference: Optional[AnyXarray] = None,
     dataoptions: DataOptions[TDataset] = DataOptions(xr.Dataset),
-) -> TDataset:
-    ...
+) -> TDataset: ...
 
 
 def asdataset(
@@ -119,16 +117,14 @@ class classproperty:
         self,
         obj: Any,
         cls: Type[OptionedClass[PInit, TDataset]],
-    ) -> Callable[PInit, TDataset]:
-        ...
+    ) -> Callable[PInit, TDataset]: ...
 
     @overload
     def __get__(
         self,
         obj: Any,
         cls: Type[DataClass[PInit]],
-    ) -> Callable[PInit, xr.Dataset]:
-        ...
+    ) -> Callable[PInit, xr.Dataset]: ...
 
     def __get__(self, obj: Any, cls: Any) -> Any:
         return self.__func__(cls)
@@ -158,8 +154,7 @@ class AsDataset:
         func: Callable[[Shape], AnyArray],
         sizes: Sizes,
         **kwargs: Any,
-    ) -> TDataset:
-        ...
+    ) -> TDataset: ...
 
     @overload
     @classmethod
@@ -168,8 +163,7 @@ class AsDataset:
         func: Callable[[Shape], AnyArray],
         sizes: Sizes,
         **kwargs: Any,
-    ) -> xr.Dataset:
-        ...
+    ) -> xr.Dataset: ...
 
     @classmethod
     def shaped(
@@ -205,8 +199,7 @@ class AsDataset:
         sizes: Sizes,
         order: Order = "C",
         **kwargs: Any,
-    ) -> TDataset:
-        ...
+    ) -> TDataset: ...
 
     @overload
     @classmethod
@@ -215,8 +208,7 @@ class AsDataset:
         sizes: Sizes,
         order: Order = "C",
         **kwargs: Any,
-    ) -> xr.Dataset:
-        ...
+    ) -> xr.Dataset: ...
 
     @classmethod
     def empty(
@@ -247,8 +239,7 @@ class AsDataset:
         sizes: Sizes,
         order: Order = "C",
         **kwargs: Any,
-    ) -> TDataset:
-        ...
+    ) -> TDataset: ...
 
     @overload
     @classmethod
@@ -257,8 +248,7 @@ class AsDataset:
         sizes: Sizes,
         order: Order = "C",
         **kwargs: Any,
-    ) -> xr.Dataset:
-        ...
+    ) -> xr.Dataset: ...
 
     @classmethod
     def zeros(
@@ -289,8 +279,7 @@ class AsDataset:
         sizes: Sizes,
         order: Order = "C",
         **kwargs: Any,
-    ) -> TDataset:
-        ...
+    ) -> TDataset: ...
 
     @overload
     @classmethod
@@ -299,8 +288,7 @@ class AsDataset:
         sizes: Sizes,
         order: Order = "C",
         **kwargs: Any,
-    ) -> xr.Dataset:
-        ...
+    ) -> xr.Dataset: ...
 
     @classmethod
     def ones(
@@ -332,8 +320,7 @@ class AsDataset:
         fill_value: Any,
         order: Order = "C",
         **kwargs: Any,
-    ) -> TDataset:
-        ...
+    ) -> TDataset: ...
 
     @overload
     @classmethod
@@ -343,8 +330,7 @@ class AsDataset:
         fill_value: Any,
         order: Order = "C",
         **kwargs: Any,
-    ) -> xr.Dataset:
-        ...
+    ) -> xr.Dataset: ...
 
     @classmethod
     def full(

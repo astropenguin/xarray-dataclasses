@@ -1,4 +1,5 @@
 """Submodule for data expression inside the package."""
+
 __all__ = ["DataModel"]
 
 

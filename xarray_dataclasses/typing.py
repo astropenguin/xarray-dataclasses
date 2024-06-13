@@ -14,6 +14,7 @@ Note:
         Y = Literal["y"]
 
 """
+
 __all__ = ["Attr", "Coord", "Coordof", "Data", "Dataof", "Name"]
 
 
@@ -74,8 +75,7 @@ Sizes = Dict[str, int]
 class DataClass(Protocol[PInit]):
     """Type hint for dataclass objects."""
 
-    def __init__(self, *args: PInit.args, **kwargs: PInit.kwargs) -> None:
-        ...
+    def __init__(self, *args: PInit.args, **kwargs: PInit.kwargs) -> None: ...
 
     __dataclass_fields__: ClassVar[Dict[str, AnyField]]
 
@@ -297,7 +297,7 @@ def get_dataclass(tp: Any) -> Type[DataClass[Any]]:
     if not is_dataclass(dataclass):
         raise TypeError(f"Could not find any dataclass in {tp!r}.")
 
-    return dataclass
+    return dataclass  # type: ignore
 
 
 def get_dims(tp: Any) -> Dims:

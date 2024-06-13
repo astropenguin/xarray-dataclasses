@@ -1,4 +1,5 @@
 """Submodule for DataArray creation."""
+
 __all__ = ["AsDataArray", "asdataarray"]
 
 
@@ -38,8 +39,7 @@ def asdataarray(
     dataclass: OptionedClass[PInit, TDataArray],
     reference: Optional[AnyXarray] = None,
     dataoptions: None = None,
-) -> TDataArray:
-    ...
+) -> TDataArray: ...
 
 
 @overload
@@ -47,8 +47,7 @@ def asdataarray(
     dataclass: DataClass[PInit],
     reference: Optional[AnyXarray] = None,
     dataoptions: None = None,
-) -> xr.DataArray:
-    ...
+) -> xr.DataArray: ...
 
 
 @overload
@@ -56,8 +55,7 @@ def asdataarray(
     dataclass: Any,
     reference: Optional[AnyXarray] = None,
     dataoptions: DataOptions[TDataArray] = DataOptions(xr.DataArray),
-) -> TDataArray:
-    ...
+) -> TDataArray: ...
 
 
 def asdataarray(
@@ -119,16 +117,14 @@ class classproperty:
         self,
         obj: Any,
         cls: Type[OptionedClass[PInit, TDataArray]],
-    ) -> Callable[PInit, TDataArray]:
-        ...
+    ) -> Callable[PInit, TDataArray]: ...
 
     @overload
     def __get__(
         self,
         obj: Any,
         cls: Type[DataClass[PInit]],
-    ) -> Callable[PInit, xr.DataArray]:
-        ...
+    ) -> Callable[PInit, xr.DataArray]: ...
 
     def __get__(self, obj: Any, cls: Any) -> Any:
         return self.__func__(cls)
@@ -158,8 +154,7 @@ class AsDataArray:
         func: Callable[[Shape], AnyArray],
         shape: Union[Shape, Sizes],
         **kwargs: Any,
-    ) -> TDataArray:
-        ...
+    ) -> TDataArray: ...
 
     @overload
     @classmethod
@@ -168,8 +163,7 @@ class AsDataArray:
         func: Callable[[Shape], AnyArray],
         shape: Union[Shape, Sizes],
         **kwargs: Any,
-    ) -> xr.DataArray:
-        ...
+    ) -> xr.DataArray: ...
 
     @classmethod
     def shaped(
@@ -204,8 +198,7 @@ class AsDataArray:
         shape: Union[Shape, Sizes],
         order: Order = "C",
         **kwargs: Any,
-    ) -> TDataArray:
-        ...
+    ) -> TDataArray: ...
 
     @overload
     @classmethod
@@ -214,8 +207,7 @@ class AsDataArray:
         shape: Union[Shape, Sizes],
         order: Order = "C",
         **kwargs: Any,
-    ) -> xr.DataArray:
-        ...
+    ) -> xr.DataArray: ...
 
     @classmethod
     def empty(
@@ -246,8 +238,7 @@ class AsDataArray:
         shape: Union[Shape, Sizes],
         order: Order = "C",
         **kwargs: Any,
-    ) -> TDataArray:
-        ...
+    ) -> TDataArray: ...
 
     @overload
     @classmethod
@@ -256,8 +247,7 @@ class AsDataArray:
         shape: Union[Shape, Sizes],
         order: Order = "C",
         **kwargs: Any,
-    ) -> xr.DataArray:
-        ...
+    ) -> xr.DataArray: ...
 
     @classmethod
     def zeros(
@@ -288,8 +278,7 @@ class AsDataArray:
         shape: Union[Shape, Sizes],
         order: Order = "C",
         **kwargs: Any,
-    ) -> TDataArray:
-        ...
+    ) -> TDataArray: ...
 
     @overload
     @classmethod
@@ -298,8 +287,7 @@ class AsDataArray:
         shape: Union[Shape, Sizes],
         order: Order = "C",
         **kwargs: Any,
-    ) -> xr.DataArray:
-        ...
+    ) -> xr.DataArray: ...
 
     @classmethod
     def ones(
@@ -331,8 +319,7 @@ class AsDataArray:
         fill_value: Any,
         order: Order = "C",
         **kwargs: Any,
-    ) -> TDataArray:
-        ...
+    ) -> TDataArray: ...
 
     @overload
     @classmethod
@@ -342,8 +329,7 @@ class AsDataArray:
         fill_value: Any,
         order: Order = "C",
         **kwargs: Any,
-    ) -> xr.DataArray:
-        ...
+    ) -> xr.DataArray: ...
 
     @classmethod
     def full(

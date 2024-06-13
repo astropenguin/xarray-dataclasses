@@ -17,7 +17,7 @@ __all__ = [
     "dataoptions",
     "typing",
 ]
-__version__ = "1.7.0"
+__version__ = "1.8.0"
 
 
 # submodules
