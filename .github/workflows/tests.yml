@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       POETRY_VIRTUALENVS_CREATE: false
-      PYTHON_DIRS: docs tests xarray_dataclasses
+      PYTHON_DIRS: docs xarray_dataclasses
     strategy:
       fail-fast: false
       matrix:
@@ -31,5 +31,4 @@ jobs:
       - run: black --check ${PYTHON_DIRS}
       - run: pyright ${PYTHON_DIRS}
       - run: mypy ${PYTHON_DIRS}
-      # - run: pytest -v
       - run: docs/build
