@@ -14,22 +14,21 @@ jobs:
     runs-on: ubuntu-latest
     env:
       POETRY_VIRTUALENVS_CREATE: false
+      PYTHON_DIRS: docs xarray_dataclasses
     strategy:
       fail-fast: false
       matrix:
-        python: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python: ["3.9", "3.10", "3.11", "3.12"]
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - name: Install project dependencies
-        run: pip install poetry && poetry install
-      - name: Test code's formatting (Black)
-        run: black --check docs tests xarray_dataclasses
-      - name: Test code's typing (Pyright)
-        run: pyright docs tests xarray_dataclasses
-      - name: Test code's execution (pytest)
-        run: pytest -v tests
-      - name: Test docs' building (Sphinx)
-        run: docs/build
+      - uses: abatilo/actions-poetry@v3
+        with:
+          poetry-version: "1.8.3"
+      - run: poetry install
+      - run: black --check ${PYTHON_DIRS}
+      - run: pyright ${PYTHON_DIRS}
+      - run: mypy ${PYTHON_DIRS}
+      - run: docs/build
