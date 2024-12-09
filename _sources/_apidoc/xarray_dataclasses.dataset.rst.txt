@@ -1,0 +1,7 @@
+xarray\_dataclasses.dataset module
+==================================
+
+.. automodule:: xarray_dataclasses.dataset
+   :members:
+   :undoc-members:
+   :show-inheritance:

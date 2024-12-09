@@ -1,0 +1,7 @@
+xarray\_dataclasses.dataoptions module
+======================================
+
+.. automodule:: xarray_dataclasses.dataoptions
+   :members:
+   :undoc-members:
+   :show-inheritance:
