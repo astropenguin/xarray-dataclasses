@@ -14,7 +14,7 @@ documentation = "https://astropenguin.github.io/xarray-dataclasses/"
 python = ">=3.8, <3.14"
 numpy = [
     { version = ">=1.22, <1.25", python = ">=3.8, <3.9" },
-    { version = ">=1.22", python = ">=3.9, <3.14" },
+    { version = ">=1.22, <3.0", python = ">=3.9, <3.14" },
 ]
 typing-extensions = "^4.0"
 xarray = [
