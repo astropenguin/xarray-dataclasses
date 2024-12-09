@@ -1,6 +1,6 @@
 {
     "name": "xarray-dataclasses",
-    "image":"python:3.12",
+    "image":"python:3.13",
     "onCreateCommand": "pip install poetry==1.8.5",
     "postCreateCommand": "poetry install",
     "containerEnv": {
