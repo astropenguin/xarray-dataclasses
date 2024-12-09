@@ -17,14 +17,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
       - name: Install project dependencies
-        run: pip install poetry && poetry install
+        run: pip install poetry==1.8.5 && poetry install
       - name: Test code's formatting (Black)
         run: black --check docs tests xarray_dataclasses
       - name: Test code's typing (Pyright)
