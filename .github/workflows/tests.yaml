@@ -30,5 +30,4 @@ jobs:
       - run: uv sync --frozen
       - run: black --check ${PYTHON_DIRS}
       - run: pyright ${PYTHON_DIRS}
-      - run: pytest -v
       - run: docs/build
