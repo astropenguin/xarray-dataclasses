@@ -1,29 +1,25 @@
 {
     "name": "xarray-dataclasses",
-    "image":"python:3.13",
-    "onCreateCommand": "pip install poetry==1.8.5",
-    "postCreateCommand": "poetry install",
+    "image": "ghcr.io/astral-sh/uv:python3.12-bookworm",
+    "runArgs": [
+        "--name=xarray-dataclasses"
+    ],
     "containerEnv": {
-        "POETRY_VIRTUALENVS_CREATE": "false"
+        "UV_PROJECT_ENVIRONMENT": "/usr/local"
     },
+    "postCreateCommand": "uv sync --frozen",
     "customizations": {
         "vscode": {
             "extensions": [
-                "github.vscode-pull-request-github",
-                "mhutchie.git-graph",
-                "ms-python.python",
+                "ms-python.black-formatter",
                 "streetsidesoftware.code-spell-checker",
                 "tamasfe.even-better-toml"
             ],
             "settings": {
-                "files.insertFinalNewline": true,
-                "files.trimTrailingWhitespace": true,
-                "python.formatting.provider": "black",
                 "python.languageServer": "Pylance",
                 "[python]": {
-                    "editor.formatOnSave": true,
-                    "editor.insertSpaces": true,
-                    "editor.tabSize": 4
+                    "editor.defaultFormatter": "ms-python.black-formatter",
+                    "editor.formatOnSave": true
                 }
             }
         }
