@@ -1,43 +1,46 @@
-[tool.poetry]
+[project]
 name = "xarray-dataclasses"
-version = "1.9.1"
+version = "2.0.0"
 description = "xarray data creation by data classes"
-authors = ["Akio Taniguchi <taniguchi@a.phys.nagoya-u.ac.jp>"]
-keywords = ["xarray", "dataclass", "dataarray", "dataset", "typing"]
-license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/astropenguin/xarray-dataclasses/"
-repository = "https://github.com/astropenguin/xarray-dataclasses/"
-documentation = "https://astropenguin.github.io/xarray-dataclasses/"
-
-[tool.poetry.dependencies]
-python = ">=3.8, <3.14"
-numpy = [
-    { version = ">=1.22, <1.25", python = ">=3.8, <3.9" },
-    { version = ">=1.22, <3.0", python = ">=3.9, <3.14" },
-]
-typing-extensions = "^4.0"
-xarray = [
-    { version = ">=2022.3, <2023.2", python = ">=3.8, <3.9" },
-    { version = ">=2022.3, <2025.0", python = ">=3.9, <3.14" },
+keywords = ["dataclasses", "specifications", "typing", "xarray"]
+requires-python = ">=3.9,<3.14"
+dependencies = ["dataspecs>=2.0,<3.0", "xarray>=2022.3,<2026.0"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 
-[tool.poetry.group.dev.dependencies]
-black = "^24.4"
-ipython = "^8.12"
-myst-parser = "^3.0"
-pydata-sphinx-theme = "^0.14"
-pyright = "^1.1"
-pytest = "^8.2"
-sphinx = "^7.1"
+[[project.authors]]
+name = "Akio Taniguchi"
+email = "taniguchi.akio@gmail.com"
 
-[tool.pyright]
-reportImportCycles = "warning"
-reportUnknownArgumentType = "warning"
-reportUnknownMemberType = "warning"
-reportUnknownVariableType = "warning"
-typeCheckingMode = "strict"
+[project.license]
+file = "LICENSE"
+
+[project.urls]
+homepage = "https://astropenguin.github.io/xarray-dataclasses/v2.0.0"
+repository = "https://github.com/astropenguin/xarray-dataclasses"
+
+[dependency-groups]
+dev = [
+    "black>=24.8",
+    "ipython>=8.18",
+    "myst-parser>=3.0",
+    "pydata-sphinx-theme>=0.16",
+    "pyright>=1.1",
+    "pytest>=8.3",
+    "sphinx>=7.4",
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pyright]
+typeCheckingMode = "strict"

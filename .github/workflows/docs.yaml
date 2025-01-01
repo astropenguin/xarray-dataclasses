@@ -1,0 +1,26 @@
+name: Docs
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  job:
+    name: Docs
+    runs-on: ubuntu-latest
+    container: ghcr.io/astral-sh/uv:python3.12-bookworm
+    env:
+      UV_PROJECT_ENVIRONMENT: /usr/local
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "::set-output name=tag::${GITHUB_REF##*/}"
+        id: tag
+      - run: uv sync --frozen
+      - run: docs/build
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          destination_dir: ${{ steps.tag.outputs.tag }}
+          force_orphan: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/_build

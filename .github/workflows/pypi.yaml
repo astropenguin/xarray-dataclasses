@@ -1,0 +1,18 @@
+name: PyPI
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  job:
+    name: PyPI
+    runs-on: ubuntu-latest
+    container: ghcr.io/astral-sh/uv:python3.12-bookworm
+    env:
+      UV_PROJECT_ENVIRONMENT: /usr/local
+      UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: uv build && uv publish

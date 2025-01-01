@@ -1,0 +1,33 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  job:
+    name: Test (${{ matrix.env }})
+    runs-on: ubuntu-latest
+    container: ghcr.io/astral-sh/uv:${{ matrix.env }}
+    env:
+      PYTHON_DIRS: docs tests xarray_dataclasses
+      UV_PROJECT_ENVIRONMENT: /usr/local
+    strategy:
+      fail-fast: false
+      matrix:
+        env:
+          - python3.9-bookworm
+          - python3.10-bookworm
+          - python3.11-bookworm
+          - python3.12-bookworm
+          - python3.13-bookworm
+    steps:
+      - uses: actions/checkout@v4
+      - run: uv sync --frozen
+      - run: black --check ${PYTHON_DIRS}
+      - run: pyright ${PYTHON_DIRS}
+      - run: docs/build
