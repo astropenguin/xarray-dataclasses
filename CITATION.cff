@@ -1,15 +1,30 @@
-cff-version: 1.2.0
-message: "If you use this software, please cite it as below."
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
 
-title: "xarray-dataclasses"
-abstract: "xarray data creation by data classes"
-version: 1.9.1
-date-released: 2024-12-09
-license: "MIT"
-doi: "10.5281/zenodo.4624819"
-url: "https://github.com/astropenguin/xarray-dataclasses"
+cff-version: 1.2.0
+title: xarray-dataclasses
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
 authors:
-  - given-names: "Akio"
-    family-names: "Taniguchi"
-    affiliation: "Nagoya University"
-    orcid: "https://orcid.org/0000-0002-9695-6183"
+  - given-names: Akio
+    family-names: Taniguchi
+    email: taniguchi.akio@gmail.com
+    affiliation: Kitami Institute of Technology
+    orcid: 'https://orcid.org/0000-0002-9695-6183'
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.10652375
+repository-code: 'https://github.com/astropenguin/xarray-dataclasses'
+url: 'https://astropenguin.github.io/xarray-dataclasses/v2.0.0'
+abstract: xarray data creation by data classes
+keywords:
+  - python
+  - dataclasses
+  - specifications
+  - typing
+  - xarray
+license: MIT
+version: 2.0.0
+date-released: '2025-01-01'
