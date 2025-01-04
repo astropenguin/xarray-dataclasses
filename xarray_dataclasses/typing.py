@@ -13,8 +13,18 @@ __all__ = [
 
 # standard library
 from collections.abc import Collection as Collection_, Hashable
+from dataclasses import Field
 from enum import auto
-from typing import Annotated, Callable, Protocol, TypeVar, Union
+from typing import (
+    Annotated,
+    Any,
+    Callable,
+    ClassVar,
+    ParamSpec,
+    Protocol,
+    TypeVar,
+    Union,
+)
 
 
 # dependencies
@@ -23,11 +33,14 @@ from xarray import DataArray, Dataset
 
 
 # type hints
+PAny = ParamSpec("PAny")
 TAny = TypeVar("TAny")
+TDataArray = TypeVar("TDataArray", bound=DataArray)
+TDataset = TypeVar("TDataset", bound=Dataset)
 TDims = TypeVar("TDims", covariant=True)
 TDtype = TypeVar("TDtype", covariant=True)
 THashable = TypeVar("THashable", bound=Hashable)
-TXarray = TypeVar("TXarray", bound="Xarray")
+TXarray = TypeVar("TXarray", covariant=True, bound="Xarray")
 Xarray = Union[DataArray, Dataset]
 
 
@@ -35,6 +48,23 @@ class Collection(Collection_[TDtype], Protocol[TDims, TDtype]):
     """Same as Collection[T] but accepts additional type variable for dims."""
 
     pass
+
+
+class DataClass(Protocol[PAny]):
+    """Protocol for a dataclass object."""
+
+    __dataclass_fields__: ClassVar[dict[str, Field[Any]]]
+
+    def __init__(self, *args: PAny.args, **kwargs: PAny.kwargs) -> None: ...
+
+
+class DataClassOf(Protocol[PAny, TXarray]):
+    """Protocol for a dataclass object with an xarray factory."""
+
+    _xarray_factory: Callable[..., TXarray]
+    __dataclass_fields__: ClassVar[dict[str, Field[Any]]]
+
+    def __init__(self, *args: PAny.args, **kwargs: PAny.kwargs) -> None: ...
 
 
 # constants
