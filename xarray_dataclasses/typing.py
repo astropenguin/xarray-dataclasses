@@ -41,6 +41,7 @@ TDims = TypeVar("TDims", covariant=True)
 TDtype = TypeVar("TDtype", covariant=True)
 THashable = TypeVar("THashable", bound=Hashable)
 TXarray = TypeVar("TXarray", covariant=True, bound="Xarray")
+HashDict = dict[Hashable, TAny]
 Xarray = Union[DataArray, Dataset]
 
 
@@ -103,19 +104,19 @@ Arrayable = Collection[Annotated[TDims, Tag.DIMS], Annotated[TDtype, Tag.DTYPE]]
 Attr = Annotated[TAny, Tag.ATTR]
 """Type alias for an attribute of DataArray/set."""
 
-Attrs = Annotated[dict[str, TAny], Tag.ATTR, Tag.MULTIPLE]
+Attrs = Annotated[HashDict[TAny], Tag.ATTR, Tag.MULTIPLE]
 """Type alias for attributes of DataArray/set."""
 
 Coord = Annotated[Arrayable[TDims, TDtype], Tag.COORD]
 """Type alias for a coordinate of DataArray/set."""
 
-Coords = Annotated[dict[str, Arrayable[TDims, TDtype]], Tag.COORD, Tag.MULTIPLE]
+Coords = Annotated[HashDict[Arrayable[TDims, TDtype]], Tag.COORD, Tag.MULTIPLE]
 """Type alias for coordinates of DataArray/set."""
 
 Data = Annotated[Arrayable[TDims, TDtype], Tag.DATA]
 """Type alias for a data object of DataArray/set."""
 
-DataVars = Annotated[dict[str, Arrayable[TDims, TDtype]], Tag.DATA, Tag.MULTIPLE]
+DataVars = Annotated[HashDict[Arrayable[TDims, TDtype]], Tag.DATA, Tag.MULTIPLE]
 """Type alias for data objects of DataArray/set."""
 
 Factory = Annotated[Callable[..., TXarray], Tag.FACTORY]
