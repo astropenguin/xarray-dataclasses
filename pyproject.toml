@@ -5,7 +5,7 @@ description = "xarray data creation by data classes"
 readme = "README.md"
 keywords = ["dataclasses", "specifications", "typing", "xarray"]
 requires-python = ">=3.9,<3.14"
-dependencies = ["dataspecs>=2.0,<3.0", "xarray>=2022.3,<2026.0"]
+dependencies = ["dataspecs>=3.0,<4.0", "xarray>=2022.3,<2026.0"]
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
