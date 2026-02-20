@@ -20,15 +20,15 @@ jobs:
       fail-fast: false
       matrix:
         env:
-          - python3.9-bookworm
           - python3.10-bookworm
           - python3.11-bookworm
           - python3.12-bookworm
           - python3.13-bookworm
+          - python3.14-bookworm
     steps:
       - uses: actions/checkout@v4
       - run: uv sync --frozen
       - run: black --check ${PYTHON_DIRS}
       - run: pyright ${PYTHON_DIRS}
-      - run: pytest -v
+      - run: pytest -v tests
       - run: docs/build
