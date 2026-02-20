@@ -2,48 +2,59 @@
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="./" >
 
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>xarray-dataclasses &#8212; Python  documentation</title>
+    <title>xarray-dataclasses &#8212; Project name not set  documentation</title>
   
   
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
   
-  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
-
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
-  <script src="_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b3ba4146"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
-    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://astropenguin.github.io/xarray-dataclasses/_static/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.10.0';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="xarray_dataclasses package" href="_apidoc/xarray_dataclasses.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -51,32 +62,16 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
-  </button>
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="search.html"
       method="get">
@@ -84,7 +79,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -92,20 +86,27 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
-  </label>
+  </button>
   
   
   <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
 
+  
+    
   
 
 <a class="navbar-brand logo" href="#">
@@ -114,14 +115,8 @@
   
   
   
-    
-    
-      
-    
-    
-    <img src="_static/logo-light.svg" class="logo__image only-light" alt="Python  documentation - Home"/>
-    <script>document.write(`<img src="_static/logo-dark.svg" class="logo__image only-dark" alt="Python  documentation - Home"/>`);</script>
   
+    <p class="title logo__title">xarray-dataclasses</p>
   
 </a></div>
     
@@ -132,28 +127,22 @@
     <div class="me-auto navbar-header-items__center">
       
         <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="#">
-                        Home
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="#">
+    Home
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="_apidoc/xarray_dataclasses.html">
-                        Package guide
-                      </a>
-                    </li>
-                
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="_apidoc/xarray_dataclasses.html">
+    Package guide
+  </a>
+</li>
+
   </ul>
 </nav></div>
       
@@ -165,31 +154,43 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
         <div class="navbar-item">
-
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
   </button>
-`);
-</script></div>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
       
-        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
         <li class="nav-item">
           
@@ -200,20 +201,8 @@ document.write(`
           
           
           
-          <a href="https://github.com/astropenguin/xarray-dataclasses/" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+          <a href="https://github.com/astropenguin/xarray-dataclasses" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
             <span class="sr-only">GitHub</span></a>
-        </li>
-        <li class="nav-item">
-          
-          
-          
-          
-          
-          
-          
-          
-          <a href="https://twitter.com/astropengu_in/" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-twitter fa-lg" aria-hidden="true"></i></span>
-            <span class="sr-only">Twitter</span></a>
         </li>
 </ul></div>
       
@@ -224,31 +213,33 @@ document.write(`
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
-    </label>
+    </button>
   
 </div>
 
-    </nav>
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -257,31 +248,28 @@ document.write(`
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          
+          
+            <div class="navbar-item">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="#">
-                        Home
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="#">
+    Home
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="_apidoc/xarray_dataclasses.html">
-                        Package guide
-                      </a>
-                    </li>
-                
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="_apidoc/xarray_dataclasses.html">
+    Package guide
+  </a>
+</li>
+
   </ul>
 </nav></div>
+          
         
       </div>
     
@@ -290,18 +278,34 @@ document.write(`
       <div class="sidebar-header-items__end">
         
           <div class="navbar-item">
-
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
-    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
   </button>
-`);
-</script></div>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
         
-          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
         <li class="nav-item">
           
@@ -312,20 +316,8 @@ document.write(`
           
           
           
-          <a href="https://github.com/astropenguin/xarray-dataclasses/" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+          <a href="https://github.com/astropenguin/xarray-dataclasses" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
             <span class="sr-only">GitHub</span></a>
-        </li>
-        <li class="nav-item">
-          
-          
-          
-          
-          
-          
-          
-          
-          <a href="https://twitter.com/astropengu_in/" title="Twitter" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-twitter fa-lg" aria-hidden="true"></i></span>
-            <span class="sr-only">Twitter</span></a>
         </li>
 </ul></div>
         
@@ -335,41 +327,46 @@ document.write(`
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
       
-      <main id="main-content" class="bd-main">
+      <main id="main-content" class="bd-main" role="main">
         
         
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article"></div>
+              <div class="bd-header-article d-print-none"></div>
               
               
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section id="xarray-dataclasses">
-<h1>xarray-dataclasses<a class="headerlink" href="#xarray-dataclasses" title="Permalink to this heading">#</a></h1>
+<h1>xarray-dataclasses<a class="headerlink" href="#xarray-dataclasses" title="Link to this heading">#</a></h1>
 <p><a class="reference external" href="https://pypi.org/project/xarray-dataclasses/"><img alt="Release" src="https://img.shields.io/pypi/v/xarray-dataclasses?label=Release&amp;color=cornflowerblue&amp;style=flat-square" /></a>
 <a class="reference external" href="https://pypi.org/project/xarray-dataclasses/"><img alt="Python" src="https://img.shields.io/pypi/pyversions/xarray-dataclasses?label=Python&amp;color=cornflowerblue&amp;style=flat-square" /></a>
 <a class="reference external" href="https://pepy.tech/project/xarray-dataclasses"><img alt="Downloads" src="https://img.shields.io/pypi/dm/xarray-dataclasses?label=Downloads&amp;color=cornflowerblue&amp;style=flat-square" /></a>
 <a class="reference external" href="https://doi.org/10.5281/zenodo.4624819"><img alt="DOI" src="https://img.shields.io/badge/DOI-10.5281/zenodo.4624819-cornflowerblue?style=flat-square" /></a>
-<a class="reference external" href="https://github.com/astropenguin/xarray-dataclasses/actions"><img alt="Tests" src="https://img.shields.io/github/actions/workflow/status/astropenguin/xarray-dataclasses/tests.yml?label=Tests&amp;style=flat-square" /></a></p>
+<a class="reference external" href="https://github.com/astropenguin/xarray-dataclasses/actions"><img alt="Tests" src="https://img.shields.io/github/actions/workflow/status/astropenguin/xarray-dataclasses/tests.yaml?label=Tests&amp;style=flat-square" /></a></p>
 <p>xarray data creation by data classes</p>
 <section id="overview">
-<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this heading">#</a></h2>
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">#</a></h2>
 <p>xarray-dataclasses is a Python package that makes it easy to create <a class="reference external" href="https://xarray.pydata.org/en/stable/index.html">xarray</a>’s DataArray and Dataset objects that are “typed” (i.e. fixed dimensions, data type, coordinates, attributes, and name) using <a class="reference external" href="https://docs.python.org/3/library/dataclasses.html">the Python’s dataclass</a>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span>
-<span class="kn">from</span> <span class="nn">xarray_dataclasses</span> <span class="kn">import</span> <span class="n">AsDataArray</span><span class="p">,</span> <span class="n">Coord</span><span class="p">,</span> <span class="n">Data</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">xarray_dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsDataArray</span><span class="p">,</span> <span class="n">Coord</span><span class="p">,</span> <span class="n">Data</span>
 
 
 <span class="n">X</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span>
@@ -377,7 +374,7 @@ document.write(`
 
 
 <span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">Image</span><span class="p">(</span><span class="n">AsDataArray</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Image</span><span class="p">(</span><span class="n">AsDataArray</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;2D image as DataArray.&quot;&quot;&quot;</span>
 
     <span class="n">data</span><span class="p">:</span> <span class="n">Data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span>
@@ -386,7 +383,7 @@ document.write(`
 </pre></div>
 </div>
 <section id="features">
-<h3>Features<a class="headerlink" href="#features" title="Permalink to this heading">#</a></h3>
+<h3>Features<a class="headerlink" href="#features" title="Link to this heading">#</a></h3>
 <ul>
 <li><p>Typed DataArray or Dataset objects can easily be created:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
@@ -403,21 +400,21 @@ document.write(`
 </ul>
 </section>
 <section id="installation">
-<h3>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">#</a></h3>
+<h3>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>xarray-dataclasses
 </pre></div>
 </div>
 </section>
 </section>
 <section id="basic-usage">
-<h2>Basic usage<a class="headerlink" href="#basic-usage" title="Permalink to this heading">#</a></h2>
+<h2>Basic usage<a class="headerlink" href="#basic-usage" title="Link to this heading">#</a></h2>
 <p>xarray-dataclasses uses <a class="reference external" href="https://docs.python.org/3/library/dataclasses.html">the Python’s dataclass</a>.
 Data (or data variables), coordinates, attributes, and a name of DataArray or Dataset objects will be defined as dataclass fields by special type hints (<code class="docutils literal notranslate"><span class="pre">Data</span></code>, <code class="docutils literal notranslate"><span class="pre">Coord</span></code>, <code class="docutils literal notranslate"><span class="pre">Attr</span></code>, <code class="docutils literal notranslate"><span class="pre">Name</span></code>), respectively.
 Note that the following code is supposed in the examples below.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span>
-<span class="kn">from</span> <span class="nn">xarray_dataclasses</span> <span class="kn">import</span> <span class="n">AsDataArray</span><span class="p">,</span> <span class="n">AsDataset</span>
-<span class="kn">from</span> <span class="nn">xarray_dataclasses</span> <span class="kn">import</span> <span class="n">Attr</span><span class="p">,</span> <span class="n">Coord</span><span class="p">,</span> <span class="n">Data</span><span class="p">,</span> <span class="n">Name</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">xarray_dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsDataArray</span><span class="p">,</span> <span class="n">AsDataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">xarray_dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">Attr</span><span class="p">,</span> <span class="n">Coord</span><span class="p">,</span> <span class="n">Data</span><span class="p">,</span> <span class="n">Name</span>
 
 
 <span class="n">X</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span>
@@ -425,11 +422,11 @@ Note that the following code is supposed in the examples below.</p>
 </pre></div>
 </div>
 <section id="data-field">
-<h3>Data field<a class="headerlink" href="#data-field" title="Permalink to this heading">#</a></h3>
+<h3>Data field<a class="headerlink" href="#data-field" title="Link to this heading">#</a></h3>
 <p>Data field is a field whose value will become the data of a DataArray object or a data variable of a Dataset object.
 The type hint <code class="docutils literal notranslate"><span class="pre">Data[TDims,</span> <span class="pre">TDtype]</span></code> fixes the dimensions and the data type of the object.
 Here are some examples of how to specify them.</p>
-<table class="table">
+<div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Type hint</p></th>
 <th class="head"><p>Inferred dimensions</p></th>
@@ -450,7 +447,8 @@ Here are some examples of how to specify them.</p>
 </tr>
 </tbody>
 </table>
-<table class="table">
+</div>
+<div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Type hint</p></th>
 <th class="head"><p>Inferred data type</p></th>
@@ -474,29 +472,30 @@ Here are some examples of how to specify them.</p>
 </tr>
 </tbody>
 </table>
+</div>
 </section>
 <section id="coordinate-field">
-<h3>Coordinate field<a class="headerlink" href="#coordinate-field" title="Permalink to this heading">#</a></h3>
+<h3>Coordinate field<a class="headerlink" href="#coordinate-field" title="Link to this heading">#</a></h3>
 <p>Coordinate field is a field whose value will become a coordinate of a DataArray or a Dataset object.
 The type hint <code class="docutils literal notranslate"><span class="pre">Coord[TDims,</span> <span class="pre">TDtype]</span></code> fixes the dimensions and the data type of the object.</p>
 </section>
 <section id="attribute-field">
-<h3>Attribute field<a class="headerlink" href="#attribute-field" title="Permalink to this heading">#</a></h3>
+<h3>Attribute field<a class="headerlink" href="#attribute-field" title="Link to this heading">#</a></h3>
 <p>Attribute field is a field whose value will become an attribute of a DataArray or a Dataset object.
 The type hint <code class="docutils literal notranslate"><span class="pre">Attr[TAttr]</span></code> specifies the type of the value, which is used only for static type check.</p>
 </section>
 <section id="name-field">
-<h3>Name field<a class="headerlink" href="#name-field" title="Permalink to this heading">#</a></h3>
+<h3>Name field<a class="headerlink" href="#name-field" title="Link to this heading">#</a></h3>
 <p>Name field is a field whose value will become the name of a DataArray object.
 The type hint <code class="docutils literal notranslate"><span class="pre">Name[TName]</span></code> specifies the type of the value, which is used only for static type check.</p>
 </section>
 <section id="dataarray-class">
-<h3>DataArray class<a class="headerlink" href="#dataarray-class" title="Permalink to this heading">#</a></h3>
+<h3>DataArray class<a class="headerlink" href="#dataarray-class" title="Link to this heading">#</a></h3>
 <p>DataArray class is a dataclass that defines typed DataArray specifications.
 Exactly one data field is allowed in a DataArray class.
 The second and subsequent data fields are just ignored in DataArray creation.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">Image</span><span class="p">(</span><span class="n">AsDataArray</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Image</span><span class="p">(</span><span class="n">AsDataArray</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;2D image as DataArray.&quot;&quot;&quot;</span>
 
     <span class="n">data</span><span class="p">:</span> <span class="n">Data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span>
@@ -535,11 +534,11 @@ The second and subsequent data fields are just ignored in DataArray creation.</p
 </div>
 </section>
 <section id="dataset-class">
-<h3>Dataset class<a class="headerlink" href="#dataset-class" title="Permalink to this heading">#</a></h3>
+<h3>Dataset class<a class="headerlink" href="#dataset-class" title="Link to this heading">#</a></h3>
 <p>Dataset class is a dataclass that defines typed Dataset specifications.
 Multiple data fields are allowed to define the data variables of the object.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">ColorImage</span><span class="p">(</span><span class="n">AsDataset</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ColorImage</span><span class="p">(</span><span class="n">AsDataset</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;2D color image as Dataset.&quot;&quot;&quot;</span>
 
     <span class="n">red</span><span class="p">:</span> <span class="n">Data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span>
@@ -573,32 +572,32 @@ Multiple data fields are allowed to define the data variables of the object.</p>
 </section>
 </section>
 <section id="advanced-usage">
-<h2>Advanced usage<a class="headerlink" href="#advanced-usage" title="Permalink to this heading">#</a></h2>
+<h2>Advanced usage<a class="headerlink" href="#advanced-usage" title="Link to this heading">#</a></h2>
 <section id="coordof-and-dataof-type-hints">
-<h3>Coordof and Dataof type hints<a class="headerlink" href="#coordof-and-dataof-type-hints" title="Permalink to this heading">#</a></h3>
+<h3>Coordof and Dataof type hints<a class="headerlink" href="#coordof-and-dataof-type-hints" title="Link to this heading">#</a></h3>
 <p>xarray-dataclasses provides advanced type hints, <code class="docutils literal notranslate"><span class="pre">Coordof</span></code> and <code class="docutils literal notranslate"><span class="pre">Dataof</span></code>.
 Unlike <code class="docutils literal notranslate"><span class="pre">Data</span></code> and <code class="docutils literal notranslate"><span class="pre">Coord</span></code>, they specify a dataclass that defines a DataArray class.
 This is useful when users want to add metadata to dimensions for <a class="reference external" href="https://xarray.pydata.org/en/stable/user-guide/plotting.html#simple-example">plotting</a>.
 For example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">xarray_dataclasses</span> <span class="kn">import</span> <span class="n">Coordof</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">xarray_dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">Coordof</span>
 
 
 <span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">XAxis</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">XAxis</span><span class="p">:</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">Data</span><span class="p">[</span><span class="n">X</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
     <span class="n">long_name</span><span class="p">:</span> <span class="n">Attr</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;x axis&quot;</span>
     <span class="n">units</span><span class="p">:</span> <span class="n">Attr</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;pixel&quot;</span>
 
 
 <span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">YAxis</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">YAxis</span><span class="p">:</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">Data</span><span class="p">[</span><span class="n">Y</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
     <span class="n">long_name</span><span class="p">:</span> <span class="n">Attr</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;y axis&quot;</span>
     <span class="n">units</span><span class="p">:</span> <span class="n">Attr</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;pixel&quot;</span>
 
 
 <span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">Image</span><span class="p">(</span><span class="n">AsDataArray</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Image</span><span class="p">(</span><span class="n">AsDataArray</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;2D image as DataArray.&quot;&quot;&quot;</span>
 
     <span class="n">data</span><span class="p">:</span> <span class="n">Data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span>
@@ -608,31 +607,31 @@ For example:</p>
 </div>
 </section>
 <section id="general-data-variable-names-in-dataset-creation">
-<h3>General data variable names in Dataset creation<a class="headerlink" href="#general-data-variable-names-in-dataset-creation" title="Permalink to this heading">#</a></h3>
+<h3>General data variable names in Dataset creation<a class="headerlink" href="#general-data-variable-names-in-dataset-creation" title="Link to this heading">#</a></h3>
 <p>Due to the limitation of Python’s parameter names, it is not possible to define data variable names that contain white spaces, for example.
 In such cases, please define DataArray classes of each data variable so that they have name fields and specify them by <code class="docutils literal notranslate"><span class="pre">Dataof</span></code> in a Dataset class.
 Then the values of the name fields will be used as data variable names.
 For example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">Red</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Red</span><span class="p">:</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">Data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span>
     <span class="n">name</span><span class="p">:</span> <span class="n">Name</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Red image&quot;</span>
 
 
 <span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">Green</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Green</span><span class="p">:</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">Data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span>
     <span class="n">name</span><span class="p">:</span> <span class="n">Name</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Green image&quot;</span>
 
 
 <span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">Blue</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Blue</span><span class="p">:</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">Data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span>
     <span class="n">name</span><span class="p">:</span> <span class="n">Name</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Blue image&quot;</span>
 
 
 <span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">ColorImage</span><span class="p">(</span><span class="n">AsDataset</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ColorImage</span><span class="p">(</span><span class="n">AsDataset</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;2D color image as Dataset.&quot;&quot;&quot;</span>
 
     <span class="n">red</span><span class="p">:</span> <span class="n">Dataof</span><span class="p">[</span><span class="n">Red</span><span class="p">]</span>
@@ -657,25 +656,25 @@ For example:</p>
 </div>
 </section>
 <section id="customization-of-dataarray-or-dataset-creation">
-<h3>Customization of DataArray or Dataset creation<a class="headerlink" href="#customization-of-dataarray-or-dataset-creation" title="Permalink to this heading">#</a></h3>
+<h3>Customization of DataArray or Dataset creation<a class="headerlink" href="#customization-of-dataarray-or-dataset-creation" title="Link to this heading">#</a></h3>
 <p>For customization, users can add a special class attribute, <code class="docutils literal notranslate"><span class="pre">__dataoptions__</span></code>, to a DataArray or Dataset class.
 A custom factory for DataArray or Dataset creation is only supported in the current implementation.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
-<span class="kn">from</span> <span class="nn">xarray_dataclasses</span> <span class="kn">import</span> <span class="n">DataOptions</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">xarray_dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataOptions</span>
 
 
-<span class="k">class</span> <span class="nc">Custom</span><span class="p">(</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Custom</span><span class="p">(</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom DataArray.&quot;&quot;&quot;</span>
 
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">custom_method</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">custom_method</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Custom method.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="kc">True</span>
 
 
 <span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">Image</span><span class="p">(</span><span class="n">AsDataArray</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Image</span><span class="p">(</span><span class="n">AsDataArray</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;2D image as DataArray.&quot;&quot;&quot;</span>
 
     <span class="n">data</span><span class="p">:</span> <span class="n">Data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span>
@@ -692,15 +691,15 @@ A custom factory for DataArray or Dataset creation is only supported in the curr
 </div>
 </section>
 <section id="dataarray-and-dataset-creation-without-shorthands">
-<h3>DataArray and Dataset creation without shorthands<a class="headerlink" href="#dataarray-and-dataset-creation-without-shorthands" title="Permalink to this heading">#</a></h3>
+<h3>DataArray and Dataset creation without shorthands<a class="headerlink" href="#dataarray-and-dataset-creation-without-shorthands" title="Link to this heading">#</a></h3>
 <p>xarray-dataclasses provides functions, <code class="docutils literal notranslate"><span class="pre">asdataarray</span></code> and <code class="docutils literal notranslate"><span class="pre">asdataset</span></code>.
 This is useful when users do not want to inherit the mix-in class (<code class="docutils literal notranslate"><span class="pre">AsDataArray</span></code> or <code class="docutils literal notranslate"><span class="pre">AsDataset</span></code>) in a DataArray or Dataset dataclass.
 For example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">xarray_dataclasses</span> <span class="kn">import</span> <span class="n">asdataarray</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">xarray_dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">asdataarray</span>
 
 
 <span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">Image</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Image</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;2D image as DataArray.&quot;&quot;&quot;</span>
 
     <span class="n">data</span><span class="p">:</span> <span class="n">Data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span>
@@ -725,7 +724,7 @@ For example:</p>
               
               
               
-                <footer class="prev-next-footer">
+                <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
     <a class="right-next"
@@ -744,14 +743,17 @@ For example:</p>
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
 
   <div class="sidebar-secondary-item">
-
-  <div class="page-toc tocsection onthispage">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc">
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#overview">Overview</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#features">Features</a></li>
@@ -778,13 +780,13 @@ For example:</p>
   </nav></div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="_sources/index.md.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -799,8 +801,8 @@ For example:</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
-<script src="_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -811,7 +813,7 @@ For example:</p>
 
   <p class="copyright">
     
-      © Copyright 2020-2024 Akio Taniguchi.
+      © Copyright 2020-2026 Akio Taniguchi.
       <br/>
     
   </p>
@@ -820,7 +822,7 @@ For example:</p>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
     <br/>
   </p>
 </div>
@@ -833,7 +835,8 @@ For example:</p>
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>
