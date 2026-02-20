@@ -17,7 +17,7 @@ identifiers:
   - type: doi
     value: 10.5281/zenodo.10652375
 repository-code: 'https://github.com/astropenguin/xarray-dataclasses'
-url: 'https://astropenguin.github.io/xarray-dataclasses/v2.0.0'
+url: 'https://astropenguin.github.io/xarray-dataclasses'
 abstract: xarray data creation by data classes
 keywords:
   - python
@@ -26,5 +26,5 @@ keywords:
   - typing
   - xarray
 license: MIT
-version: 2.0.0
-date-released: '2025-01-01'
+version: 1.10.0
+date-released: '2026-02-20'
