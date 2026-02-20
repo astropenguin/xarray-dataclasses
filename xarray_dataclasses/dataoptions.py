@@ -7,10 +7,8 @@ __all__ = ["DataOptions"]
 from dataclasses import dataclass
 from typing import Callable, Generic, TypeVar
 
-
 # submodules
 from .typing import AnyXarray
-
 
 # type hints
 TAnyXarray = TypeVar("TAnyXarray", bound=AnyXarray)

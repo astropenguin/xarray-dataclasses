@@ -2,11 +2,9 @@
 from dataclasses import dataclass
 from typing import Literal, Tuple
 
-
 # dependencies
 import numpy as np
 import xarray as xr
-
 
 # submodules
 from xarray_dataclasses.dataarray import AsDataArray

@@ -40,7 +40,6 @@ from typing import (
     Union,
 )
 
-
 # dependencies
 import numpy as np
 import xarray as xr
@@ -52,7 +51,6 @@ from typing_extensions import (
     get_origin,
     get_type_hints,
 )
-
 
 # type hints (private)
 PInit = ParamSpec("PInit")
