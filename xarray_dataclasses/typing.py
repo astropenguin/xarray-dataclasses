@@ -336,7 +336,7 @@ def get_dtype(tp: Any) -> Optional[AnyDType]:
     if get_origin(dtype) is Literal:
         dtype = get_args(dtype)[0]
 
-    return np.dtype(dtype)
+    return np.dtype(dtype)  # type: ignore
 
 
 def get_name(tp: Any, default: Hashable = None) -> Hashable:
