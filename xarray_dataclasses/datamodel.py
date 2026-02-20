@@ -18,12 +18,10 @@ from typing import (
     cast,
 )
 
-
 # dependencies
 import numpy as np
 import xarray as xr
 from typing_extensions import ParamSpec, get_type_hints
-
 
 # submodules
 from .typing import (
@@ -40,7 +38,6 @@ from .typing import (
     get_name,
     get_role,
 )
-
 
 # type hints
 PInit = ParamSpec("PInit")
@@ -153,7 +150,7 @@ class DataEntry:
 class DataModel:
     """Data representation (data model) inside the package."""
 
-    entries: Dict[str, AnyEntry] = field(default_factory=dict)
+    entries: Dict[str, AnyEntry] = field(default_factory=dict[str, AnyEntry])
     """Entries of data variable(s) and attribute(s)."""
 
     @property
