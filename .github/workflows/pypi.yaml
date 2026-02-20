@@ -12,7 +12,8 @@ jobs:
     container: ghcr.io/astral-sh/uv:python3.12-bookworm
     env:
       UV_PROJECT_ENVIRONMENT: /usr/local
-      UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - run: uv build && uv publish

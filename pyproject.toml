@@ -1,11 +1,21 @@
 [project]
 name = "xarray-dataclasses"
-version = "2.0.0"
+version = "1.10.0"
 description = "xarray data creation by data classes"
 readme = "README.md"
-keywords = ["dataclasses", "specifications", "typing", "xarray"]
-requires-python = ">=3.9,<3.14"
-dependencies = ["dataspecs>=2.0,<3.0", "xarray>=2022.3,<2026.0"]
+keywords = [
+    "dataclasses",
+    "specifications",
+    "python",
+    "typing",
+    "xarray",
+]
+requires-python = ">=3.10,<3.15"
+dependencies = [
+    "numpy>=2,<3",
+    "typing-extensions>=4,<5",
+    "xarray>=2024,<2027",
+]
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
@@ -14,28 +24,30 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 
 [[project.authors]]
 name = "Akio Taniguchi"
-email = "taniguchi.akio@gmail.com"
+email = "a-taniguchi@mail.kitami-it.ac.jp"
 
 [project.license]
 file = "LICENSE"
 
 [project.urls]
-homepage = "https://astropenguin.github.io/xarray-dataclasses/v2.0.0"
+homepage = "https://astropenguin.github.io/xarray-dataclasses"
 repository = "https://github.com/astropenguin/xarray-dataclasses"
 
 [dependency-groups]
 dev = [
-    "black>=24.8",
-    "ipython>=8.18",
-    "myst-parser>=3.0",
-    "pydata-sphinx-theme>=0.16",
-    "pyright>=1.1",
-    "pytest>=8.3",
-    "sphinx>=7.4",
+    "black>=25,<27",
+    "ipython>=8,<10",
+    "myst-parser>=3,<5",
+    "pandas-stubs>=2,<3",
+    "pydata-sphinx-theme>=0.16,<1.0",
+    "pyright>=1,<2",
+    "pytest>=9,<10",
+    "sphinx>=8,<9",
 ]
 
 [build-system]
