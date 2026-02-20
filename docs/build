@@ -1,4 +1,8 @@
 #!/bin/bash -eu
 
+export LANG=C.UTF-8
+export LC_ALL=C.UTF-8
+
 sphinx-apidoc -efMT -d 2 -o docs/_apidoc xarray_dataclasses
-sphinx-build -a docs docs/_build
+sphinx-build -a -b html docs docs/_build
+sphinx-build -a -b html docs docs/_build/1.10.0
